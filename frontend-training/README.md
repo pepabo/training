@@ -13,3 +13,11 @@
 また、第 20 章以降は Rails Tutorial で作成したアプリケーションに対して実装していくので、先に Rails Tutorial を受けた人は自分の Rails Tutorial リポジトリに対して、そうでない人は課題提出リポジトリの `sample_app` ディレクトリに配置されているアプリケーションに対して実装し、 Pull Request を出してください。
 
 第 23 章のみ `sample_app` が独立したリポジトリでないと Heroku やマネクラに push できないと思いますので、その時は適宜 `sample_app` をコピーしたリポジトリを新規で作成してください。
+
+## Rail Tutorialのライセンス
+
+Ruby on Rails Tutorial: Learn Web Development with Rails. Copyright © 2014 by Michael Hartl.
+
+All source code in the Ruby on Rails Tutorial is available jointly under the MIT License and the Beerware License.
+
+Copyright &copy; 2014-2017 [Michael Hartl](https://www.michaelhartl.com/)
