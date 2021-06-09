@@ -1,5 +1,27 @@
 # 第 15 章　モダン JavaScript 入門
-これまで作ってきた Rails Tutorial ですが、各章でやってきた `rails generate controller xxx` コマンドの実行でログを注視していたら気づくことがあると思います。
+
+## ECMAScript
+
+Rails Tutorial 第6版では JavaScript を扱うことはほとんどありませんでしたが、第8.2章で `app/javascript/packs/application.js` に以下のようなコードを書いたと思います:
+
+```js
+import Rails from "@rails/ujs"
+import Turbolinks from "turbolinks"
+import * as ActiveStorage from "@rails/activestorage"
+import "channels"
+import "jquery"
+import "bootstrap"
+
+Rails.start()
+Turbolinks.start()
+ActiveStorage.start()
+```
+
+なんの変哲もないように見える、さらっと流されたコードでしたが、実はここで使われていた `import` 文が JavaScript の仕様としてリリースされたのは 2015 年 6 月のことです。JavaScript のプログラムをモジュールに分割して別のファイルから必要なときにインポートするという仕組みは意外と最近まで標準仕様に無かったのですね。
+
+`import` / `export` 文などといった JavaScript の言語仕様を定めている仕様書は [ECMAScript](https://tc39.es/ecma262/) と呼ばれています。ECMAScript について詳しく知る前に、Rails 5 における CoffeeScript 事情について言及しておきましょう。
+
+Rails 5 で `rails generate controller xxx` コマンドを実行すると以下のようなログが表示されます:
 
 ```
 $ rails generate controller Foo new
@@ -21,7 +43,7 @@ Running via Spring preloader in process 45038
       create      app/assets/stylesheets/foo.scss
 ```
 
-`app/assets/javascripts` というディレクトリに `.coffee` ファイルが生成されていますね。Rails プロジェクトでは CoffeeScript という Ruby に似た JavaScript に変換できる言語を使って JavaScript を開発します（CoffeeScript のような JavaScript に変換できる言語を altJS と呼びます。alternative 代替ですね）。これを開発時には個別ファイルとして JavaScript に変換し、本番（e.g. Heroku, マネクラ）環境では一つの `.js` ファイルにまとめて生成するようになっています。一つの js ファイルを生成するのが、 Heroku にデプロイした時にログとして見られる `rails assets:precompile` コマンドで、一つのファイルにする、かつ改行などを削除することでインターネットへのアクセス回数や通信容量を減らすという目的を果たしています。この処理を**バンドリング**などと呼んでいます。バンドリングは JavaScript と同様に CSS にも存在し、Rails では `.scss` ファイルを一つの CSS ファイルにまとめて本番環境に置いています。
+`app/assets/javascripts` というディレクトリに `.coffee` ファイルが生成されていますね。Rails 5 のプロジェクトではデフォルトで CoffeeScript という Ruby に似た JavaScript に変換できる言語を使って JavaScript の開発が行われていました（CoffeeScript のような JavaScript に変換できる言語を altJS と呼びます。alternative=代替ですね）。これを開発時には個別ファイルとして JavaScript に変換し、本番（e.g. Heroku, マネクラ）環境では一つの `.js` ファイルにまとめて生成するようになっています。一つの js ファイルを生成するのが、 Heroku にデプロイした時にログとして見られる `rails assets:precompile` コマンドで、一つのファイルにする、かつ改行などを削除することでインターネットへのアクセス回数や通信容量を減らすという目的を果たしています。この処理を**バンドリング**などと呼んでいます。バンドリングは JavaScript と同様に CSS にも存在し、Rails では `.scss` ファイルを一つの CSS ファイルにまとめて本番環境に置いています。
 
 では、この CoffeeScript ファイルですが、残念ながら現在のモダンフロントエンド開発では使いません。CoffeeScript の言語仕様の一部は ECMAScript の一部としてモダン JavaScript にすでに取り込まれており、今から学習コストを割いてまで CoffeeScript を覚える必要はありません（開発環境が CoffeeScript をすでに使っている場合は仕方ないです）。なぜ CoffeeScript のような altJS が発生したかというと、かつて JavaScript の言語仕様が進化に乏しい時代があり、罠が多い言語仕様である JavaScript でコードを書くよりも altJS から罠を回避できる JavaScript を自動生成した方がバグが減るという経緯があったのです。
 
@@ -49,13 +71,16 @@ function bar() {
 bar();
 ```
 
-ページをリロードすると、 foo と書いたアラートが 2 回表示されるでしょう。つまり、 `function foo` で設定した一時変数を `function bar` からも参照できるということです。コード上のどこからでも参照できてしまうということは、予想しないタイミングで書き換えてしまうようなコードも書けるわけで、チーム開発をすると「知らないうちに変数が書き換えられていて、書き換わってないものと思ってコードを書いたらバグってしまった」という事態が発生してしまうわけです。恐ろしいですね。これを避けるためには `x` の前に `var` をつけ `var x = 'foo';` と書く必要がありますが、うっかり `var` をつけ忘れても動いてしまいます。そもそも、各処理のコードの末尾には `;` をつけるという決まりになっていて、これを省略しても動いてしまいますが、構文によっては構文エラーとなって動かなくなることもあります。恐ろしいですね。
+ページをリロードすると、 foo と書いたアラートが 2 回表示されるでしょう。つまり、 `function foo` で設定した一時変数を `function bar` からも参照できるということです。コード上のどこからでも参照できてしまうということは、予想しないタイミングで書き換えてしまうようなコードも書けるわけで、チーム開発をすると「知らないうちに変数が書き換えられていて、書き換わってないものと思ってコードを書いたらバグってしまった」という事態が発生してしまうわけです。恐ろしいですね。これを避けるためには `x` の前に `var` をつけ `var x = 'foo';` と書く必要がありますが、うっかり `var` をつけ忘れても動いてしまいます。
+そもそも、各処理のコードの末尾には `;` をつけるという決まりになっているのですが、JavaScript の文法には [自動セミコロン挿入](https://developer.mozilla.org/ja/docs/Web/JavaScript/Reference/Lexical_grammar#automatic_semicolon_insertion) (Automatic Semicolon Insertion, ASI) という規則があり、 `var x = 'foo'` の場合は `;` を省略しても動いてしまいます。が、構文によってはコードの意味がプログラマの意図しないものに変わってしまう場合もあります（例えば [return文](https://developer.mozilla.org/ja/docs/Web/JavaScript/Reference/Statements/return#automatic_semicolon_insertion) ）。恐ろしいですね。
 
 このように、ブラウザで動いている JavaScript には歴史的経緯により罠が大量に存在し、それを回避するために Strict （厳格：バグが混入しやすいコードを書いた場合エラーが発生する）モードなども存在していますが、これも宣言を忘れると罠のあるコードで動くという険しい状況にあります。
 
-その状況を打破するために、より安全なコードを書けるような言語仕様を策定し、徐々にブラウザ側もその言語仕様を処理できるようにしていくという試みが取られるようになりました。これが ECMAScript 6 ならびにその後継である ECMAScript 20xx です。現行のブラウザがサポートしている JavaScript というのは ECMAScript 5 相当です（Google Chrome などの最新ブラウザでは ECMAScript 6 以降の一部仕様をすでにサポートしています）。
+その状況を打破するために、より安全なコードを書けるような言語仕様を策定し、徐々にブラウザ側もその言語仕様を処理できるようにしていくという試みが取られるようになりました。これが ECMAScript 2015 (ECMAScript 6) ならびにその後継である ECMAScript 20xx です。
+ECMAScript 2015 以降は毎年1回その時点での ECMAScript 仕様書のスナップショットが ECMAScript 20xx としてリリースされています。
+現行のブラウザがサポートしている JavaScript というのは ECMAScript 5 相当です（Google Chrome などの最新ブラウザでは ECMAScript 2015 以降の一部仕様をすでにサポートしています）。
 
-とはいえ、現状でブラウザがサポートしていない言語仕様をどうやって使うのか。そこにも altJS の力を使います。 ECMAScript 20xx で書いたコードを ECMAScript 5 で解釈できるコードへと変換するツール（これを一般的に**トランスパイラ**と呼びます）を使い、ブラウザで実行可能なコードへと変換するようにしたのです。将来的にブラウザが直接サポートするようになれば、そのツール自体は捨ててしまえます。現在この ECMAScript 20xx to ECMAScript 5 トランスパイラとして主流なのが [Babel](babeljs.io) という Node.js 製のツールで、モダンフロントエンド開発は基本的にこのツールの上に構築されています。私たちも ECMAScript 20xx （執筆時は 2019 年なので ECMAScript 2018）に準拠して、安全なコードを書きましょう。
+とはいえ、現状でブラウザがサポートしていない言語仕様をどうやって使うのか。そこにも altJS の力を使います。 ECMAScript 20xx で書いたコードを ECMAScript 5 で解釈できるコードへと変換するツール（これを一般的に**トランスパイラ**と呼びます）を使い、ブラウザで実行可能なコードへと変換するようにしたのです。将来的にブラウザが直接サポートするようになれば、そのツール自体は捨ててしまえます。現在この ECMAScript 20xx to ECMAScript 5 トランスパイラとして主流なのが [Babel](babeljs.io) という Node.js 製のツールで、モダンフロントエンド開発は基本的にこのツールの上に構築されています。私たちも ECMAScript 20xx （執筆時は 2021 年 6 月なので ECMAScript 2021）に準拠して、安全なコードを書いていきましょう。
 
 （オフトピック：CoffeeScript と同じように便利だったため JavaScript DOM API に取り込まれたものとして jQuery の `$(selector)` などもあります。 Internet Explorer 8 以降であれば `$('.foo')` ではなく `document.querySelectorAll('.foo')` で同じような処理ができるので、無用な jQuery の導入を避けることができます）
 
