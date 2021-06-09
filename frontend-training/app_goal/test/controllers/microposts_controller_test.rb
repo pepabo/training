@@ -1,6 +1,7 @@
 require 'test_helper'
 
 class MicropostsControllerTest < ActionDispatch::IntegrationTest
+
   def setup
     @micropost = microposts(:orange)
   end
@@ -27,5 +28,4 @@ class MicropostsControllerTest < ActionDispatch::IntegrationTest
     end
     assert_redirected_to root_url
   end
-
 end
