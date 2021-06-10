@@ -84,18 +84,6 @@ ECMAScript 2015 以降は毎年1回その時点での ECMAScript 仕様書のス
 
 （オフトピック：CoffeeScript と同じように便利だったため JavaScript DOM API に取り込まれたものとして jQuery の `$(selector)` などもあります。 Internet Explorer 8 以降であれば `$('.foo')` ではなく `document.querySelectorAll('.foo')` で同じような処理ができるので、無用な jQuery の導入を避けることができます）
 
-## Node.js 環境のセットアップ
-（この節は macOS でのセットアップについてのみ書いています、他の OS でのセットアップについては Pull Request Welcome です）
-
-Homebrew で直接インストールもできますが、 Node.js は頻繁にリリースがあるので Node.js の各バージョンをインストールしたり切り替えたりできるツールがある方がよいと思います。以下のどちらかを使うと良いでしょう。
-
-* [nodenv/nodenv: Manage multiple NodeJS versions.](https://github.com/nodenv/nodenv) + [nodenv/node-build: Install NodeJS versions](https://github.com/nodenv/node-build) Homebrew にあります。
-* [nvm-sh/nvm: Node Version Manager - Simple bash script to manage multiple active node.js versions](https://github.com/nvm-sh/nvm) Homebrew にあります。
-
-（私見です： nodenv + node-build の方が rbenv + ruby-build と同じようなコマンドになっているので使いやすいと思います）
-
-2021年6月現在では Node.js 14 を指定すると良いでしょう。nodenv であれば `sample_app` ディレクトリ直下で `nodenv local 14.17.0` のようなコマンドを実行しましょう。
-
 ## Babel を試しに使ってみる
 Node.js のインストールが終わったら `npm` `npx` というコマンドが使えるようになると思います。これらのコマンドを使うと Babel をインストールしてみましょう。
 

@@ -17,6 +17,18 @@ CommonJS がどのようなものか動かしてみるコードを書く前に�
 
 Node.js とは C10K 問題（大規模サービスに大量ユーザのアクセスが発生して詰まってしまう問題）を解決するために考案された、非同期 I/O が特色のなどという説明があったりもしますが、一旦ここでその辺の話は置いておいて、雑に JavaScript がコマンドラインから動くもの＋その周辺環境という認識で良いです（実際最近のフロントエンド開発ではそういった側面が強く出ている）。なので、みなさんが書いている js ファイルもブラウザ固有の機能となっている部分を除けば、例えば四則演算だけで構成された js ファイルなどは Node.js で実行できます。
 
+### Node.js 環境のセットアップ
+（この節は macOS でのセットアップについてのみ書いています、他の OS でのセットアップについては Pull Request Welcome です）
+
+Homebrew で直接インストールもできますが、 Node.js は頻繁にリリースがあるので Node.js の各バージョンをインストールしたり切り替えたりできるツールがある方がよいと思います。以下のどちらかを使うと良いでしょう。
+
+* [nodenv/nodenv: Manage multiple NodeJS versions.](https://github.com/nodenv/nodenv) + [nodenv/node-build: Install NodeJS versions](https://github.com/nodenv/node-build) Homebrew にあります。
+* [nvm-sh/nvm: Node Version Manager - Simple bash script to manage multiple active node.js versions](https://github.com/nvm-sh/nvm) Homebrew にあります。
+
+（私見です： nodenv + node-build の方が rbenv + ruby-build と同じようなコマンドになっているので使いやすいと思います）
+
+2021年6月現在では Node.js 14 を指定すると良いでしょう。nodenv であれば `sample_app` ディレクトリ直下で `nodenv local 14.17.0` のようなコマンドを実行しましょう。
+
 ```js:hello_nodejs.js
 const foo = 1;
 const bar = 2;
