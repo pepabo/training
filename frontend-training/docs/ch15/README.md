@@ -85,21 +85,22 @@ ECMAScript 2015 以降は毎年1回その時点での ECMAScript 仕様書のス
 （オフトピック：CoffeeScript と同じように便利だったため JavaScript DOM API に取り込まれたものとして jQuery の `$(selector)` などもあります。 Internet Explorer 8 以降であれば `$('.foo')` ではなく `document.querySelectorAll('.foo')` で同じような処理ができるので、無用な jQuery の導入を避けることができます）
 
 ## Babel を試しに使ってみる
-Node.js のインストールが終わったら `npm` `npx` というコマンドが使えるようになると思います。これらのコマンドを使うと Babel をインストールしてみましょう。
+
+Rails Tutorial を終えた時点では皆さんの環境で `yarn` コマンドが利用できるようになっているはずです。 `yarn` コマンドを使って Babel をインストールしてみましょう:
 
 ```
-$ npm install @babel/core @babel/cli @babel/preset-env
+$ yarn add -D @babel/core @babel/cli @babel/preset-env
 ```
 
 色々ログが出ると思いますが、最終的には `added xxxx packages` のようなメッセージが出ると思います（出なかったらなぜ出なかったかちょっと考えてみて、わからなさそうだったら呼んでください）。
 
-（オフトピック：ドキュメント類でたまに `yarn` というコマンドを使っている時がありますが、 Yarn が生まれた経緯としては NPM のインストールがかつて遅かったという話があり、 NPM がある程度高速化した今 Yarn を採用するメリットはあまりありません。適宜 `npm` コマンドに置き換えて読んでください）
+（オフトピック：ドキュメント類でたまに `yarn` というコマンドを使っている時がありますが、 Yarn が生まれた経緯としては NPM のインストールがかつて遅かったり lockfile が無かったりという話があり、 NPM の機能が Yarn とあまり変わらなくなった今 Yarn を採用しなければならない理由はあまりありません。Webpacker が Yarn に依存しているため、この章ではとりあえず Yarn を使っていますが、ほかのプロジェクトでは適宜 `npm` コマンドに置き換えて読んでください）
 
-この方法でインストールした Babel はコマンドを実行したディレクトリに `node_modules` ディレクトリが掘られてそこに存在しています。もし Rails Tutorial をやっているディレクトリで実行した場合、このまま Git でコミットしてしまうと膨大な `node_modules` ディレクトリの中身がそのままコミットされてしまいます。それを避けるために、 `.gitignore` に `node_modules` という行を追加してください。同様に、 `npm` コマンド実行時にエラーが発生した場合 `npm-debug.log` というファイルが発生し、これもコミットには不要です。 `npm-debug.log*` も `.gitignore` に追加すると良いでしょう。
+この方法でインストールした Babel はコマンドを実行したディレクトリに `node_modules` ディレクトリが掘られてそこに存在しています。もし Rails Tutorial をやっているディレクトリで実行した場合、このまま Git でコミットしてしまうと膨大な `node_modules` ディレクトリの中身がそのままコミットされてしまいます。それを避けるために、 `.gitignore` に（もしまだ無ければ） `node_modules` という行を追加してください。
 
-さて、これで Babel を実行する準備が整ったので、 ECMAScript 6 のコードを書いてみましょう。
+さて、これで Babel を実行する準備が整ったので、 ECMAScript 2015 のコードを書いてみましょう。
 
-```js:hello_es6.js
+```js:hello_es2015_class.js
 class Foo {
 
   // Ruby の initialize 相当
@@ -116,13 +117,42 @@ class Foo {
 new Foo('qux').baz();
 ```
 
-`hello_es6.js` を書いたら次のコマンドを実行してみましょう。
+`hello_es2015_class.js` を書いたら次のコマンドを実行してみましょう。
 
-```
-$ npx babel --presets @babel/preset-env hello_es6.js -o welcome_to_es5.js
+```bash
+# Rails 6 がデフォルトで生成した babel.config.js が存在したままだとそちらの設定を見に行ってしまうので一旦削除します
+$ rm babel.config.js
+$ yarn run babel --presets @babel/preset-env hello_es2015_class.js -o transpiled_es2015_class_to_es5.js
 ```
 
-コマンド後に生成されている `welcome_to_es5.js` を見てみると、なにやらよくわからない JavaScript のコードが書かれています。これはブラウザで実行可能な形に変更されたあとのコードなので、これを `app/assets/javascripts` ディレクトリに置いてみましょう（ `app/assets/javascripts` に置かれた js ファイルは自動で読み込まれるようになっています）。開発環境のページをリロードすると qux とアラートが出るはずです。
+コマンド後に生成されている `transpiled_es2015_class_to_es5.js` を見てみると、なにやらよくわからない JavaScript のコードが書かれています。これはブラウザで実行可能な形に変更されたあとのコードです。
+Webpacker を利用している場合 `config/webpacker.yml` の設定が `compile: true` となっていれば、 `app/javascript` ディレクトリ以下に書かれたコードは自動でこのような Babel によるトランスパイルが行われるという寸法です。
+
+こちらのコードも書いてみましょう。ECMAScript 2015 から導入された **アロー関数（arrow function）** と呼ばれるものを使っています:
+
+```js:hello_es2015_arrow_function.js
+const add = (a, b) => {
+  return a + b;
+}
+```
+
+`hello_es2015_arrow_function.js` を書いたら次のコマンドを実行してみましょう。
+
+```bash
+$ yarn run babel --presets @babel/preset-env hello_es2015_arrow_function.js -o transpiled_es2015_arrow_function_to_es5.js
+```
+
+`transpiled_es2015_arrow_function_to_es5.js` を見てみると以下のようなコードが生成されているでしょうか:
+
+```js:transpiled_es2015_arrow_function_to_es5.js
+"use strict";
+
+var add = function add(a, b) {
+  return a + b;
+};
+```
+
+もとのコードの arrow function `() => {}` が ECMAScript 5 でも解釈可能な `function` による構文に変換されていることがわかります。
 
 これでモダンな JavaScript がどのようなものか、それがどのようにブラウザで動作するかがわかったと思います。 [Babel Repl](https://babeljs.io/repl) とドキュメントを使って ECMAScript 20xx にはどのような言語仕様があるか、それがどのようにブラウザで実行可能なコードに変換されるかを見てみましょう。
 
