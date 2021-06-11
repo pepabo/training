@@ -57,16 +57,16 @@ const requiredFunction = require('./required');
 requiredFunction();
 ```
 
-注意すべき点は `required.js` と `requiring.js` を同じディレクトリに置いておくことです。 `node requiring.js` を実行すると require OK! が出力されますでしょうか。この `module.exports =` と `require()` が CommonJS の仕組みです。この仕組みを使うと、公開されているライブラリをインストールして使うことができます。 [moment](https://momentjs.com) という日付時間を便利に扱えるライブラリが公開されているので、これをインストールして使ってみましょう。
+注意すべき点は `required.js` と `requiring.js` を同じディレクトリに置いておくことです。 `node requiring.js` を実行すると require OK! が出力されますでしょうか。この `module.exports =` と `require()` が CommonJS の仕組みです。この仕組みを使うと、公開されているライブラリをインストールして使うことができます。 [Day.js](https://day.js.org) という日付時間を便利に扱えるライブラリが公開されているので、これをインストールして使ってみましょう。
 
 ```
-$ npm install moment
+$ yarn add dayjs
 ```
 
-```js:hello_moment.js
-const moment = require('moment');
+```js:hello_dayjs.js
+const dayjs = require('dayjs');
 
-console.log(moment().format());
+console.log(dayjs().format());
 ```
 
 実行すると現在時刻が人間にも読めるように表示されると思います。
