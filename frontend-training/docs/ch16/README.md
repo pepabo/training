@@ -73,8 +73,8 @@ console.log(dayjs().format());
 
 ### 練習問題
 
-1. [lodash](https://lodash.com) という配列やオブジェクトを便利に操作できるライブラリがあります。これを使って、下の `employees` 配列を性別でグループ分けして表示してください。
-2. Node.js の各種 API も CommonJS として使うことができるようになっています。練習問題 1 のグループ分けの結果を JSON としてファイルに出力するコードを書いてください。
+1. [`Array` で使えるメソッド](https://developer.mozilla.org/ja/docs/Web/JavaScript/Reference/Global_Objects/Array) をヒントにしながら、下の `employees` 配列を性別でグループ分けして表示してください。
+2. [Node.js の各種 API](https://nodejs.org/dist/latest-v14.x/docs/api/) も CommonJS として使うことができるようになっています。練習問題 1 のグループ分けの結果を JSON としてファイルに出力するコードを書いてください。
 
 ```js
 const employees = [
