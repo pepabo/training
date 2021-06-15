@@ -130,14 +130,12 @@ Loader とは簡単に言うと「Webpack でコードをバンドルする前�
 
 ## Rails から読み込めるようにする
 
-Parcel を動かすところまでできたなら、次は Rails へ組み込んで web アプリの中に表示できるようにします。これまでの Rails 開発であれば、 `rails server` コマンドを実行するとサーバが立ち上がり、 JavaScript や CSS を含んだアセットもいい感じに取得することができるようになっていましたが、これからは JavaScript を Parcel が出力したものを使うため、それを `<script>` タグで読みに行くようにしなければいけません。
+webpack を動かすところまでできたなら、次は Rails へ組み込んで web アプリの中に表示できるようにします。これまでの Rails 開発であれば、 `rails server` コマンドを実行するとサーバが立ち上がり、 JavaScript や CSS を含んだアセットもいい感じに取得することができるようになっていましたが、これからは webpack でバンドルした JavaScript を使うため、それを `<script>` タグで読みに行くようにしなければいけません。
 
-ひとまずは Parcel を開発のための watch モードで動かします。エントリポイントとなる `index.html` は `app/javascripts/packs` に置いて（これは `webpacker` gem のファイルの置き場所と同じにしています）、 `public/packs` というディレクトリに出力し、 `http://localhost/packs/index.js` のような URL でアクセスできるようにします。 Parcel がファイルを生成するディレクトリは自動的にファイルが削除されたりするので、このように `public` のなかにサブディレクトリを掘って運用することにします。
+ひとまずは webpack を開発のための watch モードで動かします。
 
-それを実現する Parcel watch コマンドが以下の通りです。
-
-```
-$ npx parcel watch app/javascripts/packs/index.html -d public/packs --public-url /packs/ --hmr-port 50000
+```bash
+npx webpack --mode development --devtool eval-cheap-module-source-map --watch
 ```
 
 色々オプションが付いていますがこのようにするという形で一旦覚えておいてください。このままだとコマンドが少し長いですね。これを記録して簡単なコマンドとして実行できる NPM Scripts という機能があります。 `package.json` に以下を書いてみてください。
@@ -146,25 +144,44 @@ $ npx parcel watch app/javascripts/packs/index.html -d public/packs --public-url
 {
   // ...
   "scripts": {
-    "watch": "parcel watch app/javascripts/packs/index.html -d public/packs --public-url /packs/ --hmr-port 50000"
+    "watch": "webpack --mode development --devtool eval-cheap-module-source-map --watch"
   }
 }
 ```
 
-すでに `scripts` のなかに `test` が存在していた場合、それとは別に書いておきましょう（注意： `npx` は必要なくなります）。保存後に `npm run watch` を実行すると、先ほどと同じ結果になりましたね。 `public/packs` の中身は Parcel が自動的に生成するファイルであるため、このパスも `.gitignore` に記載しておきましょう。
+すでに `scripts` のなかに `test` が存在していた場合、それとは別に書いておきましょう（注意： `npx` は必要なくなります）。保存後に `npm run watch` を実行すると、先ほどと同じ結果になりましたね。
 
-しかしここで問題があります。 `public/packs` に生成されたバンドル済みの js ファイルは `packs.e31bb0bc.js` のようなファイル名となり、 `app/views/layouts/application.html.erb` に記述されている `<%= javascript_include_tag 'application' %>` のような方法で読み込めなくなっています。この js ファイル名はバンドル元の js ファイルが変更されると別のファイル名になるためです。なぜこのようなことになっているかと言うと、ブラウザは同じ URL の js ファイルをキャッシュしており、変更したファイルを同じ名前でサーバ上に配置しなおしたとしても、リロードしないと変更が反映されないようになっています。そのため、バンドルした js ファイルの内容が異なる場合には衝突しないファイル名をつけることで、リロードをせずとも変更が反映されるようにしているのです。Rails を Heroku で動かすと `application-xxxxxxx.js` のようなファイル名になっているのもこれが理由です。
+しかしここで問題があります。 `public/packs` に生成されたバンドル済みの js ファイルは `main.ce5b5fc52a137b3fd42e.js` のようなファイル名となり、 `app/views/layouts/application.html.erb` で `<%= javascript_include_tag 'application' %>` のような方法で読み込めなくなっています。この js ファイル名はバンドル元の js ファイルが変更されると別のファイル名になるためです。なぜこのようなことになっているかと言うと、ブラウザは同じ URL の js ファイルをキャッシュしており、変更したファイルを同じ名前でサーバ上に配置しなおしたとしても、いわゆるスーパーリロードをしないと変更が反映されないようになっています。そのため、バンドルした js ファイルの内容が異なる場合には衝突しないファイル名をつけることで、スーパーリロードをせずとも変更が反映されるようにしているのです。
 
-Rails から `public/packs` に存在するバンドル済み js ファイルを読み込むヘルパーメソッドを作りましょう。そのためには、バンドル済み js ファイルがどれかということがわかるようにしなければなりません。 [mugi-uno/parcel-plugin-bundle-manifest](https://github.com/mugi-uno/parcel-plugin-bundle-manifest) というバンドル済 js ファイルがどれであるかを記載した .json ファイルを吐き出してくれる小さな Parcel プラグインが公開されているので、これを使いましょう。これまでと同じように NPM を使ってインストールしてみてください。 `npm run watch` した時に使うに当たっては特に細かな設定は必要ありません。 `npm run watch` を再実行して、 `public/packs/parcel-manifest.json` が生成されたことを確認してください。
+Rails から `public/packs` に存在するバンドル済み js ファイルを読み込むヘルパーメソッドを作りましょう。そのためには、バンドル済み js ファイルがどれかということがわかるようにしなければなりません。[webpack-manifest-plugin](https://github.com/shellscape/webpack-manifest-plugin) というバンドル済 js ファイルがどれであるかを記載した .json ファイルを吐き出してくれるプラグインが公開されているので、これを使いましょう。これまでと同じように NPM を使ってインストールしてみてください。インストールしたら `webpack.config.js` に以下の内容を追加してください:
 
-（注意： `app/javascripts/packs/index.html` に `<script src="./index.js"></script>` を書いておかないと `index.js` はトランスパイルされません。これは、 Parcel が実際にコードで使われているファイルのみを抽出してトランスパイルするからです）
+```diff
+@@ -1,5 +1,6 @@
+ const path = require('path');
+ const webpack = require('webpack');
++const { WebpackManifestPlugin } = require('webpack-manifest-plugin');
 
-実際に `app/helpers/application_helper.rb` に `javascript_pack_tag` ヘルパーメソッドを書いて、 `app/views/layouts/application.html.erb` から呼び出すようにします（ちなみに `javascript_pack_tag` という名前は `webpacker` gem に存在するもので、そこからインスパイアを受けています）。少し複雑なコードになるので、以下のコードを読み解きながら実装してください。
+ module.exports = {
+   entry: path.resolve(__dirname, 'app/javascript/packs/application.js'),
+@@ -32,5 +33,8 @@ module.exports = {
+       $: 'jquery',
+       jQuery: 'jquery',
+     }),
++    new WebpackManifestPlugin({
++      publicPath: '/packs/',
++    }),
+   ],
+ };
+```
+
+`npm run watch` を再実行して、 `public/packs/manifest.json` が生成されたことを確認してください。
+
+実際に `app/helpers/application_helper.rb` に `javascript_bundle_tag` ヘルパーメソッドを書いて、 `app/views/layouts/application.html.erb` から呼び出すようにします（ちなみに `javascript_bundle_tag` という名前は `webpacker` gem に存在する `javascript_pack_tag` と衝突しないようにつけたものです）。少し複雑なコードになるので、以下のコードを読み解きながら実装してください。
 
 ```ruby:app/helpers/application_helper.rb
 module ApplicationHelper
-  def javascript_pack_tag(name)
-    javascript_include_tag(manifest["#{name}.js"])
+  def javascript_bundle_tag(name)
+    javascript_include_tag(manifest["#{name}.js"], defer: true)
   end
 
   private
@@ -174,9 +191,9 @@ module ApplicationHelper
     end
 
     def load
-      manifest_path = Rails.root.join('public', 'packs', 'parcel-manifest.json')
+      manifest_path = Rails.root.join('public', 'packs', 'manifest.json')
       if manifest_path.exist?
-        JSON.parse manifest_path.read
+        JSON.parse(manifest_path.read)
       else
         {}
       end
@@ -184,8 +201,8 @@ module ApplicationHelper
 end
 ```
 
-これで `app/views/layouts/application.html.erb` に `<%= javascript_pack_tag 'index' %>` と書くとバンドル済 js が `<script>` タグで読み込まれるようになります。開発環境をリロードして、読み込まれていることを確認してください。
+これで `app/views/layouts/application.html.erb` にある `<%= javascript_pack_tag %>` を消して代わりに `<%= javascript_bundle_tag 'main' %>` と書くとバンドル済 js が `<script>` タグで読み込まれるようになります。Rails サーバを起動して `http://localhost:3000` を開き、js ファイルが読み込まれていることを確認してください。
 
 ## 次回予告
 
-ついに本題であるところの [Vue](https://jp.vuejs.org) を導入し、本格的なフロントエンド開発に乗り出します。 Vue や React の何が jQuery などの他のフロントエンドライブラリと比べて優れているかについて知ることができます。
+ついに本題であるところの [React](https://ja.reactjs.org/) を導入し、本格的なフロントエンド開発に乗り出します。 Vue や React の何が jQuery などの他のフロントエンドライブラリと比べて優れているかについて知ることができます。
