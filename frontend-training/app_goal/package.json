@@ -1,6 +1,10 @@
 {
   "name": "sample_app",
   "private": true,
+  "scripts": {
+    "build": "webpack --mode production",
+    "watch": "webpack --mode development --devtool eval-cheap-module-source-map --watch"
+  },
   "dependencies": {
     "@rails/actioncable": "^6.0.0",
     "@rails/activestorage": "^6.0.0",
