@@ -1,4 +1,4 @@
-# SQLite version 3.x
+# SQLite. Versions 3.8.0 and up are supported.
 #   gem install sqlite3
 #
 #   Ensure the SQLite 3 gem is defined in your Gemfile
@@ -21,5 +21,11 @@ test:
   database: db/test.sqlite3
 
 production:
-  <<: *default
-  database: db/production.sqlite3
+  adapter: postgresql
+  encoding: unicode
+  # For details on connection pooling, see Rails configuration guide
+  # https://railsguides.jp/configuring.html#データベース接続をプールする
+  pool: <%= ENV.fetch("RAILS_MAX_THREADS") { 5 } %>
+  database: sample_app_production
+  username: sample_app
+  password: <%= ENV['SAMPLE_APP_DATABASE_PASSWORD'] %>
