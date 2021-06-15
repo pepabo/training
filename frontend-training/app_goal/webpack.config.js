@@ -1,5 +1,6 @@
 const path = require('path');
 const webpack = require('webpack');
+const { WebpackManifestPlugin } = require('webpack-manifest-plugin');
 
 module.exports = {
   entry: path.resolve(__dirname, 'app/javascript/packs/application.js'),
@@ -31,6 +32,9 @@ module.exports = {
     new webpack.ProvidePlugin({
       $: 'jquery',
       jQuery: 'jquery',
+    }),
+    new WebpackManifestPlugin({
+      publicPath: '/packs/',
     }),
   ],
 };
