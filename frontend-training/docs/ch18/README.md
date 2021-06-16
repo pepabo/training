@@ -1,77 +1,178 @@
-# 第 18 章　Vue 開発ことはじめ
+# 第 18 章　React 開発ことはじめ
 
 {% raw %}
 
-それでは、いよいよ Vue を使っての開発に入ります。 NPM を使って `vue` パッケージをインストールしてください。 `app/javascript/packs/index.js` と `app/views/layouts/application.html.erb` を編集して、 Vue を組み込んでみましょう。
+それでは、いよいよ React を使っての開発に入ります。 NPM を使って `react` `react-dom` パッケージをインストールしてください。
 
-```js:app/javascript/packs/index.js
-import Vue from 'vue/dist/vue';
+また Babel で React のコードを扱えるように `@babel/preset-react` もインストールしてください:
 
-document.addEventListener('DOMContentLoaded', () => {
-  new Vue({
-    el: '#app',
-    data() {
-      return {
-        name: 'Taro'
-      };
-    }
-  });
-});
+```bash
+npm i -D -E @babel/preset-react@7.14.5
 ```
 
-```erb:app/views/layouts/application.html.erb
+同時に `babel.config.js` と `webpack.config.js` も React のコードを扱うように設定を更新します:
+
+```diff
+--- a/babel.config.js
++++ b/babel.config.js
+@@ -34,6 +34,12 @@ module.exports = function(api) {
+           modules: false,
+           exclude: ['transform-typeof-symbol']
+         }
++      ],
++      [
++        '@babel/preset-react',
++        {
++          'runtime': 'automatic'
++        }
+       ]
+     ].filter(Boolean),
+     plugins: [
+```
+
+```diff
+--- a/webpack.config.js
++++ b/webpack.config.js
+@@ -14,7 +14,7 @@ module.exports = {
+   module: {
+     rules: [
+       {
+-        test: /\.m?js$/,
++        test: /(\.m?js|\.jsx)$/,
+         exclude: /(node_modules|bower_components)/,
+         use: {
+           loader: 'babel-loader',
+@@ -25,7 +25,7 @@ module.exports = {
+
+   resolve: {
+     modules: ['node_modules', path.resolve(__dirname, 'app/javascript')],
+-    extensions: ['.js', '.json', '.wasm'],
++    extensions: ['.js', '.jsx', '.json', '.wasm'],
+   },
+
+   plugins: [
+```
+
+ここまでできたら `app/javascript/components` というディレクトリを作り、 `app/javascript/components/index.jsx` という名前のファイルを作成してください。その中に以下のようなコードを書いてみましょう:
+
+```jsx
+const App = () => {
+  return <p>Hi, I'm Pepayama Botaro!</p>;
+};
+
+export default App;
+```
+
+このコードの真ん中あたりにある HTML のような構文は [JSX](https://ja.reactjs.org/docs/introducing-jsx.html) と呼ばれるものです。
+
+この `App` を `app/javascript/packs/application.js` から使うようにしてみましょう:
+
+```js
+import Rails from "@rails/ujs"
+import ReactDOM from "react-dom"
+import Turbolinks from "turbolinks"
+import * as ActiveStorage from "@rails/activestorage"
+import "channels"
+import "jquery"
+import "bootstrap"
+import App from "components"
+
+Rails.start()
+Turbolinks.start()
+ActiveStorage.start()
+
+document.addEventListener("DOMContentLoaded", () => {
+  ReactDOM.render(<App />, document.getElementById("app"))
+})
+```
+
+[`ReactDOM.render`](https://ja.reactjs.org/docs/react-dom.html#render) という API を使っていますね。これで `id="app"` な DOM 要素の中に `App` を描画するのだ、というぐらいに思ってください。
+
+では `app/views/layouts/application.html.erb` の `yield` の前あたりにでもそんな要素を置いて、 React を組み込んでみましょう。
+
+```erb
 <% # 略 %>
-<div id="app">
-  <p>Hello, {{ name }} !</p>
-</div>
+<div id="app"></div>
+<%= yield %>
 ```
 
-[Vue のドキュメント](https://jp.vuejs.org/v2/guide/)は大変よくできているので、なるべく一次情報としてこれを見るようにしましょう。 web 検索をして出てくるブログ記事などには現行バージョンであるバージョン 2 系だけではなく、 1 系や 0.9 系も混在しているので、そのような情報は公式ドキュメントで確実な裏付けを取ってから実装すると良いでしょう。
+それでは実際にページをロードして、画面に "Hi, I'm Pepayama Botaro!" が表示されることを確認してみましょう（`npm run watch` を実行しつつ、端末の別セッションで Rails サーバを起動してください（HMR についてはとりあえず考えないことにします））。
 
-それでは、実際にページをロードして、画面に Hello, Taro! が表示されることを確認してください。このように、 Vue クラスのコンストラクタに渡す設定オブジェクトのうち `data` メソッドが return するオブジェクトが、テンプレートの中で使用できるようになっています。
+このように、 `APP` が返していた JSX （が生成する "React 要素"）が実際の要素となって画面に表示されるのです。
+React 要素を返す関数は **React コンポーネント** （または単に「コンポーネント」、あるいは関数であることを特に強調したいときは「関数コンポーネント」）と呼ばれます。
 
-`data` として文字列だけではなく、数値や真偽値、配列やオブジェクトを扱うこともできます。つまり以下のようなコードも動作します。テンプレート中では他の型も文字列に変換されて表示されます。
+コンポーネントは引数（慣習的に `props` という引数名がよく使われます）を取ってそれを JSX の中で利用することができます。試してみましょう:
 
-```js:app/javascripts/packs/index.js
-// 略
+```jsx
+const Showcase = (props) => {
+  const nameLengthThreshold = 8;
 
-  new Vue({
-    el: '#app',
-    data() {
-      return {
-        name: 'Taro',
-        numberItem: 1,
-        booleanItem: true,
-        arrayItems: ['item', 'another item'],
-        objectItem: { aKey: 'object inner item' }
-      };
-    }
-  });
+  return (
+    <>
+      {/* 中括弧の中で props の値が使えます: */}
+      <p>Hi, I'm {props.name}!</p>
 
-// 後略
+      {/* props の値だけでなく、中括弧の中ではあらゆる JavaScript の式が使えます: */}
+      <p>
+        The answer is {props.answer}, so the doubled answer is{" "}
+        {props.answer * 2}.
+      </p>
+
+      {/* 論理積演算子 && を使って、条件によって要素の表示と非表示を切り替えたり: */}
+      {props.isVisible && <p>This is Visible.</p>}
+
+      {/* 三項演算子を使って、条件によって表示する要素を出し分けたりできます: */}
+      {props.name.length >= nameLengthThreshold ? (
+        <p>name.length is equal or longer than {nameLengthThreshold}.</p>
+      ) : (
+        <p>name.length is less than {nameLengthThreshold}.</p>
+      )}
+
+      {/* 配列に対して map を使えば複数の要素を描画できます: */}
+      <ul>
+        {props.items.map((item) => (
+          <li key={item.id}>
+            {item.name} is {item.price} Yen.
+          </li>
+        ))}
+      </ul>
+    </>
+  );
+};
+
+const App = () => {
+  const name = "Pepayama Botaro";
+  const answer = 42;
+  const isVisible = true;
+  const items = [
+    {
+      id: 1,
+      name: "T-shirt",
+      price: 100,
+    },
+    {
+      id: 2,
+      name: "Hoodie",
+      price: 300,
+    },
+  ];
+
+  return (
+    <Showcase
+      name={name}
+      answer={answer}
+      isVisible={isVisible}
+      items={items}
+    ></Showcase>
+  );
+};
+
+export default App;
 ```
 
-```erb:app/views/layouts/application.html.erb
-<% # 略 %>
-<div id="app">
-  <p>Hello, {{ name }} !</p>
+`app/javascript/components/index.jsx` を上のように書き換えて、画面をリロードしてみてください。また値をいろいろ変えて、それに対応して表示が変わるか試してみてください。
 
-  <% # 足し算もできる %>
-  <p>1 + 1 = {{ nuberItem + 1 }}</p>
-
-  <% # 真偽値は v-if で扱える、もちろん v-if には式も使える %>
-  <p v-if="booleanItem">This is visible.</p>
-  <p v-if="arrayItems.length > 0">This is visible, too.</p>
-
-  <% # 配列は v-for で繰り返しする %>
-  <div>
-    <p v-for="item in arrayItems" v-bind:key="item">{{ item }}</p>
-  </div>
-
-  <% # オブジェクトに対しては JavaScript のようにアクセスする %>
-  <p>{{ objectItem.aKey }}</p>
-</div>
-```
+React の使い方をこれから学ぶにあたり、どうすればやりたいことが実現できるかわからないという時も出てくるかと思いますが、[React のドキュメント](https://ja.reactjs.org/docs/)は大変よくできているので、なるべく一次情報としてこれを見るようにしましょう。
 
 ## イベントハンドリング
 
