@@ -10,7 +10,7 @@ GMO ペパボ株式会社エンジニア・デザイナー向けフロントエ�
 * JavaScript のモジュールシステム
 * モジュールシステムの補完としての JavaScript ビルドツール (e.g. Webpack, Parcel)
 * Node, フロントエンドライブラリ管理システム NPM の簡単な使い方
-* Vue.js の初歩的な使い方（なぜあなたの jQuery プロジェクトが破綻するのか、あるいは Virtual DOM とは何か）
+* React の初歩的な使い方（なぜあなたの jQuery プロジェクトが破綻するのか、あるいは Virtual DOM とは何か）
 * 非同期、コールバック、 Promise, async/await
 * SPA とは何か（JavaScript による URL ハンドリング、pushState/popState）
 * フロントエンドプロジェクトのデプロイ（マネクラ、Heroku）
