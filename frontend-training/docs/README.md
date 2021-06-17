@@ -43,6 +43,8 @@ Rails Tutorial が 14 章で終了なので、この研修教材ではその続�
   * Node.js （雑に言うとコマンドラインから JavaScript が動かせるもの）にも固有の API が存在します。バージョンに対応した一次ドキュメントを参照してください。
 * [Can I use...](https://caniuse.com/)
   * あるブラウザのあるバージョンが最新の言語仕様や機能に対応しているかを調べられます。
+* [React Docs](https://ja.reactjs.org/docs/getting-started.html)
+  * React の使い方について困ったときはまず公式ドキュメントを調べてみましょう。
 * [Vue.js ガイド](https://jp.vuejs.org/v2/guide/)
   * Vue のドキュメントは公式の翻訳が一番充実しているので、これを調べることをお勧めします。
 
