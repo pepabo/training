@@ -174,39 +174,54 @@ export default App;
 
 React の使い方をこれから学ぶにあたり、どうすればやりたいことが実現できるかわからないという時も出てくるかと思いますが、[React のドキュメント](https://ja.reactjs.org/docs/)は大変よくできているので、なるべく一次情報としてこれを見るようにしましょう。
 
-## イベントハンドリング
+## イベントハンドリングと状態
 
-まずは Vue を導入して各種データを表示するところまで学びました。しかしこれだけでは静的なページとは何も変わらず、フロントエンド開発を行うメリットがありません。そこでユーザのアクションによってページが書き換わる、インタラクティブな要素を導入してみましょう。
+まずは React を導入してコンポーネントに `props` を渡し、表示するところまで学びました。しかしこれだけでは静的なページとは何も変わらず、フロントエンド開発を行うメリットがありません。そこでユーザのアクションによってページが書き換わる、インタラクティブな要素を導入してみましょう。さきほど `props.isVisible` の値で表示を出し分けていた部分を、ボタンを押すことで表示・非表示が切り替わるようにしたいと思います。
 
-```js:app/javascripts/packs/index.js
-// 略
+さて、どうすればよいでしょうか。
 
-  new Vue({
-    el: '#app',
-    data() {
-      return {
-        visible: false
-      };
-    },
-    methods: {
-      toggleVisibility() {
-        this.visible = !this.visible;
-      }
-    }
-  });
+まずは天下り的ですが `app/javascript/components/index.jsx` の1行目に
 
-// 後略
+```js
+import { useState } from "react";
 ```
 
-```erb:app/views/layouts/application.html.erb
-<% # 略 %>
-<div id="app">
-  <p v-if="visible">Can you see this?</p>
-  <button v-on:click="toggleVisibility">toggle</button>
-</div>
+と書き、 `useState` を import してください。
+
+次に `Showcase` 内で `return` の前にこんなコードを追加してください:
+
+```js
+  const [isVisible, setIsVisible] = useState(true);
+
+  const handleClickVisibilityToggleButton = () => {
+    setIsVisible(!isVisible);
+  };
 ```
 
-書き換えてページを表示するとボタンがあり、ボタンを押すことでメッセージの表示・非表示が切り替わるようになっています。このようにユーザ入力に反応するためには `v-on` ディレクティブを使用します。今回はボタンクリックに反応するので、 `v-on:click` を使用しています。 `v-on` ディレクティブの対象としては `methods` に定義されたメソッド名が指定できますし、今回の例であれば `visible = !visible` のように実際の処理を記述することもできます（コード例では省略していますが、念のため試してみてください）。 `data` で定義されたデータは JavaScript コード中では `this.someValue =` のような形で、テンプレート中では直接の形で代入できるようになっています。また、このデータの変化は特に表示側に伝えるようなコードがなくても、自動的に表示へと反映されるようになっています。
+`isVisible` は `props` として渡されたものを使うのではなく、何やら `useState` が返している変数を使うのです。
+そしてボタンを追加します:
+
+```diff
+-      {props.isVisible && <p>This is Visible.</p>}
++      {isVisible && <p>This is Visible.</p>}
++      <button onClick={handleClickVisibilityToggleButton}>
++        Toggle visibility
++      </button>
+```
+
+これでボタンを押すことで `<p>This is Visible.</p>` の表示・非表示が切り替わる `Showcase` の完成です。 `isVisible` は `props` としては渡さなくなったので `App` 内から `isVisible` は削除してしまってください。
+
+書き換えてページを表示するとボタンがあり、ボタンを押すことでメッセージの表示・非表示が切り替わるようになっているはずです。
+
+一度にたくさんの新しい概念を導入したので詳しく説明していきます。
+
+まずそもそも「ボタンを押すことでメッセージの表示・非表示が切り替わる」とはどういうことでしょうか？それは `Showcase` コンポーネントの内部で「メッセージの視認性」という **状態** が変化する、ということです。変化しうる **状態** と、その状態を更新する関数を作って返してくれるのが `useState` です。今回の例では `isVisible` が状態を保持する変数であり、その更新関数には `setIsVisible` という名前をつけました。そして `useState` に与える引数が状態の初期値となります。今回の例では `true` を渡していたので、画面の初回表示時はメッセージが見える状態から始まっていたということです。
+
+（ちなみに `useState` は React 16.8 で追加された [フック (hook)](https://ja.reactjs.org/docs/hooks-intro.html)という新機能のうちのひとつです。）
+
+これに対して `props` はその値を変更してはいけません。[Props は読み取り専用](https://ja.reactjs.org/docs/components-and-props.html#props-are-read-only) であり、渡された `props` は決して変更してはいけません。React コンポーネントは渡された `props` の値に対しては従順にその値を使って React 要素を作るべきです。React コンポーネントは同じ `props` に対しては（`props` から作られる要素の範囲内で）同じ React 要素を返すべきです。つまり React コンポーネントは `props` に対して純粋関数のように振る舞わなければいけません。React コンポーネントを作る上で、いったいどこまでが外部から入力される決定された値（`props`）でありどれがユーザからのインタラクション等によって変化しうる内部状態（`state`）であるのかを考えることは極めて重要なのでよく覚えておいてください。
+
+そして、「ボタンをクリックする」というようななんらかのイベントに反応するためには `onXXX` 属性を使用します。今回はボタンクリックに反応するので、 `onClick` を使用しています（ちなみに React で利用可能なイベント一覧は [リファレンス](https://ja.reactjs.org/docs/events.html) をご覧ください）。 `onClick` に渡しているコールバック関数 `handleClickVisibilityToggleButton` （JavaScript においてイベントを受け取って処理するコールバック関数のことを特に「イベントハンドラ」と呼ぶことがあります）がクリック時に呼ばれて、 `setIsVisible` が `isVisible` の状態を更新するという寸法です。また、この状態（`isVisible`）の変化は特に表示側に伝えるようなコードがなくても、自動的に表示へと反映されるようになっています。
 
 ## 練習問題 1
 
