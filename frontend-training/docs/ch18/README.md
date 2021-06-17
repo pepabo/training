@@ -225,26 +225,17 @@ import { useState } from "react";
 
 ## 練習問題 1
 
-1. Parcel の環境を Rails Tutorial とは別に用意して、 Vue で以下の `data` の `pets` を表形式で表示するコードを書いてください。
-2. Vue の公式ドキュメントを調べつつ、表に犬のみを表示するボタン、表に猫のみを表示するボタン、全てのペットを表示するボタンを実装してください（ヒント： `computed` を使うと綺麗にコードを書けます）。
-3. （高度）ドキュメントを調べつつ、犬か猫を選べる新しいペットを登録するフォームを作ってください。新しいペットを登録すると表に追加して表示されるようにしてください（ヒント：フォーム要素には `v-bind:model` を使います）。
+1. webpack の環境を Rails Tutorial とは別に用意して、 React で以下の `defaultPets` を表形式で表示するコードを書いてください。環境を別に用意することが難しければ今の Rails Tutorial の環境を使い続けても構いません。
+1. 表に犬のみを表示するボタン、表に猫のみを表示するボタン、全てのペットを表示するボタンを実装してください（ヒント： `Array` には [`filter()`](https://developer.mozilla.org/ja/docs/Web/JavaScript/Reference/Global_Objects/Array/filter) というメソッドがあります）。
+1. （高度）ドキュメントを調べつつ、犬か猫を選べる新しいペットを登録するフォームを作ってください。新しいペットを登録すると表に追加して表示されるようにしてください。フォームは [制御されたコンポーネント](https://ja.reactjs.org/docs/forms.html#controlled-components) として書いてください。
 
 ```js:index.js
-document.addEventListener('DOMContentLoaded', () => {
-  new Vue({
-    el: '#app',
-    data() {
-      return {
-        pets: [
-          { name: 'Pochi', species: 'dog' },
-          { name: 'Tama', species: 'cat' },
-          { name: 'Mike', species: 'cat' },
-          { name: 'Hachi', species: 'dog' }
-        ]
-      };
-    }
-  });
-});
+const defaultPets = [
+  { name: "Pochi", species: "dog" },
+  { name: "Tama", species: "cat" },
+  { name: "Mike", species: "cat" },
+  { name: "Hachi", species: "dog" },
+];
 ```
 
 ## Vue の何がかつてのフロントエンドライブラリと比べて優れていたか
