@@ -39,7 +39,7 @@ Rails Tutorial が 14 章で終了なので、この研修教材ではその続�
   * モダンフロントエンド開発において、 JavaScript と呼ばれているものはおおよそ ECMAScript 20xx を指しています（なぜそうなっているかは後述）。JavaScript/ECMAScript 20xx の言語仕様や各種 API に困った時はこのサイトを見てください。
 * [ドキュメントオブジェクトモデル (DOM) - Web API](https://developer.mozilla.org/ja/docs/Web/API/Document_Object_Model)
   * JavaScript には言語仕様や各種型、 API とは別にブラウザに表示されるページを操作したり、ブラウザ固有の機能を動作させる DOM API が存在します。
-* [Node.js v12.5.0 Documentation](https://nodejs.org/api/documentation.html)
+* [Node.js Documentation](https://nodejs.org/api/documentation.html)
   * Node.js （雑に言うとコマンドラインから JavaScript が動かせるもの）にも固有の API が存在します。バージョンに対応した一次ドキュメントを参照してください。
 * [Can I use...](https://caniuse.com/)
   * あるブラウザのあるバージョンが最新の言語仕様や機能に対応しているかを調べられます。
