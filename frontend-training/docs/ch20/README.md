@@ -1,4 +1,4 @@
-# 第 20 章　Vue on Rails
+# 第 20 章　React on Rails
 
 {% raw %}
 
@@ -9,9 +9,9 @@
 Rails Tutorial で作成した Micropost アプリケーションを SPA にします。ただし、以下については時間の都合上考えないことにします。
 
 * ログイン機構（ JWT あたりで実装するのですが長くなりすぎる）
-* Rails を BFF (Backend for Frontend) にして Nuxt.js のフロントエンドサーバを立てる
-* Vuex （グローバルな状態管理）
-* Server Side Rendering （ Vue が吐き出す HTML をサーバ側で生成して処理高速化＋ SEO 対策）
+* Rails を BFF (Backend for Frontend) にして Next.js のフロントエンドサーバを立てる
+* Redux （グローバルな状態管理）
+* Server Side Rendering （ React が吐き出す HTML をサーバ側で生成して処理高速化＋ SEO 対策）
 
 なので、基本方針としては「ログイン後のページを、リンク読み込み不要なリッチフロントエンドにする」という方向性にします。上記のおまけテーマは appendix にある（予定）なのでそちらをご覧ください。
 
