@@ -1,20 +1,31 @@
 {
   "name": "sample_app",
   "private": true,
+  "scripts": {
+    "build": "webpack --mode production",
+    "watch": "webpack --mode development --devtool eval-cheap-module-source-map --watch"
+  },
   "dependencies": {
+    "@babel/runtime": "7.14.6",
     "@rails/actioncable": "^6.0.0",
     "@rails/activestorage": "^6.0.0",
     "@rails/ujs": "^6.0.0",
-    "@rails/webpacker": "5.4.0",
     "bootstrap": "3.4.1",
+    "core-js": "3.14.0",
     "dayjs": "^1.10.5",
     "jquery": "3.4.1",
-    "turbolinks": "^5.2.0",
-    "webpack": "^4.46.0",
-    "webpack-cli": "^3.3.12"
+    "turbolinks": "^5.2.0"
   },
   "version": "0.1.0",
   "devDependencies": {
-    "webpack-dev-server": "^3.11.2"
+    "@babel/core": "7.14.6",
+    "@babel/plugin-transform-runtime": "7.14.5",
+    "@babel/preset-env": "7.14.5",
+    "babel-loader": "8.2.2",
+    "babel-plugin-macros": "3.1.0",
+    "webpack": "5.38.1",
+    "webpack-cli": "4.7.2",
+    "webpack-dev-server": "^3.11.2",
+    "webpack-manifest-plugin": "3.1.1"
   }
 }
