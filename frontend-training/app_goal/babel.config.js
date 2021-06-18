@@ -40,7 +40,8 @@ module.exports = function(api) {
         {
           'runtime': 'automatic'
         }
-      ]
+      ],
+      ['@babel/preset-typescript']
     ].filter(Boolean),
     plugins: [
       'babel-plugin-macros',

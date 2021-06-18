@@ -1,6 +1,18 @@
 import { useState } from "react";
 
-const Showcase = (props) => {
+interface Item {
+  id: number;
+  name: string;
+  price: number;
+}
+
+interface Props {
+  name: string;
+  answer: number;
+  items: Item[];
+}
+
+const Showcase = (props: Props) => {
   const [isVisible, setIsVisible] = useState(true);
   const nameLengthThreshold = 8;
 

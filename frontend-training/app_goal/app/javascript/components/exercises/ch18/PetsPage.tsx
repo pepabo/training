@@ -1,7 +1,15 @@
+import * as React from "react";
 import { useState } from "react";
 
+type Species = "dog" | "cat";
+
+interface Pet {
+  name: string;
+  species: Species;
+}
+
 const PetsPage = () => {
-  const defaultPets = [
+  const defaultPets: Pet[] = [
     { name: "Pochi", species: "dog" },
     { name: "Tama", species: "cat" },
     { name: "Mike", species: "cat" },
@@ -9,9 +17,12 @@ const PetsPage = () => {
   ];
 
   const [pets, setPets] = useState(defaultPets);
-  const [displayedSpecies, setDisplayedSpecies] = useState(["dog", "cat"]);
+  const [displayedSpecies, setDisplayedSpecies] = useState<Species[]>([
+    "dog",
+    "cat",
+  ]);
   const [newPetName, setNewPetName] = useState("");
-  const [newPetSpecies, setNewPetSpecies] = useState("dog");
+  const [newPetSpecies, setNewPetSpecies] = useState<Species>("dog");
 
   const handleClickDogsOnlyButton = () => {
     setDisplayedSpecies(["dog"]);
@@ -23,13 +34,19 @@ const PetsPage = () => {
     setDisplayedSpecies(["dog", "cat"]);
   };
 
-  const handleChangenewPetName = (event) => {
+  const handleChangenewPetName = (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
     setNewPetName(event.target.value);
   };
-  const handleChangeInputPetSpecies = (event) => {
-    setNewPetSpecies(event.target.value);
+
+  const handleChangeInputPetSpecies = (
+    event: React.ChangeEvent<HTMLSelectElement>
+  ) => {
+    setNewPetSpecies(event.target.value as Species);
   };
-  const handleSubmitNewPet = (event) => {
+
+  const handleSubmitNewPet = (event: React.FormEvent) => {
     event.preventDefault();
 
     if (newPetName) {
