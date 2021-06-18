@@ -10,7 +10,7 @@ GMO ペパボ株式会社エンジニア・デザイナー向けフロントエ�
 * JavaScript のモジュールシステム
 * モジュールシステムの補完としての JavaScript ビルドツール (e.g. Webpack, Parcel)
 * Node, フロントエンドライブラリ管理システム NPM の簡単な使い方
-* Vue.js の初歩的な使い方（なぜあなたの jQuery プロジェクトが破綻するのか、あるいは Virtual DOM とは何か）
+* React の初歩的な使い方（なぜあなたの jQuery プロジェクトが破綻するのか、あるいは Virtual DOM とは何か）
 * 非同期、コールバック、 Promise, async/await
 * SPA とは何か（JavaScript による URL ハンドリング、pushState/popState）
 * フロントエンドプロジェクトのデプロイ（マネクラ、Heroku）
@@ -39,10 +39,12 @@ Rails Tutorial が 14 章で終了なので、この研修教材ではその続�
   * モダンフロントエンド開発において、 JavaScript と呼ばれているものはおおよそ ECMAScript 20xx を指しています（なぜそうなっているかは後述）。JavaScript/ECMAScript 20xx の言語仕様や各種 API に困った時はこのサイトを見てください。
 * [ドキュメントオブジェクトモデル (DOM) - Web API](https://developer.mozilla.org/ja/docs/Web/API/Document_Object_Model)
   * JavaScript には言語仕様や各種型、 API とは別にブラウザに表示されるページを操作したり、ブラウザ固有の機能を動作させる DOM API が存在します。
-* [Node.js v12.5.0 Documentation](https://nodejs.org/api/documentation.html)
+* [Node.js Documentation](https://nodejs.org/api/documentation.html)
   * Node.js （雑に言うとコマンドラインから JavaScript が動かせるもの）にも固有の API が存在します。バージョンに対応した一次ドキュメントを参照してください。
 * [Can I use...](https://caniuse.com/)
   * あるブラウザのあるバージョンが最新の言語仕様や機能に対応しているかを調べられます。
+* [React Docs](https://ja.reactjs.org/docs/getting-started.html)
+  * React の使い方について困ったときはまず公式ドキュメントを調べてみましょう。
 * [Vue.js ガイド](https://jp.vuejs.org/v2/guide/)
   * Vue のドキュメントは公式の翻訳が一番充実しているので、これを調べることをお勧めします。
 
