@@ -31,6 +31,10 @@ const FeedList = () => {
     fetchFeeds();
   }, []);
 
+  const deleteFeed = (id: number) => {
+    setFeeds(feeds.filter((feed) => feed.id !== id));
+  };
+
   return (
     <>
       <h3>Micropost Feed</h3>
@@ -40,7 +44,7 @@ const FeedList = () => {
         <ol className="microposts">
           {feeds.map((feed) => (
             <li key={feed.id}>
-              <FeedItem feed={feed} />
+              <FeedItem feed={feed} onDelete={deleteFeed} />
             </li>
           ))}
         </ol>

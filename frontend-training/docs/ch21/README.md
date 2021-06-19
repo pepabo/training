@@ -2,7 +2,7 @@
 
 {% raw %}
 
-さて、それでは前の章で出題された練習問題ではスキップしていた、削除リンクの実装をしましょう。 scaffold から推察するに、おおよそこのようなコードになると考えられますね。
+さて、それでは前の章で出題された練習問題ではスキップしていた、削除リンクの実装をしましょう。おおよそこのようなコードになると考えられますね。
 
 ```ruby
 # app/controllers/microposts_controller.rb
@@ -22,35 +22,41 @@ class MicropostsController < ApplicationController
 end
 ```
 
-```vue:app/javascripts/packs/FeedItem.vue
-<template>
-  <!-- 略 -->
-    <a v-on:click="delete">delete</a>
-  <!-- 略 -->
-</template>
+```tsx
+// app/javascript/components/static-pages/FeedItem.tsx
 
-<script>
-import axios from 'axios';
+import axios from "axios";
+import * as React from "react";
 
-export default {
-  // 略
-  props: {
-    // 略
-    onDelete: Function
-  },
-  methods: {
-    async delete() {
-      const res = await axios.delete(`/microposts/${this.feed.id}.json`);
-      this.onDelete(this.feed.id);  // 親コンポーネントから渡された関数を実行して要素を削除する
+// 略
+interface Props {
+  feed: Feed;
+  onDelete: (id: number) => void;
+}
+
+const FeedItem = (props: Props) => {
+  const handleClickDeleteButton = async (event: React.MouseEvent) => {
+    event.preventDefault();
+
+    if (confirm("You sure?")) {
+      await axios.delete(`/microposts/${props.feed.id}.json`);
+      // 親のfeedsを更新する
+      props.onDelete(props.feed.id);
     }
-  }
+  };
+
+  return (
+    <>
+      {/* 略 */}
+        {props.feed.user.is_current_user && (
+          <a onClick={handleClickDeleteButton}>delete</a>
+        )}
+    </>
+  );
 };
-</script>
 ```
 
-（ tips: 親コンポーネントから子コンポーネントに渡す `props` として、親コンポーネントの `methods` に定義した関数を渡すことができます。）
-
-しかし、これを書いて削除リンクを押したところで、何も発生しません。 Google Chrome などで開発者コンソールを開いてエラーを見ると、レスポンスコード 422, Can't verify CSRF token authenticity というエラーが発生していることが確認できます。これは、セキュリティ講習で出てきた外部 web アプリケーションからの不正な POST 操作である CSRF を防ぐ機構が Rails ではデフォルトで搭載されているためです。
+しかし、これを書いて削除リンクを押したところで、何も発生しません。 Google Chrome などで開発者コンソールを開いてエラーを見ると、レスポンスコード 422, Can't verify CSRF token authenticity というエラーが発生していることが確認できます。これは、セキュリティ講習で出てきた外部 web アプリケーションからの不正な POST 操作である CSRF を防ぐ機構が Rails では [デフォルトで搭載されている](https://railsguides.jp/security.html#csrf%E3%81%B8%E3%81%AE%E5%AF%BE%E5%BF%9C%E7%AD%96) ためです。
 
 （ TODO: セキュリティ研修受けてない人向けに CSRF がどのようなものかまとめる）
 
@@ -61,21 +67,9 @@ export default {
 <meta name="csrf-token" content="OmfhveuM3UaRbeTV1CTvejMViyFzaqN1I9EIOzhkd5pb+shYAYMmpp6HDuxzqDFV/BVU5fe21V7h+PX7a0aBWQ==" />
 ```
 
-これが CSRF を回避するためのトークンで、 Rails が生成する HTML から POST を行うときには、これをパラメータに付加して送信しているのです。この仕組みは `ApplicationController` にある `protect_from_forgery with: :exception` の部分で有効化されているので、ひとまずこの行をコメントアウトして、実際に削除のリクエストが実行できるか確かめてみましょう。
+これが CSRF を回避するためのトークンで、 `csrf_meta_tags` ヘルパーによって生成されています。 Rails が生成する HTML から POST を行うときには、これをパラメータに付加して送信しているのです。この仕組みはコントローラ内で `protect_from_forgery` メソッドが呼ばれていると有効になるのですが、Rails 5.2 以降でアプリケーションを作成している場合（ 2021 年 6 月現在、 Rails の最新版は 6.1 です）、 `protect_from_forgery` はデフォルトで有効になっています（ちなみに Rails 5.1 まではプログラマが手で `ApplicationController` に `protect_from_forgery with: :exception` などのように書いていました）。
 
-（オフトピック： BFF (Backend for Frontend) や API サーバのような構成を採用する場合、セッションを使ってログインするという作業は発生せず、リクエストにトークンを付加することでユーザを認証するので、 CSRF 対策はあまり考えなくてよくなります。）
-
-## 練習問題 1
-
-新規 Micropost 投稿フォームを Vue に置き換えてください（画像投稿が結構むずいかも）。投稿後に投稿データを FeedList に反映させるようにしてください。ただし、 `/feeds.json` を再取得する方法ではない方法で実装してください（ヒント： scaffold を作成した時 `create` メソッドは JSON のレスポンスを返すようになっています。それを使います）。
-
-## `protect_from_forgery` に対応する
-
-さて、このままだとログイン済みの状態で不正なサイトから POST 処理ができてしまいます。これを正規の方法を用いて POST できるようにします。もっともシンプルな実装をするのであれば、 HTTP リクエストをするときに `<meta>` タグからトークンを取得すれば良いのです。 XMLHttpRequest でリクエストを送信する際に `X-CSRF-Token` ヘッダを付与すれば正常処理されるようになります。
-
-（注意！！： `protect_from_forgery: :exception` のコメントアウトを戻すようにしましょう）
-
-Rails 5.2 以降でアプリケーションを作成している場合（ 2019 年現在、 Rails Tutorial の最新版は Rails 5.1 系です）、 `protect_from_forgery` がデフォルトで有効になっているので以下のように `config/application.rb` で無効化する必要があります。
+Rails 5.2 以降で `protect_from_forgery` を無効化するには `config/application.rb` で以下のように設定する必要があります:
 
 ```ruby
 # config/application.rb
@@ -85,10 +79,20 @@ Rails 5.2 以降でアプリケーションを作成している場合（ 2019 �
 module FooApplication
   class Application < Rails::Application
     # 略
-    action_controller.default_protect_from_forgery = false
+    config.action_controller.default_protect_from_forgery = false
   end
 end
 ```
+
+## 練習問題 1
+
+1. 試しに上記のように設定を変更してから Rails サーバを再起動し、もう一度自分の Micropost が `delete` リンクから削除できるか試してみてください。削除できることを確認したら必ず設定を元に戻してください。
+
+（オフトピック： BFF (Backend for Frontend) や API サーバのような構成を採用する場合、セッションを使ってログインするという作業は発生せず、リクエストにトークンを付加することでユーザを認証するので、 CSRF 対策はあまり考えなくてよくなります。）
+
+## `protect_from_forgery` に対応する
+
+さて、`protect_from_forgery` が無効になっているとログイン済みの状態で不正なサイトから POST 処理ができてしまいます。これを正規の方法を用いて POST できるようにします。もっともシンプルな実装をするのであれば、 HTTP リクエストをするときに `<meta>` タグからトークンを取得すれば良いのです。 XMLHttpRequest でリクエストを送信する際に `X-CSRF-Token` ヘッダを付与すれば正常処理されるようになります。
 
 （こぼれ話：ちなみに、HTML の `<form>` タグが送信できる HTTP メソッドは実は GET, POST しかなく、 PATCH, PUT, DELETE などの HTTP メソッドは XMLHttpRequest からしか送れません。これを Rails では擬似的に POST で扱えるように、特殊なパラメータをフォームに追加しているのです。）
 
@@ -190,6 +194,10 @@ export default client;
 import axios from './axiosClient';
 // 後略
 ```
+
+## 練習問題 1
+
+新規 Micropost 投稿フォームを Vue に置き換えてください（画像投稿が結構むずいかも）。投稿後に投稿データを FeedList に反映させるようにしてください。ただし、 `/feeds.json` を再取得する方法ではない方法で実装してください（ヒント： scaffold を作成した時 `create` メソッドは JSON のレスポンスを返すようになっています。それを使います）。
 
 ## 練習問題 2
 

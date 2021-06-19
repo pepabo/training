@@ -1,3 +1,5 @@
+import axios from "axios";
+import * as React from "react";
 import GravatarImage from "./GravatarImage";
 
 interface User {
@@ -17,9 +19,19 @@ interface Feed {
 
 interface Props {
   feed: Feed;
+  onDelete: (id: number) => void;
 }
 
 const FeedItem = (props: Props) => {
+  const handleClickDeleteButton = async (event: React.MouseEvent) => {
+    event.preventDefault();
+
+    if (confirm("You sure?")) {
+      await axios.delete(`/microposts/${props.feed.id}.json`);
+      props.onDelete(props.feed.id);
+    }
+  };
+
   return (
     <>
       <GravatarImage user={props.feed.user} />
@@ -32,7 +44,9 @@ const FeedItem = (props: Props) => {
       </span>
       <span className="timestamp">
         Posted {props.feed.created_at_time_ago_in_words} ago.{" "}
-        {props.feed.user.is_current_user && <a>delete</a>}
+        {props.feed.user.is_current_user && (
+          <a onClick={handleClickDeleteButton}>delete</a>
+        )}
       </span>
     </>
   );
