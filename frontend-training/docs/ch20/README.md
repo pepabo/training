@@ -21,56 +21,80 @@ Rails Tutorial で作成した Micropost アプリケーションを SPA にし�
 そこで TypeScript の導入を強くおすすめします。導入といってもそんなに手順は複雑ではありません。 [付録 3](../appendix03/) に内容をまとめてありますので、先に進む前にまずこちらを読んでみてください。
 これ以降は TypeScript でコードを書くことを前提として話を進めます。
 
-## Vue on Rails をはじめる
+## React on Rails をはじめる
 
-ではまず、 Rails Tutorial で作成したプロジェクトルートで以下を実行します。
+前章までで React による UI を表示させることはできました。ではまず、ログイン後に React の UI が出るようにしたいので、`app/views/layouts/application.html.erb` に置いていた `<div>` 要素を削除して、`app/views/static_pages/home.html.erb` に以下のように配置します:
 
-```
-$ npm install parcel-bundler parcel-plugin-bundle-manifest vue vue-router axios core-js regenerator-runtime --save
-```
-
-`node_modules` と `public/packs` を `.gitignore` に追記して `package.json` と `package-lock.json` のみコミットします。この 2 つのファイルはデプロイする時に必要になるので、忘れずにコミットしておいてください。その後前章までの指示に従って Rails で `parcel-manifest.json` を読み込む設定と `npm run watch` が実行できる設定をします。
-
-ログイン後に Vue の UI が出るようにするので、 `app/javascripts/packs/Home.vue` と `app/javascripts/packs/index.js` を作って `app/views/static_pages/home.html.erb` を以下のように変更します。
-
-```vue:app/javascripts/packs/Home.vue
-<template>
-  <p>Hello, world!</p>
-</template>
-
-<script>
-export default {};
-</script>
+```diff
+--- a/app/views/layouts/application.html.erb
++++ b/app/views/layouts/application.html.erb
+@@ -15,7 +15,6 @@
+       <% flash.each do |message_type, message| %>
+         <div class="alert alert-<%= message_type %>"><%= message %></div>
+       <% end %>
+-      <div id="app"></div>
+       <%= yield %>
+       <%= render 'layouts/footer' %>
+       <%= debug(params) if Rails.env.development? %>
 ```
 
-```js:app/javascripts/packs/index.js
-import 'core-js/stable';
-import 'regenerator-runtime/runtime';
-import Vue from 'vue/dist/vue';
-import Home from './Home.vue';
-
-document.addEventListener('DOMContentLoaded', () => {
-  new Vue({
-    el: '#app',
-    render: (createElement) => {
-      return createElement(Home)
-    }
-  });
-});
+```diff
+--- a/app/views/static_pages/home.html.erb
++++ b/app/views/static_pages/home.html.erb
+@@ -1,4 +1,5 @@
+ <% if logged_in? %>
++  <div id="app"></div>
+   <div class="row">
+     <aside class="col-md-4">
+       <section class="user_info">
 ```
 
-```erb:app/views/static_pages/home.html.erb
-<% if logged_in? %>
-  <% # 中略 %>
-  <div id="app"></div>
-  <%= javascript_pack_tag 'index' %>
-<% else %>
-  <% # 後略 %>
+`app/javascript/components/index.tsx` の中に書いていた `Showcase` コンポーネントはもう使わないので、削除するか適当なファイルにコピーして脇に置いておいてください。
+
+`app/javascripts/components/static-pages/Home.tsx` を作って以下のような内容にします:
+
+```tsx
+const Home = () => {
+  return <>Hello, world!</>;
+};
+
+export default Home;
 ```
 
-（ tips: これまで Ruby/Rails で開発してきたので、 `Home.vue` とファイル名に大文字が入ることに違和感を感じるかもしれませんが、 Vue や React でコンポーネントを作った時のファイル名はキャメルケースを使うことが多いです。）
+（ Tips: これまで Ruby/Rails で開発してきたので、 `Home.tsx` とファイル名に大文字が入ることに違和感を感じるかもしれませんが、React や Vue でコンポーネントを作った時のファイル名はキャメルケースを使うことが多いです。）
 
-ログイン後の画面の下部に Hello, world! と表示されていることが確認できると思います。それでは、実際に Rails からデータを取得するようにしてみましょう。
+この `Home` コンポーネントを `app/javascripts/components/static-pages/index.ts` から提供する形にしましょう:
+
+```ts
+import Home from "./Home";
+
+export { Home };
+```
+
+`app/javascript/components/index.tsx` は以下のように変更してください:
+
+```tsx
+import { Home } from "./static-pages";
+
+const App = () => {
+  return <Home></Home>;
+};
+
+export default App;
+```
+
+`<div id="app">` 要素はログイン時のみ存在するようにしたので、 `app/javascript/packs/application.js` ではその要素がある場合に限って `ReactDOM.render()` するように修正しましょう:
+
+```js
+document.addEventListener("DOMContentLoaded", () => {
+  const container = document.getElementById("app")
+  if (container) {
+    ReactDOM.render(<App />, container)
+  }
+})
+```
+
+ログイン後の画面に Hello, world! と表示されていることが確認できると思います。それでは、実際に Rails からデータを取得するようにしてみましょう。
 
 ## JSON を吐き出す機械としての Rails
 

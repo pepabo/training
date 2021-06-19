@@ -17,5 +17,8 @@ Turbolinks.start()
 ActiveStorage.start()
 
 document.addEventListener("DOMContentLoaded", () => {
-  ReactDOM.render(<App />, document.getElementById("app"))
+  const container = document.getElementById("app")
+  if (container) {
+    ReactDOM.render(<App />, container)
+  }
 })
