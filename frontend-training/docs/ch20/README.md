@@ -210,8 +210,8 @@ export default Home;
 # extract! は feed 変数の id, content アトリビュートがそれぞれの名前で設定される
 json.extract! feed, :id, :content
 
-# feed に画像があれば、 picture_url という要素に URL を設定する
-json.picture_url feed.picture.url if feed.picture?
+# feed に画像があれば、 image_url という要素に URL を設定する
+json.image_url feed.display_image if feed.image.attached?
 
 # Helper に定義したメソッドも使うことができる
 json.created_at_time_ago_in_words time_ago_in_words(feed.created_at)
@@ -223,7 +223,7 @@ json.user do
 end
 ```
 
-次に Gravatar の画像を出力できるようにします。現在 UsersHelper に定義している `gravatar_for` メソッドでは、 `<img>` タグが全部出力されてしまいます。これを分割して、 Rails 側では Gravatar 用の URL を出力するようにし、 Vue 側で Gravatar の画像を表示するコンポーネントを作成します。
+次に Gravatar の画像を出力できるようにします。現在 UsersHelper に定義している `gravatar_for` メソッドでは、 `<img>` タグが全部出力されてしまいます。これを分割して、 Rails 側では Gravatar 用の URL を出力するようにし、 React 側で Gravatar の画像を表示するコンポーネントを作成します。
 
 ```ruby:app/models/user.rb
 class User < ApplicationRecord
@@ -236,10 +236,12 @@ end
 ```
 
 ```ruby:app/helpers/users_helper.rb
-class UsersHelper
+module UsersHelper
+
   # 引数で与えられたユーザーのGravatar画像を返す
-  def gravatar_for(user, size: 80)
-    image_tag(user.gravatar_url(size: size), alt: user.name, class: "gravatar")
+  def gravatar_for(user, options = { size: 80 })
+    size = options[:size]
+    image_tag(user.gravatar_url(**{ size: size }), alt: user.name, class: "gravatar")
   end
 end
 ```
@@ -247,38 +249,48 @@ end
 ```ruby:app/views/feeds/_feed.json.jbuilder
 # 略
 json.user do
-  json.extract! feed.user, :id, :name, :gravatar_url
+  json.gravatar_url feed.user.gravatar_url(**{ size: 50 })
 end
 ```
 
-このようなコードの共通化作業は**リファクタリング**の一つです。 `http://0.0.0.0:3000/feeds.json` に改めてアクセスすると、 JSON の要素が揃っていることが確認できると思います。これで Micropost をこれまで表示していた部分が全て JSON として取得できるようになったので、 Vue に置き換えていきます。まずは Gravatar の画像を表示するコンポーネントを作りましょう。
+このようなコードの共通化作業は**リファクタリング**の一つです。 `http://localhost:3000/feeds.json` に改めてアクセスすると、 JSON の要素が揃っていることが確認できると思います。これで Micropost をこれまで表示していた部分が全て JSON として取得できるようになったので、 React に置き換えていきます。まずは Gravatar の画像を表示するコンポーネントを作りましょう。
 
-```vue:app/javascripts/packs/GravatarImage.vue
-<template>
-  <a v-bind:href="'/users/' + user.id">
-    <img v-bind:src="user.gravatar_url" v-bind:alt="user.name" class="gravatar" />
-  </a>
-</template>
+```tsx:app/javascript/components/static-pages/GravatarImage.tsx
+interface User {
+  id: number;
+  name: string;
+  gravatar_url: string;
+}
 
-<script>
-export default {
-  props: {
-    user: Object
-  }
+interface Props {
+  user: User;
+}
+
+const GravatarImage = (props: Props) => {
+  return (
+    <a href={`/users/${props.user.id}`}>
+      <img
+        src={props.user.gravatar_url}
+        alt={props.user.name}
+        className="gravatar"
+      />
+    </a>
+  );
 };
-</script>
+
+export default GravatarImage;
 ```
 
-このコンポーネントを Home.vue から読み込んで配置すると、 Gravatar とユーザ詳細ページへのリンクが表示されるでしょう。
+このコンポーネントを `Home.tsx` から読み込んで配置すると、 Gravatar とユーザ詳細ページへのリンクが表示されるでしょう。
 
 ## 練習問題 2
 
-Vue ファイルを編集して、フィードリストを Vue に置き換えてみてください。想定しているコンポーネントは以下の通りです。削除ボタンは今のところ動作しなくても大丈夫です。
+React ファイルを編集して、フィードリストを React に置き換えてみてください。想定しているコンポーネントは以下の通りです。削除ボタンは今のところ動作しなくても大丈夫です。
 
-* Home.vue （ホーム画面用のコンポーネント）
-* FeedList.vue （フィードリストのコンポーネント）
-* FeedItem.vue （フィードリストの各要素のコンポーネント）
-* GravatarImage.vue （ Gravatar 画像表示用のコンポーネント）
+* Home.tsx （ホーム画面用のコンポーネント）
+* FeedList.tsx （フィードリストのコンポーネント）
+* FeedItem.tsx （フィードリストの各要素のコンポーネント）
+* GravatarImage.tsx （ Gravatar 画像表示用のコンポーネント）
 
 ## 次回予告
 
