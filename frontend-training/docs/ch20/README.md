@@ -112,12 +112,16 @@ class FeedsController < ApplicationController
   before_action :logged_in_user
 
   def index
-    @feeds = current_user.feed.paginate(page: params[:page])
+    respond_to do |format|
+      format.json do
+        @feeds = current_user.feed.paginate(page: params[:page])
+      end
+    end
   end
 end
 ```
 
-まずはコントローラを用意します。ここまでは HTML を出力するコントローラと同じですね。しかし JSON を出力するには `.json.jbuilder` 形式のファイルが ERB の代わりに必要になります。ひとまずは `app/views/feeds/index.json.jbuilder` と `app/view/feeds/_feeds.json.jbuilder` を用意します。
+まずはルーティングを追加してコントローラを用意します。ここまでは HTML を出力するコントローラと同じですね。しかし JSON を出力するには `.json.jbuilder` 形式のファイルが ERB の代わりに必要になります。ひとまずは `app/views/feeds/index.json.jbuilder` と `app/view/feeds/_feeds.json.jbuilder` を用意します。
 
 ```ruby:app/views/feeds/index.json.jbuilder
 json.array! @feeds, partial: 'feeds/feed', as: :feed
@@ -127,7 +131,9 @@ json.array! @feeds, partial: 'feeds/feed', as: :feed
 json.extract! feed, :id, :content
 ```
 
-これで `rails server` コマンドを実行し、ログインしてから `http://0.0.0.0:3000/feeds.json` にアクセスすると、直近で投稿された Micropost の ID と文章のみが JSON 配列で出力されるはずです。他の属性（どのユーザが投稿したか）などは複雑になるので、まずはシンプルな出力にしました。 [jbuilder](https://github.com/rails/jbuilder) の記法はかなり癖があるので、しっかりと README を読み込んでおきましょう。
+ただし jbuilder は [v2.10.1](https://github.com/rails/jbuilder/releases/tag/v2.10.1) 以上のバージョンに更新してください（これより前のバージョンだと Ruby 3.0 ではエラーになります）。
+
+これで `rails server` コマンドを実行し、ログインしてから `http://localhost:3000/feeds.json` にアクセスすると、直近で投稿された Micropost の ID と文章のみが JSON 配列で出力されるはずです。他の属性（どのユーザが投稿したか）などは複雑になるので、まずはシンプルな出力にしました。 [jbuilder](https://github.com/rails/jbuilder) の記法はかなり癖があるので、しっかりと README を読み込んでおきましょう。
 
 ## Vue から JSON にアクセスする
 

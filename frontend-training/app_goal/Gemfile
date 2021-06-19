@@ -16,7 +16,7 @@ gem 'bootstrap-sass', '3.4.1'
 gem 'puma',       '4.3.6'
 gem 'sass-rails', '5.1.0'
 gem 'turbolinks', '5.2.0'
-gem 'jbuilder',   '2.9.1'
+gem 'jbuilder',   '2.11.2'
 gem 'bootsnap',   '1.7.5', require: false
 gem 'rexml', '~> 3.2', '>= 3.2.5'
 
