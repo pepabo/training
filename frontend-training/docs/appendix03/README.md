@@ -42,8 +42,8 @@ npm i -D @babel/preset-typescript
 `@babel/preset-typescript` をインストールしたら `babel.cofig.js` の `presets` の末尾に追加しましょう:
 
 ```diff
---- a/app_goal/babel.config.js
-+++ b/app_goal/babel.config.js
+--- a/babel.config.js
++++ b/babel.config.js
 @@ -40,7 +40,8 @@ module.exports = function(api) {
          {
            'runtime': 'automatic'
@@ -103,8 +103,8 @@ TypeScriptのファイルの拡張子は `.ts` です。 `.js` ファイルをTy
 そして一応この時点でwebpackでもバンドルできるようにしておきましょう。 `webpack.config.js` で `babel-loader` を使っている `module.rules.test` の箇所と `resolve.extensions` を以下のように変更してください:
 
 ```diff
---- a/app_goal/webpack.config.js
-+++ b/app_goal/webpack.config.js
+--- a/webpack.config.js
++++ b/webpack.config.js
 @@ -14,7 +14,7 @@ module.exports = {
    module: {
      rules: [
