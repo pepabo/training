@@ -135,46 +135,71 @@ json.extract! feed, :id, :content
 
 これで `rails server` コマンドを実行し、ログインしてから `http://localhost:3000/feeds.json` にアクセスすると、直近で投稿された Micropost の ID と文章のみが JSON 配列で出力されるはずです。他の属性（どのユーザが投稿したか）などは複雑になるので、まずはシンプルな出力にしました。 [jbuilder](https://github.com/rails/jbuilder) の記法はかなり癖があるので、しっかりと README を読み込んでおきましょう。
 
-## Vue から JSON にアクセスする
+## React から JSON にアクセスする
 
-データを提供するところまではできたので、実際に Vue のコンポーネントからデータを取得しましょう。基本的なお作法としては、そのコンポーネントが表示される前の段階になったら XMLHttpRequest （をラップした axios で）データ取得を開始し、取得後にデータを反映するようにします。 [Vue にはインスタンスライフサイクルフック](https://jp.vuejs.org/v2/guide/instance.html#インスタンスライフサイクルフック) という、コンポーネント生成・消滅のタイミングでコードを実行させる機能がありますので、ここに実装していきます。
+データを提供するところまではできたので、実際に React コンポーネントからデータを取得しましょう。まずは `axios`（XMLHttpRequest をラップして Promise を返却する HTTP クライアントとして人気のあるライブラリです）をインストールしましょう:
 
-```vue:app/javascripts/packs/Home.vue
-<template>
-  <div>
-    <div v-if="feeds.length > 0">
-      <p v-for="feed in feeds" v-bind:key="feed.id">
-        {{ feed.content }}
-      </p>
-    </div>
-    <div v-else>
-      表示できるフィードはありません。
-    </div>
-  </div>
-</template>
-
-<script>
-import axios from 'axios';
-
-export default {
-  data() {
-    return {
-      feeds: []  // API から取得前の初期データを用意する必要あり
-    };
-  },
-  async mounted() {
-    const res = await axios.get('/feeds.json');
-    this.feeds = res.data;
-  }
-};
-</script>
+```bash
+npm i -E axios@0.21.1
 ```
 
-ブラウザをリロードすると、ページの下部にフィードが出力されるようになったと思います。
+基本的なお作法としては、そのコンポーネントがレンダー（描画）された後に axios を呼んで Rails サーバからデータを取得し、そのデータでコンポーネント内の状態を更新するようにします。React にはそのために [useEffect](https://ja.reactjs.org/docs/hooks-effect.html) という API がありますので、これを使って実装していきます。
+
+`app/javascript/components/static-pages/Home.tsx` を以下のように書き換えましょう:
+
+```tsx
+import axios from "axios";
+import { useEffect, useState } from "react";
+
+interface Feed {
+  id: number;
+  content: string;
+}
+
+const Home = () => {
+  const [feeds, setFeeds] = useState<Feed[]>([]);
+
+  useEffect(() => {
+    const fetchFeeds = async () => {
+      const res = await axios.get<Feed[]>("/feeds.json");
+      setFeeds(res.data);
+    };
+
+    fetchFeeds();
+  }, []);
+
+  return (
+    <div className="row">
+      <div className="col-mod-8">
+        <h3>Micropost Feed</h3>
+        {feeds.length > 0 ? (
+          <ol className="microposts">
+            {feeds.map((feed) => (
+              <li key={feed.id}>
+                <span className="content">{feed.content}</span>
+              </li>
+            ))}
+          </ol>
+        ) : (
+          <div>表示できるフィードはありません。</div>
+        )}
+      </div>
+    </div>
+  );
+};
+
+export default Home;
+```
+
+ブラウザをリロードすると、ページの上部にフィードが出力されるようになったと思います。
+
+いくつか注意すべき点があります。React の場合、CSS のクラスを指定するには通常の `class` 属性ではなく [`className` 属性を使用してください](https://ja.reactjs.org/docs/dom-elements.html#classname) 。
+
+それから `useEffect` はデフォルトではコンポーネントのレンダー後に **毎回** 呼ばれます。第 18 章で React は状態の変更の前後で UI のどの部分が書き換わるかを検知してその部分だけ更新すると書きましたが、その更新のたびに（初回レンダー時だけでなく）呼ばれるという意味です。しかし Rails サーバからのフィード情報の取得に関しては初回の画面読み込み時だけで十分なので、毎回呼ばれてほしくはないですよね。そこで `useEffect` には第二引数に、「この値が変わったときだけまた `useEffect` を呼んでほしい」というような値を配列に入れて渡せるようになっています。上記のコードをよく見ると `useEffect` の第二引数に空配列を渡していることに気づいたでしょうか。空配列ということはつまり「初回レンダー以降ではもう `useEffect` を呼んでほしくない」という意味になるわけです。
 
 ## 練習問題 1
 
-1. （ノーヒントだと難しいかも）このままでは「表示できるフィードはありません。」という表示が API からデータを取得する前に一瞬表示されてしまいます。これを避けて「ローディング中」という表示を出す方法を考えてください（ヒント：犬だけ表示ボタン・猫だけ表示ボタンを実装した時を思い出してみましょう）。
+1. （ノーヒントだと難しいかも）このままでは「表示できるフィードはありません。」という表示が API からデータを取得する前に一瞬表示されてしまいます。これを避けて「ローディング中」という表示を出す方法を考えてください。
 2. 1 のレビューを先に受けて（もしくは解答を見て）から、実際にそれを実装してみてください。
 
 ## jbuilder
