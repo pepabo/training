@@ -80,7 +80,7 @@ bar();
 ECMAScript 2015 以降は毎年1回その時点での ECMAScript 仕様書のスナップショットが ECMAScript 20xx としてリリースされています。
 現行のブラウザがサポートしている JavaScript というのは ECMAScript 5 相当です（Google Chrome などの最新ブラウザでは ECMAScript 2015 以降の一部仕様をすでにサポートしています）。
 
-とはいえ、現状でブラウザがサポートしていない言語仕様をどうやって使うのか。そこにも altJS の力を使います。 ECMAScript 20xx で書いたコードを ECMAScript 5 で解釈できるコードへと変換するツール（これを一般的に**トランスパイラ**と呼びます）を使い、ブラウザで実行可能なコードへと変換するようにしたのです。将来的にブラウザが直接サポートするようになれば、そのツール自体は捨ててしまえます。現在この ECMAScript 20xx to ECMAScript 5 トランスパイラとして主流なのが [Babel](babeljs.io) という Node.js 製のツールで、モダンフロントエンド開発は基本的にこのツールの上に構築されています。私たちも ECMAScript 20xx （執筆時は 2021 年 6 月なので ECMAScript 2021）に準拠して、安全なコードを書いていきましょう。
+とはいえ、現状でブラウザがサポートしていない言語仕様をどうやって使うのか。そこにも altJS の力を使います。 ECMAScript 20xx で書いたコードを ECMAScript 5 で解釈できるコードへと変換するツール（これを一般的に**トランスパイラ**と呼びます）を使い、ブラウザで実行可能なコードへと変換するようにしたのです。将来的にブラウザが直接サポートするようになれば、そのツール自体は捨ててしまえます。現在この ECMAScript 20xx to ECMAScript 5 トランスパイラとして主流なのが [Babel](https://babeljs.io/) という Node.js 製のツールで、モダンフロントエンド開発は基本的にこのツールの上に構築されています。私たちも ECMAScript 20xx （執筆時は 2021 年 6 月なので ECMAScript 2021）に準拠して、安全なコードを書いていきましょう。
 
 （オフトピック：CoffeeScript と同じように便利だったため JavaScript DOM API に取り込まれたものとして jQuery の `$(selector)` などもあります。 Internet Explorer 8 以降であれば `$('.foo')` ではなく `document.querySelectorAll('.foo')` で同じような処理ができるので、無用な jQuery の導入を避けることができます）
 
