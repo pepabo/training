@@ -101,6 +101,11 @@ class User < ApplicationRecord
     following.include?(other_user)
   end
 
+  def gravatar_url(size: 80)
+    gravatar_id = Digest::MD5::hexdigest(email.downcase)
+    "https://secure.gravatar.com/avatar/#{gravatar_id}?s=#{size}"
+  end
+
   private
 
     # メールアドレスをすべて小文字にする

@@ -11,6 +11,7 @@
     "@rails/actioncable": "^6.0.0",
     "@rails/activestorage": "^6.0.0",
     "@rails/ujs": "^6.0.0",
+    "axios": "0.21.1",
     "bootstrap": "3.4.1",
     "core-js": "3.14.0",
     "dayjs": "^1.10.5",
