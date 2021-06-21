@@ -6,6 +6,8 @@
 
 ### 全般
 
+（TODO: ESLint、Prettierの導入方法をまとめる。）
+
 [ESLint](https://eslint.org) の [recommended](https://eslint.org/docs/rules/) を押さえておけばいいです。直感的にものすごく変なコードを書かない限りエラーになることはないです。
 
 15 章後半からは基本的に何らかのトランスパイラをかけてブラウザ上で実行される JavaScript を生成するので、あまりコーディング規約に対して神経質にならなくて良いです。とはいえ野放図にコードを書くと保守やレビューで問題があるので、一定のルールを作っておきます。
@@ -27,6 +29,18 @@
 * セミコロンを省略しない。
 * arrow function の変数が 1 つの時もカッコを省略しない。
 * オブジェクト、配列の最後の要素のあとにコンマを入れるか入れないかは自由とする。
+
+## TypeScript
+
+TODO:
+  * @typescript-eslint/eslint-plugin
+  * @typescript-eslint/parser
+
+## React
+
+TODO:
+  * eslint-plugin-react
+  * eslint-plugin-react-hooks
 
 ## Vue
 
