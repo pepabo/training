@@ -223,13 +223,14 @@ end
   // ...
 ```
 
-## 練習問題 1
-
-新規 Micropost 投稿フォームを Vue に置き換えてください（画像投稿が結構むずいかも）。投稿後に投稿データを FeedList に反映させるようにしてください。ただし、 `/feeds.json` を再取得する方法ではない方法で実装してください（ヒント： scaffold を作成した時 `create` メソッドは JSON のレスポンスを返すようになっています。それを使います）。
-
 ## 練習問題 2
 
-1. 新規 Micropost 投稿フォームも `axiosClient.js` を使うようにしてください。
-2. このままではトークンの置き換えが HTML に依存してしまいます。 [Window.localStorage](https://developer.mozilla.org/ja/docs/Web/API/Window/localStorage) にトークンを保存するようにしてください（ヒント：初回は HTML の `<meta>` タグから読み込みます）。
+1. `user_info`、 `stats`、`micropost_form` （新規 Micropost 投稿フォーム）も React に置き換えてください（画像投稿が結構むずいかも）。ただし
+
+  - 投稿後に投稿データを FeedList に反映させるようにしてください。ただし、 `/feeds.json` を再取得する方法ではない方法で実装してください（ヒント： `create` メソッドで JSON のレスポンスを返すようにします）。
+
+  - 現状 `app/javascript/packs/application.js` に「ファイルサイズが 5MB 以上の場合はアラートを出す」ための jQuery のコードが置きっぱなしになっていると思いますが、そのコードを消して、新規 Micropost 投稿フォームのコンポーネント内で（jQuery を使わない形で）書き直してください。
+
+  - すべてできたら `home.html.erb` の `<% if logged_in? %>` の分岐内部から `<div id="app"></div>` 以外のDOM要素を削除して、完全に React の描画だけで画面を作るようにしてください。
 
 {% endraw %}
