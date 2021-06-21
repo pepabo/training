@@ -209,6 +209,45 @@ end
 
 これで `app/views/layouts/application.html.erb` にある `<%= javascript_pack_tag %>` を消して代わりに `<%= javascript_bundle_tag 'main' %>` と書くとバンドル済 js が `<script>` タグで読み込まれるようになります。Rails サーバを起動して `http://localhost:3000` を開き、js ファイルが読み込まれていることを確認してください。
 
+また、ここで Chrome の開発者コンソールを開いてみると "Uncaught ReferenceError: $ is not defined" というエラーが表示されていると思います。どうやらバンドル済み js が解析されるよりも前に .erb ファイル内に直書きされたスクリプトの方が評価されてしまうようなので、いったん `app/views/shared/_micropost_form.html.erb` 内のスクリプトを `app/javascript/packs/application.js` に移動させてください。
+
+```diff
+--- a/app/views/shared/_micropost_form.html.erb
++++ b/app/views/shared/_micropost_form.html.erb
+@@ -8,13 +8,3 @@
+     <%= f.file_field :image, accept: "image/jpeg,image/gif,image/png" %>
+   </span>
+ <% end %>
+-
+-<script type="text/javascript">
+-  $("#micropost_image").bind("change", function() {
+-    var size_in_megabytes = this.files[0].size/1024/1024;
+-    if (size_in_megabytes > 5) {
+-      alert("Maximum file size is 5MB. Please choose a smaller file.");
+-      $("#micropost_image").val("");
+-    }
+-  });
+-</script>
+```
+
+```diff
+--- a/app/javascript/packs/application.js
++++ b/app/javascript/packs/application.js
+@@ -16,6 +16,14 @@ Rails.start()
+ Turbolinks.start()
+ ActiveStorage.start()
+
++$("#micropost_image").bind("change", function() {
++  var size_in_megabytes = this.files[0].size/1024/1024;
++  if (size_in_megabytes > 5) {
++    alert("Maximum file size is 5MB. Please choose a smaller file.");
++    $("#micropost_image").val("");
++  }
++});
+```
+
+あまり良いやり方ではありませんが、いったんはこれでエラーが出なくなるはずです。このコードはまた後々あるべき場所に書き直すことにしましょう。
+
 ## 次回予告
 
 ついに本題であるところの [React](https://ja.reactjs.org/) を導入し、本格的なフロントエンド開発に乗り出します。 Vue や React の何が jQuery などの他のフロントエンドライブラリと比べて優れているかについて知ることができます。
