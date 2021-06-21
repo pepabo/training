@@ -14,7 +14,7 @@ module.exports = {
   module: {
     rules: [
       {
-        test: /(\.m?js|\.jsx)$/,
+        test: /(\.m?js|\.tsx?)$/,
         exclude: /(node_modules|bower_components)/,
         use: {
           loader: 'babel-loader',
@@ -25,7 +25,7 @@ module.exports = {
 
   resolve: {
     modules: ['node_modules', path.resolve(__dirname, 'app/javascript')],
-    extensions: ['.js', '.jsx', '.json', '.wasm'],
+    extensions: ['.js', '.jsx', '.ts', '.tsx', '.json', '.wasm'],
   },
 
   plugins: [
