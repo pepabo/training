@@ -1,4 +1,4 @@
-import axios from "axios";
+import axios from "axiosClient";
 import * as React from "react";
 import GravatarImage from "./GravatarImage";
 
@@ -28,6 +28,7 @@ const FeedItem = (props: Props) => {
 
     if (confirm("You sure?")) {
       await axios.delete(`/microposts/${props.feed.id}.json`);
+
       props.onDelete(props.feed.id);
     }
   };

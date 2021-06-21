@@ -96,29 +96,89 @@ end
 
 （こぼれ話：ちなみに、HTML の `<form>` タグが送信できる HTTP メソッドは実は GET, POST しかなく、 PATCH, PUT, DELETE などの HTTP メソッドは XMLHttpRequest からしか送れません。これを Rails では擬似的に POST で扱えるように、特殊なパラメータをフォームに追加しているのです。）
 
-```vue:app/javascripts/packs/FeedItem.vue
-<script>
-import axios from 'axios';
+```tsx
+// app/javascript/components/static-pages/FeedItem.tsx
 
-export default {
   // 略
-  methods: {
-    async delete() {
-      const token = document.querySelector('meta[name="csrf-token"]').content;
-      const res = await axios.delete(`/microposts/${this.feed.id}.json`, {
+    if (confirm("You sure?")) {
+      const token = document.querySelector<HTMLMetaElement>(
+        'meta[name="csrf-token"]'
+      )?.content;
+
+      await axios.delete(`/microposts/${props.feed.id}.json`, {
         headers: {
           // JavaScript のオブジェクトのキーにハイフンが入るときは必ずクオートしないといけない
-          'X-CSRF-Token': token
-        }
+          "X-CSRF-Token": token,
+        },
       });
-      this.onDelete(this.feed.id);  // 親コンポーネントから渡されたハンドラを実行して要素を削除する
+
+      props.onDelete(props.feed.id);
     }
-  }
-};
-</script>
+  // ...
 ```
 
-さて、これで一見すればリクエストが通るように見えます。実際に操作してみましょう。しかし一度は削除処理ができたものの、複数回はできないままになっていると思います。これはリクエストごとにトークンが変化し、新しいものに置き換えをしないと不正なリクエストであると判断されてしまうためです。
+さて、これでリクエストが通るはずです。実際に操作してみましょう。
+
+しかし、これでは他の POST/PUT/PATCH/DELETE リクエストの時にも同じ処理を書かなくてはいけなくなります。これを共通化できる仕組みとして axios には [interceptor](https://github.com/axios/axios#interceptors) という仕組みがあり、リクエスト・レスポンスごとにフックする関数を与えることができます。新しく `axiosClient.ts` というファイルを作成して以下のように書いてください:
+
+```ts
+// app/javascript/axiosClient.ts
+
+import axios from "axios";
+
+const client = axios.create();
+
+client.interceptors.request.use(
+  (config) => {
+    const token = document.querySelector<HTMLMetaElement>(
+      'meta[name="csrf-token"]'
+    )?.content;
+
+    config.headers["X-CSRF-Token"] = token;
+    return config;
+  },
+  (error) => {
+    return Promise.reject(error);
+  }
+);
+
+export default client;
+```
+
+この `axiosClient.ts` を使えば、リクエストを送る時に毎回 `X-CSRF-Token` ヘッダを設定する処理を書かずに済みます:
+
+```diff
+--- a/app/javascript/components/static-pages/FeedItem.tsx
++++ b/app/javascript/components/static-pages/FeedItem.tsx
+@@ -1,4 +1,4 @@
+-import axios from "axios";
++import axios from "axiosClient";
+ import * as React from "react";
+ import GravatarImage from "./GravatarImage";
+
+@@ -27,16 +27,7 @@ const FeedItem = (props: Props) => {
+     event.preventDefault();
+
+     if (confirm("You sure?")) {
+-      const token = document.querySelector<HTMLMetaElement>(
+-        'meta[name="csrf-token"]'
+-      )?.content;
+-
+-      await axios.delete(`/microposts/${props.feed.id}.json`, {
+-        headers: {
+-          // JavaScript のオブジェクトのキーにハイフンが入るときは必ずクオートしないといけない
+-          "X-CSRF-Token": token,
+-        },
+-      });
++      await axios.delete(`/microposts/${props.feed.id}.json`);
+
+       props.onDelete(props.feed.id);
+     }
+```
+
+### Synchronizer Token Pattern
+
+もしかしたら、手元の環境で一度は削除処理ができたものの、複数回はできないままになっていることがあるかもしれません。これはリクエストごとにトークンが変化し、新しいものに置き換えをしないと不正なリクエストであると判断されてしまうためです。
 
 これを避けるためには、リクエストごとに新しいトークンに置き換える仕組みが必要です。 HTTP レスポンスに新しいトークンを付与する [Synchronizer Token Pattern](https://github.com/OWASP/CheatSheetSeries/blob/master/cheatsheets/Cross-Site_Request_Forgery_Prevention_Cheat_Sheet.md#synchronizer-token-pattern) を採用します。まずは、 Rails サーバ側からリクエスト完了時に新しいトークンをヘッダに付与して送信するようにします。
 
@@ -138,61 +198,29 @@ end
 
 そしてこのレスポンスに存在するヘッダを取得し、古いトークンを置き換えるよう実装します。
 
-```vue:app/javascripts/packs/FeedItem.vue
-<script>
-import axios from 'axios';
+```tsx
+// app/javascript/components/static-pages/FeedItem.tsx
 
-export default {
   // 略
-  methods: {
-    async delete() {
-      const meta = document.querySelector('meta[name="csrf-token"]');
-      const res = await axios.delete(`/microposts/${feed.id}.json`, {
+    if (confirm("You sure?")) {
+      const meta = document.querySelector<HTMLMetaElement>(
+        'meta[name="csrf-token"]'
+      );;
+
+      const res = await axios.delete(`/microposts/${props.feed.id}.json`, {
         headers: {
-          'X-CSRF-Token': meta.content
-        }
+          // JavaScript のオブジェクトのキーにハイフンが入るときは必ずクオートしないといけない
+          "X-CSRF-Token": meta?.content,
+        },
       });
-      meta.content = res.headers['X-CSRF-Token'];
-      this.onDelete();  // 親コンポーネントから渡されたハンドラを実行して要素を削除する
+
+      if (meta) {
+        meta.content = res.headers["X-CSRF-Token"];
+      }
+
+      props.onDelete(props.feed.id);
     }
-  }
-};
-</script>
-```
-
-しかし、これでは他の POST/PUT/PATCH/DELETE リクエストの時にも同じ処理を書かなくてはいけなくなります。これを共通化できる仕組みとして axios には [interceptor](https://github.com/axios/axios#interceptors) という仕組みがあり、リクエスト・レスポンスごとにフックする関数を与えることができます。
-
-```js:app/javascripts/packs/axiosClient.js
-import axios from 'axios';
-
-const client = axios.create();
-
-client.interceptors.request.use((config) => {
-  const token = document.querySelector('meta[name="csrf-token"]').content;
-  config.headers['x-csrf-token'] = token;
-  return config;
-}, (error) => {
-  return Promise.reject(error);
-});
-
-client.interceptors.response.use((response) => {
-  const token = response.headers['x-csrf-token'];
-  if (token) {
-    document.querySelector('meta[name="csrf-token"]').content = token;
-  }
-  return response;
-}, (error) => {
-  return Promise.reject(error);
-});
-
-export default client;
-```
-
-```js:app/javascripts/packs/FeedItem.vue
-// import axios from 'axios';
-// 置き換え
-import axios from './axiosClient';
-// 後略
+  // ...
 ```
 
 ## 練習問題 1
