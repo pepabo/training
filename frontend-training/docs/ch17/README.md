@@ -73,7 +73,9 @@ webpack を使うために必要な設定があと1つ残されています。�
 
 複雑とは言いましたが Rails Tutorial を終えた状態でのコードをバンドルするだけであれば以下のような設定を書けば十分かと思いますので、これを使ってください:
 
-```js:webpack.config.js
+```js
+// webpack.config.js
+
 const path = require('path');
 const webpack = require('webpack');
 
@@ -140,7 +142,9 @@ npx webpack --mode development --devtool eval-cheap-module-source-map --watch
 
 色々オプションが付いていますがこのようにするという形で一旦覚えておいてください。このままだとコマンドが少し長いですね。これを記録して簡単なコマンドとして実行できる NPM Scripts という機能があります。 `package.json` に以下を書いてみてください。
 
-```json:package.json
+```json
+// package.json
+
 {
   // ...
   "scripts": {
@@ -178,7 +182,9 @@ Rails から `public/packs` に存在するバンドル済み js ファイルを
 
 実際に `app/helpers/application_helper.rb` に `javascript_bundle_tag` ヘルパーメソッドを書いて、 `app/views/layouts/application.html.erb` から呼び出すようにします（ちなみに `javascript_bundle_tag` という名前は `webpacker` gem に存在する `javascript_pack_tag` と衝突しないようにつけたものです）。少し複雑なコードになるので、以下のコードを読み解きながら実装してください。
 
-```ruby:app/helpers/application_helper.rb
+```ruby
+# app/helpers/application_helper.rb
+
 module ApplicationHelper
   def javascript_bundle_tag(name)
     javascript_include_tag(manifest["#{name}.js"], defer: true)

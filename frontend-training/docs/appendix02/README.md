@@ -34,7 +34,9 @@ Jest はデフォルトで前の二つは実行されるようになっていま
 $ npm install vue-jest @vue/test-utils babel-jest babel-preset-env --save-dev
 ```
 
-```json:package.json
+```json
+// package.json
+
 {
   // ...
   "jest": {
@@ -54,7 +56,9 @@ $ npm install vue-jest @vue/test-utils babel-jest babel-preset-env --save-dev
 }
 ```
 
-```json:.babelrc
+```json
+// .babelrc
+
 {
   "presets": [["env", { "modules": false }]],
   "env": {
@@ -67,7 +71,9 @@ $ npm install vue-jest @vue/test-utils babel-jest babel-preset-env --save-dev
 
 まずはシンプルな文言を表示するだけのコンポーネントをテストしてみましょう。 22 章で作成した HelloVueRouter コンポーネントをテストします。 `app/javascripts/packs/HelloVueRouter.test.js` に以下のようなコードを作成します。
 
-```js:app/javascripts/packs/HelloVueRouter.test.js
+```js
+// app/javascripts/packs/HelloVueRouter.test.js
+
 import { mount } from '@vue/test-utils';
 import HelloVueRouter from './HelloVueRouter.vue';
 
@@ -95,7 +101,9 @@ FeedItem が `props` の値によって削除ボタンの表示・非表示が�
 
 [ci.pepalab.com](https://ci.pepalab.com) で自分のリポジトリを有効にした上で、以下のような `.drone.yml` を作成してプッシュしてください。
 
-```yaml:.drone.yml
+```yaml
+# .drone.yml
+
 kind: pipeline
 name: default
 steps:

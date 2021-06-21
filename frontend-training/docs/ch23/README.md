@@ -16,7 +16,9 @@ $ git commit
 
 Heroku では、 NPM Script に build が定義されるとデプロイした時に自動的に `npm run build` が実行されるようになります。 `package.json` に以下を記述してみましょう。
 
-```json:package.json
+```json
+// package.json
+
 {
   // 略
   "scripts": {

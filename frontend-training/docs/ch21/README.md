@@ -4,7 +4,9 @@
 
 さて、それでは前の章で出題された練習問題ではスキップしていた、削除リンクの実装をしましょう。 scaffold から推察するに、おおよそこのようなコードになると考えられますね。
 
-```ruby:app/controllers/microposts_controller.rb
+```ruby
+# app/controllers/microposts_controller.rb
+
 class MicropostsController < ApplicationController
   # 略
   def destroy
@@ -75,7 +77,9 @@ export default {
 
 Rails 5.2 以降でアプリケーションを作成している場合（ 2019 年現在、 Rails Tutorial の最新版は Rails 5.1 系です）、 `protect_from_forgery` がデフォルトで有効になっているので以下のように `config/application.rb` で無効化する必要があります。
 
-```ruby:config/application.rb
+```ruby
+# config/application.rb
+
 # 略
 
 module FooApplication
@@ -114,7 +118,9 @@ export default {
 
 これを避けるためには、リクエストごとに新しいトークンに置き換える仕組みが必要です。 HTTP レスポンスに新しいトークンを付与する [Synchronizer Token Pattern](https://github.com/OWASP/CheatSheetSeries/blob/master/cheatsheets/Cross-Site_Request_Forgery_Prevention_Cheat_Sheet.md#synchronizer-token-pattern) を採用します。まずは、 Rails サーバ側からリクエスト完了時に新しいトークンをヘッダに付与して送信するようにします。
 
-```ruby:app/controllers/application_controller.rb
+```ruby
+# app/controllers/application_controller.rb
+
 class ApplicationController < ActionController::Base
   # 略
 

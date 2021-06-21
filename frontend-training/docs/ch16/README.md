@@ -29,7 +29,9 @@ Homebrew で直接インストールもできますが、 Node.js は頻繁に�
 
 2021年6月現在では Node.js 14 を指定すると良いでしょう。nodenv であれば `sample_app` ディレクトリ直下で `nodenv local 14.17.0` のようなコマンドを実行しましょう。
 
-```js:hello_nodejs.js
+```js
+// hello_nodejs.js
+
 const foo = 1;
 const bar = 2;
 const baz = foo + bar;
@@ -45,13 +47,17 @@ $ node hello_nodejs.js
 
 `node` コマンドに引数として js ファイルを渡すと実行され、計算結果が出力されることが確認できたでしょうか。それでは、 CommonJS による別ファイルの読み込みを試してみましょう。
 
-```js:required.js
+```js
+// required.js
+
 module.exports = () => {
   console.log('require OK!');
 }
 ```
 
-```js:requiring.js
+```js
+// requiring.js
+
 const requiredFunction = require('./required');
 
 requiredFunction();
@@ -63,7 +69,9 @@ requiredFunction();
 $ yarn add dayjs
 ```
 
-```js:hello_dayjs.js
+```js
+// hello_dayjs.js
+
 const dayjs = require('dayjs');
 
 console.log(dayjs().format());
@@ -87,7 +95,9 @@ const employees = [
 ## ES Modules
 ES Modules も基本的な仕組みはファイルの `require` と同じ仕組みになっていて、 `module.exports =` で公開していたものが `export` という予約語になります。ただし、 CommonJS と違う点は default export というものが存在し、少し入り組んだ公開ができるようになっているということです。
 
-```js:exporting.js
+```js
+// exporting.js
+
 // default export
 export default function foo() {
   console.log('foo');
@@ -99,7 +109,9 @@ export function bar() {
 }
 ```
 
-```js:importing.js
+```js
+// importing.js
+
 import foo, { bar } from './exporting';
 
 foo();
