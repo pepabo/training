@@ -178,7 +178,9 @@ Rails から `public/packs` に存在するバンドル済み js ファイルを
 
 実際に `app/helpers/application_helper.rb` に `javascript_bundle_tag` ヘルパーメソッドを書いて、 `app/views/layouts/application.html.erb` から呼び出すようにします（ちなみに `javascript_bundle_tag` という名前は `webpacker` gem に存在する `javascript_pack_tag` と衝突しないようにつけたものです）。少し複雑なコードになるので、以下のコードを読み解きながら実装してください。
 
-```ruby:app/helpers/application_helper.rb
+```ruby
+# app/helpers/application_helper.rb
+
 module ApplicationHelper
   def javascript_bundle_tag(name)
     javascript_include_tag(manifest["#{name}.js"], defer: true)

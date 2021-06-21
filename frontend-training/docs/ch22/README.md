@@ -76,7 +76,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
 しかし、これでは想定しない動作を Rails サーバ側が起こしてしまうようになります。これまで `#/` 形式の URL では `#` 以降は URL の path とは違う部分と認識されているので、 Rails 側では処理されない内容となっていました。 HTML5 History モードを有効化すると、これまで http://0.0.0.0:3000/#/hello として処理されていた URL は http://0.0.0.0:3000/hello として扱われるようになるので、ブラウザをリロードすると Rails 側でそのような route は存在しないというエラーが発生してしまいます。そこで、 Rails で処理できない URL へのリクエストも `StaticPagesController#home` へと到達させるようにします。
 
-```ruby:config/routes.rb
+```ruby
+# config/routes.rb
+
 Rails.application.routes.draw do
   # 最終行に追加
   get '*any', to: 'static_pages#home'

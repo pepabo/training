@@ -100,14 +100,18 @@ document.addEventListener("DOMContentLoaded", () => {
 
 Rails で `generate scaffold` コマンドを実行すると、実は JSON を返却するような設定になっています。しかし、 Rails Tutorial ではその設定を省いてコードを書いてしまっているので、まずはその設定を復活させましょう。まずはログイン後のトップに表示されている最新の Micropost 一覧を取得するようにしてみましょう。既存の機能を壊してしまわないように、 `/feeds.json` という URL で Micropost 一覧を返却するようにします。
 
-```ruby:config/routes.rb
+```ruby
+# config/routes.rb
+
 Rails.application.routes.draw do
   # 略
   resources :feeds, only: [:index]  # 追記する
 end
 ```
 
-```ruby:app/controllers/feeds_controller.rb
+```ruby
+# app/controllers/feeds_controller.rb
+
 class FeedsController < ApplicationController
   before_action :logged_in_user
 
@@ -123,11 +127,15 @@ end
 
 まずはルーティングを追加してコントローラを用意します。ここまでは HTML を出力するコントローラと同じですね。しかし JSON を出力するには `.json.jbuilder` 形式のファイルが ERB の代わりに必要になります。ひとまずは `app/views/feeds/index.json.jbuilder` と `app/view/feeds/_feeds.json.jbuilder` を用意します。
 
-```ruby:app/views/feeds/index.json.jbuilder
+```ruby
+# app/views/feeds/index.json.jbuilder
+
 json.array! @feeds, partial: 'feeds/feed', as: :feed
 ```
 
-```ruby:app/views/feeds/_feed.json.jbuilder
+```ruby
+# app/views/feeds/_feed.json.jbuilder
+
 json.extract! feed, :id, :content
 ```
 
@@ -206,7 +214,9 @@ export default Home;
 
 ひとまず Micropost の内容 (content) は表示することができるようになったので、作成日時や Gravatar の画像など、他の内容も表示できるようにしましょう。生成される JSON の要素は、 jbuilder ファイル内で `json.xxx` と定義することができます。
 
-```ruby:app/views/feeds/_feed.json.jbuilder
+```ruby
+# app/views/feeds/_feed.json.jbuilder
+
 # extract! は feed 変数の id, content アトリビュートがそれぞれの名前で設定される
 json.extract! feed, :id, :content
 
@@ -225,7 +235,9 @@ end
 
 次に Gravatar の画像を出力できるようにします。現在 UsersHelper に定義している `gravatar_for` メソッドでは、 `<img>` タグが全部出力されてしまいます。これを分割して、 Rails 側では Gravatar 用の URL を出力するようにし、 React 側で Gravatar の画像を表示するコンポーネントを作成します。
 
-```ruby:app/models/user.rb
+```ruby
+# app/models/user.rb
+
 class User < ApplicationRecord
   # 略
   def gravatar_url(size: 80)
@@ -235,7 +247,9 @@ class User < ApplicationRecord
 end
 ```
 
-```ruby:app/helpers/users_helper.rb
+```ruby
+# app/helpers/users_helper.rb
+
 module UsersHelper
 
   # 引数で与えられたユーザーのGravatar画像を返す
@@ -246,7 +260,9 @@ module UsersHelper
 end
 ```
 
-```ruby:app/views/feeds/_feed.json.jbuilder
+```ruby
+# app/views/feeds/_feed.json.jbuilder
+
 # 略
 json.user do
   json.gravatar_url feed.user.gravatar_url(**{ size: 50 })
