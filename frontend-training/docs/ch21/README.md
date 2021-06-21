@@ -225,9 +225,11 @@ end
 
 ## 練習問題 2
 
-1. `user_info`、 `stats`、`micropost_form` （新規 Micropost 投稿フォーム）も React に置き換えてください（画像投稿が結構むずいかも）。ただし
+1. `user_info`、 `stats`、`micropost_form` （新規 Micropost 投稿フォーム）も React に置き換えてください。ただし
 
   - 投稿後に投稿データを FeedList に反映させるようにしてください。ただし、 `/feeds.json` を再取得する方法ではない方法で実装してください（ヒント： `create` メソッドで JSON のレスポンスを返すようにします）。
+
+  - 画像投稿が結構むずいかも。React 公式ドキュメントの [ファイル input タグ](https://ja.reactjs.org/docs/uncontrolled-components.html#the-file-input-tag) や [useRef](https://ja.reactjs.org/docs/hooks-reference.html#useref) 、[FormData](https://developer.mozilla.org/ja/docs/Web/API/FormData) などを参考にしてください。
 
   - 現状 `app/javascript/packs/application.js` に「ファイルサイズが 5MB 以上の場合はアラートを出す」ための jQuery のコードが置きっぱなしになっていると思いますが、そのコードを消して、新規 Micropost 投稿フォームのコンポーネント内で（jQuery を使わない形で）書き直してください。
 

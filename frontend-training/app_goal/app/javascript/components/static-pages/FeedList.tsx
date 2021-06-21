@@ -1,5 +1,3 @@
-import axios from "axios";
-import { useEffect, useState } from "react";
 import FeedItem from "./FeedItem";
 
 interface User {
@@ -17,34 +15,20 @@ interface Feed {
   user: User;
 }
 
-const FeedList = () => {
-  const [feeds, setFeeds] = useState<Feed[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+interface Props {
+  feeds: Feed[];
+  onDelete: (id: number) => void;
+}
 
-  useEffect(() => {
-    const fetchFeeds = async () => {
-      const res = await axios.get<Feed[]>("/feeds.json");
-      setFeeds(res.data);
-      setIsLoading(false);
-    };
-
-    fetchFeeds();
-  }, []);
-
-  const deleteFeed = (id: number) => {
-    setFeeds(feeds.filter((feed) => feed.id !== id));
-  };
-
+const FeedList = (props: Props) => {
   return (
     <>
       <h3>Micropost Feed</h3>
-      {isLoading ? (
-        <div>ローディング中</div>
-      ) : feeds.length > 0 ? (
+      {props.feeds.length > 0 ? (
         <ol className="microposts">
-          {feeds.map((feed) => (
+          {props.feeds.map((feed) => (
             <li key={feed.id}>
-              <FeedItem feed={feed} onDelete={deleteFeed} />
+              <FeedItem feed={feed} onDelete={props.onDelete} />
             </li>
           ))}
         </ol>
