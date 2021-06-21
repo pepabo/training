@@ -100,7 +100,9 @@ $ yarn add -D @babel/core @babel/cli @babel/preset-env
 
 さて、これで Babel を実行する準備が整ったので、 ECMAScript 2015 のコードを書いてみましょう。
 
-```js:hello_es2015_class.js
+```js
+// hello_es2015_class.js
+
 class Foo {
 
   // Ruby の initialize 相当
@@ -130,7 +132,9 @@ Webpacker を利用している場合 `config/webpacker.yml` の設定が `compi
 
 こちらのコードも書いてみましょう。ECMAScript 2015 から導入された **アロー関数（arrow function）** と呼ばれるものを使っています:
 
-```js:hello_es2015_arrow_function.js
+```js
+// hello_es2015_arrow_function.js
+
 const add = (a, b) => {
   return a + b;
 }
@@ -144,7 +148,9 @@ $ yarn run babel --presets @babel/preset-env hello_es2015_arrow_function.js -o t
 
 `transpiled_es2015_arrow_function_to_es5.js` を見てみると以下のようなコードが生成されているでしょうか:
 
-```js:transpiled_es2015_arrow_function_to_es5.js
+```js
+// transpiled_es2015_arrow_function_to_es5.js
+
 "use strict";
 
 var add = function add(a, b) {

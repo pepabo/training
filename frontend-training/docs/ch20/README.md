@@ -271,7 +271,9 @@ end
 
 このようなコードの共通化作業は**リファクタリング**の一つです。 `http://localhost:3000/feeds.json` に改めてアクセスすると、 JSON の要素が揃っていることが確認できると思います。これで Micropost をこれまで表示していた部分が全て JSON として取得できるようになったので、 React に置き換えていきます。まずは Gravatar の画像を表示するコンポーネントを作りましょう。
 
-```tsx:app/javascript/components/static-pages/GravatarImage.tsx
+```tsx
+// app/javascript/components/static-pages/GravatarImage.tsx
+
 interface User {
   id: number;
   name: string;

@@ -229,7 +229,9 @@ import { useState } from "react";
 1. 表に犬のみを表示するボタン、表に猫のみを表示するボタン、全てのペットを表示するボタンを実装してください（ヒント： `Array` には [`filter()`](https://developer.mozilla.org/ja/docs/Web/JavaScript/Reference/Global_Objects/Array/filter) というメソッドがあります）。
 1. （高度）ドキュメントを調べつつ、犬か猫を選べる新しいペットを登録するフォームを作ってください。新しいペットを登録すると表に追加して表示されるようにしてください。フォームは [制御されたコンポーネント](https://ja.reactjs.org/docs/forms.html#controlled-components) として書いてください。
 
-```js:index.js
+```js
+// index.js
+
 const defaultPets = [
   { name: "Pochi", species: "dog" },
   { name: "Tama", species: "cat" },

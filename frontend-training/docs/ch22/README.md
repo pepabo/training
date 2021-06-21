@@ -23,7 +23,9 @@ SPA でも、現時点で表示している内容に対応する URL をブラ�
 
 それでは、 Vue Router を始めましょう。まずは移動先としてメッセージを表示するだけの SFC を作ります。そしてそれを Vue Router で接続します。
 
-```vue:app/javascripts/packs/HelloVueRouter.vue
+```vue
+// app/javascripts/packs/HelloVueRouter.vue
+
 <template>
   <div>Hello, Vue Router!</div>
 </template>
@@ -34,7 +36,9 @@ export default {
 </script>
 ```
 
-```erb:app/views/static_pages/home.html.erb
+```erb
+<%# app/views/static_pages/home.html.erb %>
+
 <% # 略 %>
 <div id="app">
   <% # 以下を追記します %>
@@ -42,7 +46,9 @@ export default {
 </div>
 ```
 
-```js:app/javascripts/packs/index.js
+```js
+// app/javascripts/packs/index.js
+
 import 'core-js/stable';
 import 'regenerator-runtime/runtime';
 import Vue from 'vue/dist/vue';

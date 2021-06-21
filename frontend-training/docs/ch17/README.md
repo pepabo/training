@@ -73,7 +73,9 @@ webpack を使うために必要な設定があと1つ残されています。�
 
 複雑とは言いましたが Rails Tutorial を終えた状態でのコードをバンドルするだけであれば以下のような設定を書けば十分かと思いますので、これを使ってください:
 
-```js:webpack.config.js
+```js
+// webpack.config.js
+
 const path = require('path');
 const webpack = require('webpack');
 
@@ -140,7 +142,9 @@ npx webpack --mode development --devtool eval-cheap-module-source-map --watch
 
 色々オプションが付いていますがこのようにするという形で一旦覚えておいてください。このままだとコマンドが少し長いですね。これを記録して簡単なコマンドとして実行できる NPM Scripts という機能があります。 `package.json` に以下を書いてみてください。
 
-```json:package.json
+```json
+// package.json
+
 {
   // ...
   "scripts": {
