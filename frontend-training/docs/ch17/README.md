@@ -157,7 +157,7 @@ npx webpack --mode development --devtool eval-cheap-module-source-map --watch
 
 しかしここで問題があります。 `public/packs` に生成されたバンドル済みの js ファイルは `main.ce5b5fc52a137b3fd42e.js` のようなファイル名となり、 `app/views/layouts/application.html.erb` で `<%= javascript_include_tag 'application' %>` のような方法で読み込めなくなっています。この js ファイル名はバンドル元の js ファイルが変更されると別のファイル名になるためです。なぜこのようなことになっているかと言うと、ブラウザは同じ URL の js ファイルをキャッシュしており、変更したファイルを同じ名前でサーバ上に配置しなおしたとしても、いわゆるスーパーリロードをしないと変更が反映されないようになっています。そのため、バンドルした js ファイルの内容が異なる場合には衝突しないファイル名をつけることで、スーパーリロードをせずとも変更が反映されるようにしているのです。
 
-Rails から `public/packs` に存在するバンドル済み js ファイルを読み込むヘルパーメソッドを作りましょう。そのためには、バンドル済み js ファイルがどれかということがわかるようにしなければなりません。[webpack-manifest-plugin](https://github.com/shellscape/webpack-manifest-plugin) というバンドル済 js ファイルがどれであるかを記載した .json ファイルを吐き出してくれるプラグインが公開されているので、これを使いましょう。これまでと同じように NPM を使ってインストールしてみてください。インストールしたら `webpack.config.js` に以下の内容を追加してください:
+Rails から `public/packs` に存在するバンドル済み js ファイルを読み込むヘルパーメソッドを作りましょう。そのためには、バンドル済み js ファイルがどれかということがわかるようにしなければなりません。[webpack-manifest-plugin](https://github.com/shellscape/webpack-manifest-plugin) というバンドル済 js ファイルがどれであるかを記載した .json ファイルを吐き出してくれるプラグインが公開されているので、これを使いましょう。これまでと同じように NPM を使ってインストールしてみてください。インストールしたら `webpack-manifest-plugin` を使うための設定を`webpack.config.js` の `plugins` 配列の中に書きます。以下の内容を追加してください:
 
 ```diff
 @@ -1,5 +1,6 @@
