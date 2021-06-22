@@ -11,9 +11,11 @@ Rails が生成するオールドスタイルな web アプリケーションで
 * `/` => トップページ
 * `/users/:id` => ID に該当するユーザプロフィールページ
 
-SPA でも、現時点で表示している内容に対応する URL をブラウザに認識させたいという要望があります。例えば、トップページからユーザプロフィールページに JavaScript で書き換えたとして、ブラウザバックでトップページに戻れないとなるととても不便です。[現在の JavaScript](https://developer.mozilla.org/ja/docs/Web/Guide/DOM/Manipulating_the_browser_history#履歴エントリの追加と修正) には `pushState` によるブラウザ URL の書き換えや、 `onpopstate` というフックにより URL の変化からの処理実行があります。
+SPA でも、現時点で表示している内容に対応する URL をブラウザに認識させたいという要望があります。例えば、トップページからユーザプロフィールページに JavaScript で書き換えたとして、ブラウザバックでトップページに戻れないとなるととても不便です。
 
-しかし、 `pushState` での URL 書き換えを画面の変更に合わせて書くのは非常に煩雑なので、 Vue での URL 制御は [Vue Router](https://router.vuejs.org/ja/) というライブラリを使うことで便利に取り回すことができます。
+[History API](https://developer.mozilla.org/ja/docs/Web/API/History_API) には `pushState` によるブラウザ URL の書き換えや、 `onpopstate` というフックにより URL の変化からの処理実行があります。
+
+しかし、 `pushState` での URL 書き換えを画面の変更に合わせて書くのは非常に煩雑です。React での URL 制御を便利に取り回すライブラリとして今回は [React Router](https://reactrouter.com/web/guides/quick-start) を使ってみましょう。
 
 ## Hello, Vue Router
 
