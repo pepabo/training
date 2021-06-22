@@ -227,6 +227,8 @@ end
 
 1. `user_info`、 `stats`、`micropost_form` （新規 Micropost 投稿フォーム）も React に置き換えてください。ただし
 
+  - `StaticPagesController#me` という API を作成して、 `/me.json` へのリクエストで自分のユーザ情報を取得するようにしてください。
+
   - 投稿後に投稿データを FeedList に反映させるようにしてください。ただし、 `/feeds.json` を再取得する方法ではない方法で実装してください（ヒント： `create` メソッドで JSON のレスポンスを返すようにします）。
 
   - 画像投稿が結構むずいかも。React 公式ドキュメントの [ファイル input タグ](https://ja.reactjs.org/docs/uncontrolled-components.html#the-file-input-tag) や [useRef](https://ja.reactjs.org/docs/hooks-reference.html#useref) 、[FormData](https://developer.mozilla.org/ja/docs/Web/API/FormData) などを参考にしてください。

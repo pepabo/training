@@ -1,4 +1,6 @@
 class StaticPagesController < ApplicationController
+  before_action :logged_in_user, only: [:me]
+
   def home
     if logged_in?
       @micropost  = current_user.microposts.build
@@ -13,5 +15,11 @@ class StaticPagesController < ApplicationController
   end
 
   def contact
+  end
+
+  def me
+    respond_to do |format|
+      format.json {}
+    end
   end
 end
