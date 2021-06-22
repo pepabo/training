@@ -21,7 +21,7 @@ const UserInfo = () => {
 
   useEffect(() => {
     const fetchUser = async () => {
-      const res = await axios.get<User>("/account/profiles.json");
+      const res = await axios.get<User>("/me.json");
       setUser(res.data);
       setIsLoading(false);
     };
