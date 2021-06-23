@@ -135,13 +135,58 @@ const App = () => {
 export default App;
 ```
 
-## 動的ルートマッチング
+## useParams
 
-[この説明で十分なのでここ見て](https://router.vuejs.org/ja/guide/essentials/dynamic-matching.html)
+`Route` の `path` にはパラメータを指定することもできます。
+
+```diff
+--- a/app/javascript/components/index.tsx
++++ b/app/javascript/components/index.tsx
+@@ -1,6 +1,7 @@
+ import { BrowserRouter, Link, Switch, Route } from "react-router-dom";
+ import PageNotFound from "./PageNotFound";
+ import { Home } from "./static-pages";
++import UserProfle from "./user-profiles/UserProfile";
+
+ const App = () => {
+   return (
+@@ -9,6 +10,9 @@ const App = () => {
+         <Route exact path="/">
+           <Home></Home>
+         </Route>
++        <Route path="/user_profiles/:id">
++          <UserProfle></UserProfle>
++        </Route>
+         <Route path="*">
+           <PageNotFound></PageNotFound>
+         </Route>
+```
+
+パラメータの具体的な値は [useParams](https://reactrouter.com/web/api/Hooks/useparams) フックを使って取得できます:
+
+```tsx
+// app/javascript/components/user-profiles/UserProfile.tsx
+
+import { useParams } from "react-router-dom";
+
+interface Params {
+  id: string;
+}
+
+const UserProfle = () => {
+  const { id } = useParams<Params>();
+
+  return <>User id: {id}</>;
+};
+
+export default UserProfle;
+```
+
+`GravatarImage` の ``<a href={`/users/${props.user.id}`}>`` タグを ``<Link to={`/user_profiles/${props.user.id}`}>`` に変えて、 Gravatar の画像をクリックしたら画面遷移ができること、かつパスの `:id` 部分の値に応じた表示になっていることを確かめてみてください。
 
 ## 練習問題 2
 
-ユーザの情報を表示する `UserProfile.vue` コンポーネントを作成し、これを `/user_profiles/:id` でルーティングできるようにして、 Gravatar の画像をクリックしたらこのコンポーネントを表示するようにしてください。
+できる範囲で構わないので、 Rails が `/users/:id` で表示していたのと同等の画面を `UserProfile.tsx` で作ってください。
 
 ## 次回予告
 
