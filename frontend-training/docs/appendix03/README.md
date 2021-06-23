@@ -198,5 +198,6 @@ npx tsc -p . --noEmit
 
 ## 練習問題
 
-1. TypeScriptコンパイラによる型検査を行い、コンパイルエラーであったらfailするようなGitHub Actionsの設定を書いてください。
+1. TypeScriptコンパイラによる型検査を行い、コンパイルエラーであったらfailするようなGitHub Actionsの設定を書いてください（もしかしたら [self-hosted runner を追加](https://docs.github.com/ja/actions/hosting-your-own-runners/adding-self-hosted-runners) する必要があるかもしれません。もし追加できなさそうであればこの課題は飛ばしてしまってください）。
+
 1. （高度）第18章の練習問題で作ったコンポーネントファイルを `.tsx` に変更して、コンパイルエラーが出ないように修正してください。
