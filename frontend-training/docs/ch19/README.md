@@ -68,7 +68,7 @@ someFunction(otherFunction);
 
 ## 練習問題 1
 
-1. `setTimeout()` を Promise でラップしたものを返す `sleep(ms)` 関数を作り、 `sleep(ms)` を呼び、`.then` でチェーンさせた内部でさらにもう一度 `sleep(ms)` を呼び、 `.then` が2個チェーンした形になるようにしてください。
+1. `setTimeout()` を Promise でラップしたものを返す `sleep(ms)` 関数を作り、 `sleep(ms)` を呼び、`.then` でチェーンさせた内部でもう一度 `sleep(ms)` を `return` し、 `.then` が2個チェーンした形になるようにしてください。
 2. `fs.writeFile()` の第 3 引数は、 Error オブジェクトが引数として渡ってくるコールバック関数ですが、これを考慮に入れて、 Promise でラップしたものを返す `write(filename, data)` 関数を作ってください。
 
 ## async/await
