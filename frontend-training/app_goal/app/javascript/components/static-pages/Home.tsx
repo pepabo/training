@@ -1,9 +1,6 @@
 import axios from "axios";
 import { useEffect, useState } from "react";
-import FeedList from "./FeedList";
-import MicropostForm from "./MicropostForm";
-import Stats from "./Stats";
-import UserInfo from "./UserInfo";
+import { FeedList, MicropostForm, Stats, UserInfo } from "components/shared";
 
 interface User {
   id: number;
