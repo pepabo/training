@@ -1,5 +1,3 @@
-import axios from "axios";
-import { useEffect, useState } from "react";
 import GravatarImage from "./GravatarImage";
 
 interface User {
@@ -9,42 +7,25 @@ interface User {
   microposts_count: number;
 }
 
+interface Props {
+  user: User;
+}
+
 const pluralizeMicroposts = (microposts_count: number) => {
   return `${microposts_count} ${
     microposts_count > 1 ? "microposts" : "micropost"
   }`;
 };
 
-const UserInfo = () => {
-  const [user, setUser] = useState<User>();
-  const [isLoading, setIsLoading] = useState(true);
-
-  useEffect(() => {
-    const fetchUser = async () => {
-      const res = await axios.get<User>("/me.json");
-      setUser(res.data);
-      setIsLoading(false);
-    };
-
-    fetchUser();
-  }, []);
-
-  if (isLoading) {
-    return <>ローディング中</>;
-  }
-
-  if (!user) {
-    return <></>;
-  }
-
+const UserInfo = (props: Props) => {
   return (
     <>
-      <GravatarImage user={user}></GravatarImage>
-      <h1>{user.name}</h1>
+      <GravatarImage user={props.user}></GravatarImage>
+      <h1>{props.user.name}</h1>
       <span>
-        <a href={`/users/${user.id}`}>view my profile</a>
+        <a href={`/users/${props.user.id}`}>view my profile</a>
       </span>
-      <span>{pluralizeMicroposts(user.microposts_count)}</span>
+      <span>{pluralizeMicroposts(props.user.microposts_count)}</span>
     </>
   );
 };
