@@ -28,7 +28,11 @@ const FeedList = (props: Props) => {
         <ol className="microposts">
           {props.feeds.map((feed) => (
             <li key={feed.id}>
-              <FeedItem feed={feed} onDelete={props.onDelete} />
+              <FeedItem
+                feed={feed}
+                user={feed.user}
+                onDelete={props.onDelete}
+              />
             </li>
           ))}
         </ol>
