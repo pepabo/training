@@ -14,7 +14,7 @@ $ git add .
 $ git commit
 ```
 
-Heroku では、 NPM Script に build が定義されるとデプロイした時に自動的に `npm run build` が実行されるようになります。 `package.json` に以下を記述してみましょう。
+Heroku では、 NPM Script に `build` が定義されるとデプロイした時に自動的に `npm run build` が実行されるようになります。 `package.json` に以下を記述してみましょう。
 
 ```json
 // package.json
@@ -22,8 +22,9 @@ Heroku では、 NPM Script に build が定義されるとデプロイした時
 {
   // 略
   "scripts": {
-    "watch": "parcel watch app/javascript/packs/index.html -d public/packs --public-url /packs/ --hmr-port 50000",
-    "build": "parcel build app/javascript/packs/index.html -d public/packs --public-url /packs/"
+    "build": "webpack --mode production",
+    "watch": "webpack --mode development --devtool eval-cheap-module-source-map --watch",
+    "typecheck": "tsc -p . --noEmit"
   },
   // 後略
 }
