@@ -229,7 +229,7 @@ export default Home;
 json.extract! feed, :id, :content
 
 # feed に画像があれば、 image_url という要素に URL を設定する
-json.image_url feed.display_image if feed.image.attached?
+json.image_url url_for(feed.display_image) if feed.image.attached?
 
 # Helper に定義したメソッドも使うことができる
 json.created_at_time_ago_in_words time_ago_in_words(feed.created_at)
