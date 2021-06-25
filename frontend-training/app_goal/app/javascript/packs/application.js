@@ -16,9 +16,17 @@ Rails.start()
 Turbolinks.start()
 ActiveStorage.start()
 
-document.addEventListener("DOMContentLoaded", () => {
+const renderReactDOM = () => {
   const container = document.getElementById("app")
   if (container) {
     ReactDOM.render(<App />, container)
   }
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+  renderReactDOM()
+})
+
+document.addEventListener("turbolinks:load", () => {
+  renderReactDOM()
 })
