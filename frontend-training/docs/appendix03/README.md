@@ -196,6 +196,95 @@ npx tsc -p . --noEmit
 
 特に何も表示されなければコンパイルエラーは無かったということです。何か良くないコードをわざと書いてから同じコマンドを実行するとどうなるか試してみてください。
 
+## TypeScript Tips
+
+TypeScriptの型システムに備わっている機能は非常に多岐に渡るので、その紹介は公式の [Handbook](https://www.typescriptlang.org/docs/handbook/intro.html) 等をご覧いただくとして、ここではとりあえず研修を行うにあたって特に知っておくと良いものをいくつかかいつまんで紹介しようと思います。
+
+### Optional Properties
+
+`interface Props` を定義しようとした際に、そのプロパティのうちいくつかが場合によってはサーバから返ってこないこともある、という状況はよくあります。
+そんなときはプロパティ名の末尾に `?` マークをつけることで、そのプロパティが *optional* であることを型の上でも表現できます。
+
+公式ドキュメントの例を引用しましょう:
+
+```ts
+// https://www.typescriptlang.org/docs/handbook/2/objects.html#optional-properties
+
+interface PaintOptions {
+  shape: Shape;
+  xPos?: number;
+  yPos?: number;
+}
+
+function paintShape(opts: PaintOptions) {
+  // ...
+}
+
+const shape = getShape();
+paintShape({ shape });
+paintShape({ shape, xPos: 100 });
+paintShape({ shape, yPos: 100 });
+paintShape({ shape, xPos: 100, yPos: 100 });
+```
+
+上記の例において `paintShape` 関数は `PaintOptions` 型の引数を受け取りますが、`PaintOptions` の定義では `xPos` と `yPos` の後ろに `?` マークがついています。
+すると、実際に `paintShape` を呼び出している部分を見るとわかるように、引数として渡すオブジェクトの中に `xPos` や `yPos` が無かったとしてもvalidなTypeScriptのコードとなるのです。
+
+### Generics
+
+React の `useState` について考えてみましょう。`useState` には引数として状態の初期値を与えることができるのでした:
+
+```ts
+const [isLoading, setIsLoading] = useState(true);
+const [content, setContent] = useState("hello");
+const [answer, setAnswer] = useState(42);
+```
+
+しかし `useState` の引数の型についてよく考えてみると、その型はなにか特定の型に限定されているわけではなく任意の型の引数を渡すことができていますね。
+
+`@types/react` 17.0.11 時点での `useState` の [型定義](https://github.com/DefinitelyTyped/DefinitelyTyped/blob/5aca90f372f6e8173be8439c2ba7bee8b6c23702/types/react/index.d.ts#L916) を見てみると
+
+```ts
+function useState<S>(initialState: S | (() => S)): [S, Dispatch<SetStateAction<S>>];
+```
+
+となっています。後ろの方はちょっと複雑ですが、`useState<S>` は `S` という **型引数** を取れるように定義されており、引数 `initialState` の型は `S` （または `S` を返す関数）であるという条件が指定されています。
+
+TypeScriptではこのように `<>` の中に **型パラメータ** のリストを指定することで、一般的な型に対する関数やクラス、interfaceなどを定義することができるのです。
+
+このように定義された関数を使うとき、大抵の場合は型引数を明示的に書かなくてもコンパイラが適切にその型を推論してくれます。
+しかしたとえば、空配列を初期値としたいが実際にはそれは `Feed` の配列なのだということを明示的にコンパイラに伝えないといけない場面だってあります。そのような時は `useState` を呼ぶ際に `<>` の中に型引数を明示的に書くことができます:
+
+```ts
+const [feeds, setFeeds] = useState<Feed[]>([]);
+```
+
+ほかにもよくある例として、 `document.querySelector()` が返す `Element` の型をより詳細に指定したい場面が出てくることがあります。
+
+`document.querySelector()` は何も指定しないと基本的には `Element | null` 型の値を返すのですが、 `Element` 型は `document` の中にあるすべての要素の型の基底となる型であり、特定の要素にしか存在しない特別なプロパティは `Element` には存在しません。なのでそのようなプロパティにアクセスしようとすると型エラーになります。
+
+```ts
+const csrfTokenMetaElement = document.querySelector('meta[name="csrf-token"]');
+const token = csrfTokenMetaElement?.content;
+                                 // ~~~~~~~
+                                 // Property 'content' does not exist on type 'Element'.
+```
+
+そこでプログラマーが明示的に型引数を指定することにより、コンパイラに返り値の型を特定の要素型として扱ってもらうようにします:
+
+```ts
+const csrfTokenMetaElement = document.queryselector<HTMLMetaElement>('meta[name="csrf-token"]');
+const token = csrfTokenMetaElement?.content; // This compiles :)
+```
+
+（ちなみに `document.queryselector()` に関して言うと、引数として「単なるタグ名だけからなる文字列」を与えた場合については、型引数を明示しなくてもコンパイラが適切に戻り値をその要素型として推論してくれます。たとえば
+
+```ts
+const textareaElement = document.querySelector('textarea');
+```
+
+とだけ書いても `textareaElement` の型は `HTMLTextAreaElement | null` であると推論してくれます。）
+
 ## 練習問題
 
 1. TypeScriptコンパイラによる型検査を行い、コンパイルエラーであったらfailするようなGitHub Actionsの設定を書いてください（もしかしたら [self-hosted runner を追加](https://docs.github.com/ja/actions/hosting-your-own-runners/adding-self-hosted-runners) する必要があるかもしれません。もし追加できなさそうであればこの課題は飛ばしてしまってください）。
