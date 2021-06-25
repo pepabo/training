@@ -86,11 +86,19 @@ export default App;
 `<div id="app">` 要素はログイン時のみ存在するようにしたので、 `app/javascript/packs/application.js` ではその要素がある場合に限って `ReactDOM.render()` するように修正しましょう:
 
 ```js
-document.addEventListener("DOMContentLoaded", () => {
+const renderReactDOM = () => {
   const container = document.getElementById("app")
   if (container) {
     ReactDOM.render(<App />, container)
   }
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+  renderReactDOM()
+})
+
+document.addEventListener("turbolinks:load", () => {
+  renderReactDOM()
 })
 ```
 
