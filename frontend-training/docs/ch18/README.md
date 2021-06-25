@@ -84,6 +84,11 @@ ActiveStorage.start()
 document.addEventListener("DOMContentLoaded", () => {
   ReactDOM.render(<App />, document.getElementById("app"))
 })
+
+// turbolinksによる画面遷移時は DOMContentLoaded ではなく turbolinks:load イベントが発火する
+document.addEventListener("turbolinks:load", () => {
+  ReactDOM.render(<App />, document.getElementById("app"))
+})
 ```
 
 [`ReactDOM.render`](https://ja.reactjs.org/docs/react-dom.html#render) という API を使っていますね。これで `id="app"` な DOM 要素の中に `App` を描画するのだ、というぐらいに思ってください。

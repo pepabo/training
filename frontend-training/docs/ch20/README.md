@@ -51,7 +51,7 @@ Rails Tutorial で作成した Micropost アプリケーションを SPA にし�
 
 `app/javascript/components/index.tsx` の中に書いていた `Showcase` コンポーネントはもう使わないので、削除するか適当なファイルにコピーして脇に置いておいてください。
 
-`app/javascripts/components/static-pages/Home.tsx` を作って以下のような内容にします:
+`app/javascript/components/static-pages/Home.tsx` を作って以下のような内容にします:
 
 ```tsx
 const Home = () => {
@@ -63,7 +63,7 @@ export default Home;
 
 （ Tips: これまで Ruby/Rails で開発してきたので、 `Home.tsx` とファイル名に大文字が入ることに違和感を感じるかもしれませんが、React や Vue でコンポーネントを作った時のファイル名はキャメルケースを使うことが多いです。）
 
-この `Home` コンポーネントを `app/javascripts/components/static-pages/index.ts` から提供する形にしましょう:
+この `Home` コンポーネントを `app/javascript/components/static-pages/index.ts` から提供する形にしましょう:
 
 ```ts
 import Home from "./Home";
@@ -86,11 +86,19 @@ export default App;
 `<div id="app">` 要素はログイン時のみ存在するようにしたので、 `app/javascript/packs/application.js` ではその要素がある場合に限って `ReactDOM.render()` するように修正しましょう:
 
 ```js
-document.addEventListener("DOMContentLoaded", () => {
+const renderReactDOM = () => {
   const container = document.getElementById("app")
   if (container) {
     ReactDOM.render(<App />, container)
   }
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+  renderReactDOM()
+})
+
+document.addEventListener("turbolinks:load", () => {
+  renderReactDOM()
 })
 ```
 
