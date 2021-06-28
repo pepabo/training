@@ -1,9 +1,15 @@
 import axios from "axios";
 import { useEffect, useState } from "react";
-import FeedList from "./FeedList";
-import MicropostForm from "./MicropostForm";
-import Stats from "./Stats";
-import UserInfo from "./UserInfo";
+import { FeedList, MicropostForm, Stats, UserInfo } from "components/shared";
+
+interface Me {
+  id: number;
+  name: string;
+  gravatar_url: string;
+  microposts_count: number;
+  following_count: number;
+  followers_count: number;
+}
 
 interface User {
   id: number;
@@ -22,7 +28,9 @@ interface Feed {
 
 const Home = () => {
   const [feeds, setFeeds] = useState<Feed[]>([]);
+  const [me, setMe] = useState<Me>();
   const [isLoadingFeeds, setIsLoadingFeeds] = useState(true);
+  const [isLoadingMe, setIsLoadingMe] = useState(true);
 
   useEffect(() => {
     const fetchFeeds = async () => {
@@ -32,6 +40,16 @@ const Home = () => {
     };
 
     fetchFeeds();
+  }, []);
+
+  useEffect(() => {
+    const fetchMe = async () => {
+      const res = await axios.get<Me>("/me.json");
+      setMe(res.data);
+      setIsLoadingMe(false);
+    };
+
+    fetchMe();
   }, []);
 
   const concatNewFeed = (newFeed: Feed) => {
@@ -45,12 +63,20 @@ const Home = () => {
   return (
     <div className="row">
       <aside className="col-md-4">
-        <section className="user_info">
-          <UserInfo />
-        </section>
-        <section className="stats">
-          <Stats />
-        </section>
+        {isLoadingMe ? (
+          <div>ローディング中</div>
+        ) : (
+          me && (
+            <>
+              <section className="user_info">
+                <UserInfo user={me} />
+              </section>
+              <section className="stats">
+                <Stats user={me} />
+              </section>
+            </>
+          )
+        )}
         <section className="micropost_form">
           <MicropostForm onCreateNewMicropost={concatNewFeed} />
         </section>

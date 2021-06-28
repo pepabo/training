@@ -1,12 +1,8 @@
-# 第 22 章　Vue でページ移動を作る
+# 第 22 章　React でページ移動を作る
 
 {% raw %}
 
 20 章で Gravatar の画像を表示した際、 `<a href="/users/1">` のようなリンクを作成しました。このままでは、この画像をクリックした時には一旦ページを離れて、 Rails が出力した `/users/1` の HTML を取得し、その内容を表示してしまいます。しかし、共通部分を除いて JavaScript でページの内容だけを書き換えた方が、よりスムーズなレスポンスになるとは感じないでしょうか。このようなページ自体の遷移をなくして JavaScript によるページ書き換えと URL を対応させたのが、 Single Page Application (SPA) です。
-
-## 練習問題 1
-
-自分のユーザ情報を取得する `/me.json` `StaticPagesController#me` という API を作成して、ログイン後トップ画面左側のアカウント情報を表示している部分を Vue に置き換えてください。
 
 ## JavaScript での URL 処理
 
@@ -15,102 +11,180 @@ Rails が生成するオールドスタイルな web アプリケーションで
 * `/` => トップページ
 * `/users/:id` => ID に該当するユーザプロフィールページ
 
-SPA でも、現時点で表示している内容に対応する URL をブラウザに認識させたいという要望があります。例えば、トップページからユーザプロフィールページに JavaScript で書き換えたとして、ブラウザバックでトップページに戻れないとなるととても不便です。[現在の JavaScript](https://developer.mozilla.org/ja/docs/Web/Guide/DOM/Manipulating_the_browser_history#履歴エントリの追加と修正) には `pushState` によるブラウザ URL の書き換えや、 `onpopstate` というフックにより URL の変化からの処理実行があります。
+SPA でも、現時点で表示している内容に対応する URL をブラウザに認識させたいという要望があります。例えば、トップページからユーザプロフィールページに JavaScript で書き換えたとして、ブラウザバックでトップページに戻れないとなるととても不便です。
 
-しかし、 `pushState` での URL 書き換えを画面の変更に合わせて書くのは非常に煩雑なので、 Vue での URL 制御は [Vue Router](https://router.vuejs.org/ja/) というライブラリを使うことで便利に取り回すことができます。
+[History API](https://developer.mozilla.org/ja/docs/Web/API/History_API) には `pushState` によるブラウザ URL の書き換えや、 `onpopstate` というフックにより URL の変化からの処理実行があります。
 
-## Hello, Vue Router
+しかし、 `pushState` での URL 書き換えを画面の変更に合わせて書くのは非常に煩雑です。React での URL 制御を便利に取り回すライブラリとして今回は [React Router](https://reactrouter.com/web/guides/quick-start) を使ってみましょう。
 
-それでは、 Vue Router を始めましょう。まずは移動先としてメッセージを表示するだけの SFC を作ります。そしてそれを Vue Router で接続します。
+## Hello, React Router
 
-```vue
-// app/javascripts/packs/HelloVueRouter.vue
+それでは、 React Router を始めましょう。 `react-router-dom` とその型定義をインストールします:
 
-<template>
-  <div>Hello, Vue Router!</div>
-</template>
+```bash
+npm i -E react-router-dom@5.2.0
+npm i -D -E @types/react-router-dom@5.1.7
+```
 
-<script>
-export default {
+まずは移動先としてメッセージを表示するだけのコンポーネントを作ります。そしてそれを React Router でルーティングします。
+
+```tsx
+// app/javascript/components/HelloRouter.tsx
+
+const HelloRouter = () => {
+  return <>Hello, Router!</>;
 };
-</script>
+
+export default HelloRouter;
 ```
 
-```erb
-<%# app/views/static_pages/home.html.erb %>
+```tsx
+// app/javascript/components/index.tsx
 
-<% # 略 %>
-<div id="app">
-  <% # 以下を追記します %>
-  <router-view></router-view>
-</div>
+import { BrowserRouter, Link, Switch, Route } from "react-router-dom";
+import HelloRouter from "./HelloRouter";
+import { Home } from "./static-pages";
+
+const App = () => {
+  return (
+    <BrowserRouter>
+      <nav>
+        <ul>
+          <li>
+            <Link to="/">Home</Link>
+          </li>
+          <li>
+            <Link to="/hello">Say Hello Router</Link>
+          </li>
+        </ul>
+      </nav>
+
+      <Switch>
+        <Route exact path="/">
+          <Home></Home>
+        </Route>
+        <Route path="/hello">
+          <HelloRouter></HelloRouter>
+        </Route>
+      </Switch>
+    </BrowserRouter>
+  );
+};
+
+export default App;
 ```
 
-```js
-// app/javascripts/packs/index.js
+画面を再読み込みすると、画面上部に新たにリンクが2つ表示されています。 `<Link>` コンポーネントは画面遷移が React Router によって制御される `<a>` タグ（本物の `<a>` タグ）をレンダーします。
+`<Route>` コンポーネントは `path` 属性に URL のパスを指定し、そのパスにおいて描画したいコンポーネントを子コンポーネントとして書きます。
 
-import 'core-js/stable';
-import 'regenerator-runtime/runtime';
-import Vue from 'vue/dist/vue';
-import VueRouter from 'vue-router';
-import Home from './Home.vue';
-import HelloVueRouter from './HelloVueRouter.vue';
+`<Route>` コンポーネントたちの親にさらに `<Switch>` コンポーネントがあると、パスに最初に合致したコンポーネントだけが描画されるようになります（ `<Switch>` が無いとパスが合致したコンポーネントすべてが描画されるのです。詳しくは [公式APIドキュメント](https://reactrouter.com/web/api/Switch) を読んでください）。
 
-Vue.use(VueRouter);
+さて、画面に表示されたリンクを何回かいろいろクリックしてみて、画面が素早く遷移することを確認してください。
+また開発者コンソールの Network タブを確認すると、 `/hello` へのリンクをクリックしても実際にサーバにリクエストは送られていないこともわかると思います。
 
-const routes = [
-  { path: '/hello', component: HelloVueRouter },
-  { path: '/', component: Home }
-];
-
-const router = new VueRouter({
-  routes  // routes: routes と同じ
-})
-
-document.addEventListener('DOMContentLoaded', () => {
-  new Vue({ router }).$mount('#app');
-});
-```
-
-画面を再読み込みすると、 `http://0.0.0.0:3000/#/` という URL になって、先ほどと変わらない画面が出力されます。この `#/` という部分は `pushState` に対応していない古いブラウザ対策として使われており、後ほどこれを普通の URL へと置き換えるコードを書きます。ひとまずは HelloVueRouter コンポーネントが表示されるかを確認しましょう。 [http://0.0.0.0:3000/#/hello](http://0.0.0.0:3000/#/hello) にアクセスすると、 HelloVueRouter コンポーネントがレンダリングされていることが確認できます。
-
-それでは Home コンポーネントから HelloVueRouter コンポーネントへのリンクを作成してみましょう。 Vue Router を有効化すると、 `<router-link>` というコンポーネントが使えるようになります。 Home コンポーネントのテンプレートに `<router-link to="/hello">Say Hello</router-link>` と記述して [http://0.0.0.0:3000/](http://0.0.0.0:3000/) を読み込むと、リンクが作成されていることがわかります。実際にリンクをクリックすると、表示が Hello, Vue Router! に切り替わって URL も `#/hello` になることが確認できますね。このままブラウザバックをすると、 Home コンポーネントに戻ることもできます。
-
-## `pushState` に対応させる
-
-このままでも SPA としては十分に機能しますが、 URL に `#` が入ってしまいあまりクールではないですね（これは個人の感想であり、効果・効能を示すものではありません）。このような特殊な URL ではなく通常の URL でこの Micropost SPA を操作できるようにしましょう。 Vue Router には `pushState` を使って URL を操作する　[HTML5 History モード](https://router.vuejs.org/ja/guide/essentials/history-mode.html) が存在しています。これは `VueRouter` の設定に `mode: 'history'` を設定するだけで動作します。確かめてみましょう（ブラウザを立ち上げ直さないと HTML5 History モードが有効にならないかも）。
-
-しかし、これでは想定しない動作を Rails サーバ側が起こしてしまうようになります。これまで `#/` 形式の URL では `#` 以降は URL の path とは違う部分と認識されているので、 Rails 側では処理されない内容となっていました。 HTML5 History モードを有効化すると、これまで http://0.0.0.0:3000/#/hello として処理されていた URL は http://0.0.0.0:3000/hello として扱われるようになるので、ブラウザをリロードすると Rails 側でそのような route は存在しないというエラーが発生してしまいます。そこで、 Rails で処理できない URL へのリクエストも `StaticPagesController#home` へと到達させるようにします。
+しかしこのままでは想定しない動作を Rails サーバ側が起こしてしまうようになります。URL が http://localhost:3000/hello となった状態でブラウザをリロードすると、 Rails 側でそのような route は存在しないというエラーが発生してしまいます。そこで、 Rails で処理できない URL へのリクエストも `StaticPagesController#home` へと到達させるようにします。
 
 ```ruby
 # config/routes.rb
 
 Rails.application.routes.draw do
   # 最終行に追加
-  get '*any', to: 'static_pages#home'
+  # ただし /rails 以下は特別な意味を持つので :any としてはルーティングさせない
+  get '*any', to: 'static_pages#home', constraints: { any: /(?<!rails)\w+/}
 end
 ```
 
-これで [http://0.0.0.0:3000/hello](http://0.0.0.0:3000/hello) にブラウザで直接アクセスしても、 Rails 側でエラーが出ることなく HelloVueRouter コンポーネントが表示できるようになると思います。
+これで [http://localhost:3000/hello](http://localhost:3000/hello) にブラウザで直接アクセスしても、 Rails 側でエラーが出ることなく HelloRouter コンポーネントが表示できるようになると思います。
 
-実際の SPA 開発では、 Vue Router 側で、定義されていないルートにアクセスされた際に 404 Not Found であることを示すルートを定義します。以下のようなコードになりますが、今回は省略します。
+さらに React Router 側でも、定義されていないルートにアクセスされた際にページが存在しないことをユーザに伝えるようなコンポーネントを用意しておきます。
 
-```js
-const router = new VueRouter({
-  mode: 'history',
-  routes: [
-    { path: '*', component: NotFoundComponent }
-  ]
-});
+```tsx
+// app/javascript/components/PageNotFound.tsx
+
+const PageNotFound = () => {
+  return <>Page Not Found.</>;
+};
+
+export default PageNotFound;
 ```
 
-## 動的ルートマッチング
+```tsx
+// app/javascript/components/index.tsx
 
-[この説明で十分なのでここ見て](https://router.vuejs.org/ja/guide/essentials/dynamic-matching.html)
+import { BrowserRouter, Link, Switch, Route } from "react-router-dom";
+import PageNotFound from "./PageNotFound";
+import { Home } from "./static-pages";
+
+const App = () => {
+  return (
+    <BrowserRouter>
+      <Switch>
+        <Route exact path="/">
+          <Home></Home>
+        </Route>
+        <Route path="*">
+          <PageNotFound></PageNotFound>
+        </Route>
+      </Switch>
+    </BrowserRouter>
+  );
+};
+
+export default App;
+```
+
+## useParams
+
+`Route` の `path` にはパラメータを指定することもできます。
+
+```diff
+--- a/app/javascript/components/index.tsx
++++ b/app/javascript/components/index.tsx
+@@ -1,6 +1,7 @@
+ import { BrowserRouter, Link, Switch, Route } from "react-router-dom";
+ import PageNotFound from "./PageNotFound";
+ import { Home } from "./static-pages";
++import UserProfle from "./user-profiles/UserProfile";
+
+ const App = () => {
+   return (
+@@ -9,6 +10,9 @@ const App = () => {
+         <Route exact path="/">
+           <Home></Home>
+         </Route>
++        <Route path="/user_profiles/:id">
++          <UserProfle></UserProfle>
++        </Route>
+         <Route path="*">
+           <PageNotFound></PageNotFound>
+         </Route>
+```
+
+パラメータの具体的な値は [useParams](https://reactrouter.com/web/api/Hooks/useparams) フックを使って取得できます:
+
+```tsx
+// app/javascript/components/user-profiles/UserProfile.tsx
+
+import { useParams } from "react-router-dom";
+
+interface Params {
+  id: string;
+}
+
+const UserProfle = () => {
+  const { id } = useParams<Params>();
+
+  return <>User id: {id}</>;
+};
+
+export default UserProfle;
+```
+
+`GravatarImage` の ``<a href={`/users/${props.user.id}`}>`` タグを ``<Link to={`/user_profiles/${props.user.id}`}>`` に変えて、 Gravatar の画像をクリックしたら画面遷移ができること、かつパスの `:id` 部分の値に応じた表示になっていることを確かめてみてください。
 
 ## 練習問題 2
 
-ユーザの情報を表示する `UserProfile.vue` コンポーネントを作成し、これを `/user_profiles/:id` でルーティングできるようにして、 Gravatar の画像をクリックしたらこのコンポーネントを表示するようにしてください。
+できる範囲で構わないので、 Rails が `/users/:id` で表示していたのと同等の画面を `UserProfile.tsx` で作ってください。
 
 ## 次回予告
 

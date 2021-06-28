@@ -1,3 +1,5 @@
+import { Link } from "react-router-dom";
+
 interface User {
   id: number;
   name: string;
@@ -10,13 +12,13 @@ interface Props {
 
 const GravatarImage = (props: Props) => {
   return (
-    <a href={`/users/${props.user.id}`}>
+    <Link to={`/user_profiles/${props.user.id}`}>
       <img
         src={props.user.gravatar_url}
         alt={props.user.name}
         className="gravatar"
       />
-    </a>
+    </Link>
   );
 };
 

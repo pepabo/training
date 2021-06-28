@@ -14,11 +14,11 @@ interface Feed {
   content: string;
   image_url?: string;
   created_at_time_ago_in_words: string;
-  user: User;
 }
 
 interface Props {
   feed: Feed;
+  user: User;
   onDelete: (id: number) => void;
 }
 
@@ -35,9 +35,9 @@ const FeedItem = (props: Props) => {
 
   return (
     <>
-      <GravatarImage user={props.feed.user} />
+      <GravatarImage user={props.user} />
       <span className="user">
-        <a href={`/users/${props.feed.user.id}`}>{props.feed.user.name}</a>
+        <a href={`/users/${props.user.id}`}>{props.user.name}</a>
       </span>
       <span className="content">
         {props.feed.content}
@@ -45,7 +45,7 @@ const FeedItem = (props: Props) => {
       </span>
       <span className="timestamp">
         Posted {props.feed.created_at_time_ago_in_words} ago.{" "}
-        {props.feed.user.is_current_user && (
+        {props.user.is_current_user && (
           <a onClick={handleClickDeleteButton}>delete</a>
         )}
       </span>

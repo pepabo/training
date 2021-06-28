@@ -14,9 +14,13 @@ Rails.application.routes.draw do
     end
   end
   resources :users
+  resources :user_profiles, only: [:show]
   resources :account_activations, only: [:edit]
   resources :password_resets,     only: [:new, :create, :edit, :update]
   resources :microposts,          only: [:create, :destroy]
   resources :relationships,       only: [:create, :destroy]
   resources :feeds, only: [:index]
+
+  # /rails 以下は特別な意味を持つので :any としてはルーティングさせない
+  get '*any', to: 'static_pages#home', constraints: { any: /(?<!rails)\w+/}
 end
