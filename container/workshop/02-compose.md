@@ -43,7 +43,7 @@ Wordpress には、本体と DB が必要です。
 | `MYSQL_ALLOW_EMPTY_PASSWORD` | `yes`を指定すると`root`にパスワードなしでアクセス可 |
 | `MYSQL_RANDOM_ROOT_PASSWORD` | `yes`を指定すると起動時に`root`のパスワードをランダムに生成してstdoutへ出力 |
 
-### 演習2.2
+### 演習2.2 docker-compose.yamlを修正してDocker Compose で実行する
 
 [Gitea](https://gitea.io/ja-jp/)はセルフホスト型Gitサービスです。MySQLやPostgresなどのDBをバックエンドとして利用できます。
 
