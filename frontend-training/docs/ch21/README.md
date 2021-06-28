@@ -215,7 +215,7 @@ end
       });
 
       if (meta) {
-        meta.content = res.headers["X-CSRF-Token"];
+        meta.content = res.headers["x-csrf-token"];
       }
 
       props.onDelete(props.feed.id);
