@@ -10,12 +10,38 @@ Docker Compose なら、`docker-compose.yaml` というファイルであるべ�
 また、Rails と Rails が利用する DB を両方上げるなど、複数のコンテナを起動してそれぞれを簡単に連携できるように設定ができます。  
 
 ### 演習2.1: DB を利用するアプリケーションを Docker Compose で実行する
+
 みんな大好き Wordpress を Docker Compose を利用して起動してみましょう。  
 Wordpress には、本体と DB が必要です。  
 本体は[公式](https://hub.docker.com/_/wordpress/)の `wordpress` イメージを、DB も[公式](https://hub.docker.com/_/mysql/)の `mysql` イメージを使ってみましょう。  
-docker-compose.yaml の書き方は、以下のリンクを参考にしてください。  
 
-https://docs.docker.jp/compose/compose-file.html
+上記イメージのページにはほぼ答えそのものが載っているので、演習2.1のみ参考にしていいページは[docker-compose.yaml の書き方  ](https://docs.docker.jp/compose/compose-file.html) だけとします。
+また、イメージは次のtagの物を利用してください。
+
+* `wordpress:php7.4`
+* `mysql:5.7`
+
+`wordpress`イメージと`mysql`イメージでは次の環境変数が利用できます。
+
+**wordpress**
+
+| 環境変数 | 説明 |
+|:-|:-|
+| `WORDPRESS_DB_HOST` | 接続先DBホスト名 |
+| `WORDPRESS_DB_USER` | DB接続ユーザー |
+| `WORDPRESS_DB_PASSWORD` | DB接続パスワード |
+| `WORDPRESS_DB_NAME` | 接続先DB名 |
+
+**mysql**
+
+| 環境変数 | 説明 |
+|:-|:-|
+| `MYSQL_ROOT_PASSWORD` | `root`ユーザーのパスワード |
+| `MYSQL_DATABASE` | 起動時に作成するDB名 |
+| `MYSQL_USER` | 起動時に作成するユーザー名 |
+| `MYSQL_PASSWORD` | `MYSQL_USER`のパスワード |
+| `MYSQL_ALLOW_EMPTY_PASSWORD` | `yes`を指定すると`root`にパスワードなしでアクセス可 |
+| `MYSQL_RANDOM_ROOT_PASSWORD` | `yes`を指定すると起動時に`root`のパスワードをランダムに生成してstdoutへ出力 |
 
 ### 演習2.2: 謎のアプリケーションを Docker Compose で実行する
 謎の Web アプリケーションを構築し、リクエストを受けられる状態まで組み立ててみましょう。
