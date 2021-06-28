@@ -43,7 +43,47 @@ Wordpress には、本体と DB が必要です。
 | `MYSQL_ALLOW_EMPTY_PASSWORD` | `yes`を指定すると`root`にパスワードなしでアクセス可 |
 | `MYSQL_RANDOM_ROOT_PASSWORD` | `yes`を指定すると起動時に`root`のパスワードをランダムに生成してstdoutへ出力 |
 
-### 演習2.2: 謎のアプリケーションを Docker Compose で実行する
+### 演習2.2
+
+[Gitea](https://gitea.io/ja-jp/)はセルフホスト型Gitサービスです。MySQLやPostgresなどのDBをバックエンドとして利用できます。
+
+次の docker-compose.yaml はバックエンドとしてPostgresを利用しGiteaを動かそうとしていますが、間違ったところがあり正常に動作しません。
+ブラウザで`http://localhost:3000`にアクセスして、Giteaのインストールが正常に行えるように修正してください。
+
+```yaml
+version: 3.7
+services:
+  gitea:
+    image: gitea/gitea:latest
+    environment:
+      - DB_TYPE=postgres
+      - DB_HOST=db:5432
+      - DB_NAME=gitea
+      - DB_USER=gitea
+      - DB_PASSWD=gitea
+    volumes:
+      - git_data:/data
+    ports:
+      - 3000:3000
+  postgres:
+    image: postgres:alpine
+    environment:
+      - POSTGRESQL_USER=gitea
+      - POSTGRESQL_PASSWORD=gitea
+      - POSTGRESQL_DB=gitea
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    expose:
+      - 5432
+volumes:
+  postgres_data:
+  git_data:
+```
+
+Giteaのイメージの使い方について必要であればこちらのドキュメントを参考にすると良いでしょう。
+[Installation with Docker - Docs](https://docs.gitea.io/en-us/install-with-docker/)
+
+### 演習2.3: 謎のアプリケーションを Docker Compose で実行する
 謎の Web アプリケーションを構築し、リクエストを受けられる状態まで組み立ててみましょう。
 `takutakahashi/blackbox-webapp` というイメージを用意したので、あとは頑張ってください！  
 `/` のパスでリクエストしたらとある文字列が返ってきますので、それを僕にスレで教えてください。  
