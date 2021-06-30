@@ -90,7 +90,9 @@ export default App;
 Rails.application.routes.draw do
   # 最終行に追加
   # ただし /rails 以下は特別な意味を持つので :any としてはルーティングさせない
-  get '*any', to: 'static_pages#home', constraints: { any: /(?<!rails)\w+/}
+  scope ':any', as: :any, constraints: { any: /(?!rails\/).*/ } do
+    root to: 'static_pages#home'
+  end
 end
 ```
 
