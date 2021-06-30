@@ -60,11 +60,7 @@ const MicropostForm = (props: Props) => {
         data.append("micropost[image]", file);
       }
 
-      const res = await axios.post<Feed>("/microposts.json", data, {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
-      });
+      const res = await axios.post<Feed>("/microposts.json", data);
 
       setContent("");
       if (inputFileElement.current) {
