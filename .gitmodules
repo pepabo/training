@@ -1,0 +1,3 @@
+[submodule "start-frontend-training"]
+	path = start-frontend-training
+	url = git@github.com:pepabo/start-frontend-training.git
