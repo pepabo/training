@@ -1,0 +1,14 @@
+{
+  "name": "start-frontend-training",
+  "version": "1.0.0",
+  "description": "🚀 frontend-training starter",
+  "bin": {
+    "start-frontend-training": "index.js"
+  },
+  "author": "GMO Pepabo Inc.",
+  "dependencies": {
+    "commander": "^2.20.0",
+    "fs-extra": "^8.1.0",
+    "tempy": "^0.3.0"
+  }
+}
