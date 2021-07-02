@@ -1,0 +1,24 @@
+---
+# Only the main Sass file needs front matter (the dashes are enough)
+---
+
+@import "minima";
+
+.code-block-header {
+  position: relative;
+  padding-top: 32px;
+
+  &::before {
+    content: attr(data-lang);
+    background: darken(#f6f8fa, 8%);
+    color: darken(#f6f8fa, 50%);
+    display: block;
+    font-size: 13px;
+    font-weight: 700;
+    padding: 1px 10px;
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 10;
+  }
+}
