@@ -15,12 +15,13 @@ Docker Compose なら、`docker-compose.yaml` というファイルであるべ�
 Wordpress には、本体と DB が必要です。  
 本体は[公式](https://hub.docker.com/_/wordpress/)の `wordpress` イメージを、DB も[公式](https://hub.docker.com/_/mysql/)の `mysql` イメージを使ってみましょう。  
 
-上記イメージのページにはほぼ答えそのものが載っているので、演習2.1のみ参考にしていいページは[docker-compose.yaml の書き方  ](https://docs.docker.jp/compose/compose-file.html) だけとします。
+上記イメージのページにはほぼ答えそのものが載っているので、演習2.1のみ参考にしていいページは[docker-compose.yaml の書き方  ](https://docs.docker.jp/compose/compose-file.html) だけとします。  
 また、イメージは次のtagの物を利用してください。
 
 * `wordpress:php7.4`
 * `mysql:5.7`
 
+wordpressは80番port、mysqlは3306番ポートでlistenしています。  
 `wordpress`イメージと`mysql`イメージでは次の環境変数が利用できます。
 
 **wordpress**
