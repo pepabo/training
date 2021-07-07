@@ -12,8 +12,8 @@ Terraform を使う準備をしましょう。
 terraform のバージョン管理である tfenv を利用してインストールします。  
 ```
 brew install tfenv
-tfenv install 0.12.25
-tfenv use 0.12.25
+tfenv install 1.0.1
+tfenv use 1.0.1
 ```
 
 ### クレデンシャルの設定
