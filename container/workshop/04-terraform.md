@@ -161,7 +161,7 @@ https://dev.classmethod.jp/articles/use-awspec-to-test-aws-resrouces/
 
 ## 4.7 自動 plan, 自動 apply をしてみる
 
-ペパボの GHE では、drone というツールを利用して CI/CD を構築することができます。  
+ペパボの GHE では、GitHub Actions を利用して CI/CD を構築することができます。  
 PR を出したら `plan` を実行し、マージされたら `apply` が実行されるパイプラインを構築してみましょう。  
 こちらを実行する際には、tfstate を local から s3 などの remote のものに切り替える必要があります。  
 取り組む際に声をかけてください。  
