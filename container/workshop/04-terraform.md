@@ -16,10 +16,20 @@ tfenv install 1.0.1
 tfenv use 1.0.1
 ```
 
-### クレデンシャルの設定
+### AWSクレデンシャルの設定
+
+ホームディレクトリの `.aws/credentials` に、講師から教えられた認証情報を記入しましょう。  
+ファイルやフォルダがなければ作成しましょう。 
+
+```
+[training]
+aws_access_key_id = ******
+aws_secret_access_key = ******
+```
+
+### Terraform作業ディレクトリの初期化
 
 terraform 用のリポジトリを作成して、そちらで作業をしましょう。  
-
 
 以下の、backend.tf を作成します。  
 
@@ -27,17 +37,11 @@ terraform 用のリポジトリを作成して、そちらで作業をしまし�
 terraform {
   backend "local" {}
 }
-
 ```
 
-ホームディレクトリの `.aws/credentials` に、以下の gist の内容を追記しましょう。  
-ファイルやフォルダがなければ作成しましょう。 
-
-```
-ナイショ
-```
 
 `provider.tf` を作成しましょう。
+`profile`には[AWSクレデンシャルの設定](#AWSクレデンシャルの設定)で指定したprofile名を指定します。
 
 ```
 provider "aws" {
@@ -47,8 +51,9 @@ provider "aws" {
 }
 ```
 
-`terraform init` を実行して、以下の表示が出れば OK です。
-```
+`terraform init` を実行して、以下のように`Terraform has been successfully initialized!`が表示されれば OK です。
+
+```console
 % terraform init
 
 Initializing the backend...
@@ -137,6 +142,7 @@ resource "aws_volume_attachment" "test" {
 }
 
 ```
+
 上記の要領で、インスタンスにストレージを追加してみましょう。  
 
 ## 4.4 rds を import する
