@@ -86,7 +86,7 @@ Giteaのイメージの使い方について必要であればこちらのドキ
 
 ### 演習2.3: 謎のアプリケーションを Docker Compose で実行する
 謎の Web アプリケーションを構築し、リクエストを受けられる状態まで組み立ててみましょう。
-`takutakahashi/blackbox-webapp` というイメージを用意したので、あとは頑張ってください！  
+[`takutakahashi/blackbox-webapp`](https://hub.docker.com/r/takutakahashi/blackbox-webapp) というイメージを用意したので、あとは頑張ってください！  
 `/` のパスでリクエストしたらとある文字列が返ってきますので、それを僕にスレで教えてください。  
 
 ### 追加演習1: Wordpress を SSL 対応する
