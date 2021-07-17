@@ -18,6 +18,6 @@ $ npx https://gitpkg.now.sh/pepabo/training/start-frontend-training
 
 ## Troubleshooting
 
-### `npm install -g` したけどコマンドがない
+### `npx` したけどコマンドがない
 
 nodenv + node-build 使ってたら `nodenv rehash` してみてください。
