@@ -9,8 +9,7 @@
 このツールは Node.js で動いていますので、まず [Node.js をセットアップ](https://github.com/pepabo/frontend-training/tree/master/docs/ch15#nodejs-環境のセットアップ) してから以下のコマンドを実行してください。
 
 ```
-$ npm install -g 'git+https://github.com/pepabo/start-frontend-training#master'
-$ start-frontend-training
+$ npx https://gitpkg.now.sh/pepabo/training/start-frontend-training
 ```
 
 ## Options
