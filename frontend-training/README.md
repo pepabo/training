@@ -6,7 +6,7 @@
 
 ## 課題の提出方法について
 
-各チャプターには練習問題が存在します。練習問題の回答に対するフィードバックが欲しい場合、 [pepabo/start-frontend-training: 🚀 frontend-training starter](https://github.com/pepabo/start-frontend-training/) をインストールして実行すると提出用ディレクトリ `frontend-training` が実行したディレクトリの直下に作成されます。この中で `git commit` して、 GitHub 上に個人リポジトリを作成の上、 `git push` してください。
+各チャプターには練習問題が存在します。練習問題の回答に対するフィードバックが欲しい場合、 [start-frontend-training: 🚀 frontend-training starter](https://github.com/pepabo/training/tree/master/start-frontend-training) をインストールして実行すると提出用ディレクトリ `frontend-training` が実行したディレクトリの直下に作成されます。この中で `git commit` して、 GitHub 上に個人リポジトリを作成の上、 `git push` してください。
 
 各チャプターで練習問題が出題されたとき、その回答を対応するディレクトリの中にファイルとして配置し、 Pull Request を作成してください。休んでなかったら 1 日ぐらいでレビューできると思います。レビューが Approve されたらマージしましょう。
 
