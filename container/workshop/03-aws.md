@@ -78,6 +78,7 @@ AWSのマネジメントコンソールにログインして、 [Amazon EC2 の�
 - インスタンスタイプ: t2.micro
 - ネットワーク: training-vpc
 - サブネット: training-private1a
+- IAM role: SSMForTraining
 - Security Group: training
 - tag: `Name`tagに自分のたてたインスタンスであることがわかるように任意の名前を設定します
 
