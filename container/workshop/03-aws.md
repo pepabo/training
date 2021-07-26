@@ -76,11 +76,12 @@ AWSのマネジメントコンソールにログインして、 [Amazon EC2 の�
 
 - OS: Amazon Linux 2 AMI (HVM), SSD Volume Type (64 ビット x86)
 - インスタンスタイプ: t2.micro
-- ネットワーク: training-vpc
-- サブネット: training-private1a
+- ネットワーク: training
+- サブネット: training-private-us-east-1a
 - IAM role: SSMForTraining
 - Security Group: training
 - tag: `Name`tagに自分のたてたインスタンスであることがわかるように任意の名前を設定します
+- キーペア: 「キーペア無しで続行」
 
 作成できたら、 [Session Manager](https://docs.aws.amazon.com/ja_jp/AWSEC2/latest/UserGuide/session-manager.html) でインスタンスに接続してみます。
 
