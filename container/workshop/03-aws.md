@@ -42,7 +42,7 @@ AWS CLIを利用するために必要な設定を行います。
 - `~/.aws/credentials`
 
     ```
-    [default]
+    [training]
     aws_access_key_id=<ACCESS_KEY_ID>
     aws_secret_access_key=<SECRET_ACCESS_KEY>
     ```
@@ -50,14 +50,22 @@ AWS CLIを利用するために必要な設定を行います。
 - `~/.aws/config`
 
     ```
-    [default]
+    [profile training]
     region=us-east-1
     ```
 
 設定が行えたら次のコマンドがエラーなく実行できることを確認します。
 
 ```console
-$ aws ec2 describe-instances
+$ aws ec2 describe-instances --profile training
+```
+
+---
+
+`AWS_PROFILE`環境変数を指定することで、いちいち`--profile training`を指定する必要がなくなります。
+
+```
+export AWS_PROFILE=training
 ```
 
 ## 演習 3.1
