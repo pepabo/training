@@ -89,6 +89,10 @@ AWSのマネジメントコンソールにログインして、 [Amazon EC2 の�
 $ aws --region us-east-1 ssm start-session --target <インスタンスID>
 ```
 
+session managerの利用にはプラグインが必要です。次の記事を参考にインストールしてください。
+
+[(オプション) AWS CLI 用の Session Manager プラグインをインストールする - AWS Systems Manager](https://docs.aws.amazon.com/ja_jp/systems-manager/latest/userguide/session-manager-working-with-install-plugin.html)
+
 ## 演習3.2 作成したインスタンスを壊してみる
 
 作成できたインスタンスを、中身を書き換えて起動できないように壊してみましょう。  
