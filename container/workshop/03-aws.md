@@ -78,7 +78,7 @@ AWSのマネジメントコンソールにログインして、 [Amazon EC2 の�
 - インスタンスタイプ: t2.micro
 - ネットワーク: training
 - サブネット: training-private-us-east-1a
-- IAM role: SSMForTraining
+- IAM role: SSMProfileForTraining
 - Security Group: training
 - tag: `Name`tagに自分のたてたインスタンスであることがわかるように任意の名前を設定します
 - キーペア: 「キーペア無しで続行」
