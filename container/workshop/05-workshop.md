@@ -50,7 +50,7 @@ EKS (Elastic Kubernetes Service) のクラスタを用意しておきました�
 aws コマンドが利用できれば、以下で認証情報を取得できます。  
 
 ```
-aws eks --profile training --region us-east-1 update-kubeconfig --name training
+aws eks --profile training --region us-east-1 update-kubeconfig --name training-cluster
 ```
 
 クラスタには共有で利用できる次のコンポーネントが用意されています。必要に応じて利用してください。
@@ -68,5 +68,4 @@ Kubernetes を一から触るには、以下のサイトが参考になります
 - [Learn Kubernetes using Interactive Browser-Based Labs | Katacoda](https://www.katacoda.com/courses/kubernetes)
 
 ArgoCDについては公式の [Getting Started](https://argoproj.github.io/argo-cd/getting_started/) か次のサイトが参考になります。
-
-[ArgoCDに入門する - TECHSTEP](https://techstep.hatenablog.com/entry/2020/09/22/113404)
+- [ArgoCDに入門する - TECHSTEP](https://techstep.hatenablog.com/entry/2020/09/22/113404)
