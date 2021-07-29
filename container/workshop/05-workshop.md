@@ -64,7 +64,8 @@ aws eks --profile training --region us-east-1 update-kubeconfig --name training
 ## 参考
 
 Kubernetes を一から触るには、以下のサイトが参考になります。  
-https://cybozu.github.io/introduction-to-kubernetes/introduction-to-kubernetes.html
+- [Introduction to Kubernetes](https://cybozu.github.io/introduction-to-kubernetes/introduction-to-kubernetes.html)
+- [Learn Kubernetes using Interactive Browser-Based Labs | Katacoda](https://www.katacoda.com/courses/kubernetes)
 
 ArgoCDについては公式の [Getting Started](https://argoproj.github.io/argo-cd/getting_started/) か次のサイトが参考になります。
 
