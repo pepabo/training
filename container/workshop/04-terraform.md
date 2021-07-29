@@ -97,9 +97,9 @@ commands will detect it and remind you to do so if necessary.
 resource "aws_instance" "test" {
   ami           = "ami-0ac80df6eff0e70b5"
   instance_type = "t2.micro"
-  subnet_id     = "subnet-0f82350780ed8c71b"
+  subnet_id     = "subnet-09ab64d2a04b6d5be"
 
-  vpc_security_group_ids = ["sg-03cffe5ebe505e62f"]
+  vpc_security_group_ids = ["sg-0caac3cc6c56185a3"]
 
   tags = {
     Name = "training-[自分の名前]"
