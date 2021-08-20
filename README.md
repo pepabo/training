@@ -60,7 +60,7 @@ Webセキュリティ研修で利用した資料です。以下の内容が含�
 
 ### mobile-training
 
-モバイルアプリ(Flutter)研修の資料です。
+モバイルアプリ(Flutter)研修の資料です。フロントエンド・SPA研修の続きとして作成されています。
 
 ### start-frontend-training
 
