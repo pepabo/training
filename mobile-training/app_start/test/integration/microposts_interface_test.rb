@@ -1,6 +1,7 @@
 require 'test_helper'
 
 class MicropostsInterfaceTest < ActionDispatch::IntegrationTest
+
   def setup
     @user = users(:michael)
   end
@@ -14,6 +15,7 @@ class MicropostsInterfaceTest < ActionDispatch::IntegrationTest
       post microposts_path, params: { micropost: { content: "" } }
     end
     assert_select 'div#error_explanation'
+    assert_select 'a[href=?]', '/?page=2'  # 正しいページネーションリンク
     # 有効な送信
     content = "This micropost really ties the room together"
     assert_difference 'Micropost.count', 1 do

@@ -4,19 +4,24 @@ class MicropostsController < ApplicationController
 
   def create
     @micropost = current_user.microposts.build(micropost_params)
+    @micropost.image.attach(params[:micropost][:image])
+
     respond_to do |format|
-      if @micropost.save
-        format.html do
+      format.html do
+        if @micropost.save
           flash[:success] = "Micropost created!"
           redirect_to root_url
-        end
-        format.json { render :show, status: :created }
-      else
-        format.html do
+        else
           @feed_items = current_user.feed.paginate(page: params[:page])
           render 'static_pages/home'
         end
-        format.json { render json: @micropost.errors, status: :unprocessable_entity }
+      end
+      format.json do
+        if @micropost.save
+          render template: 'feeds/_feed', locals: { feed: @micropost }, status: 201
+        else
+          render json: { message: @micropost.errors.full_messages }, status: 400
+        end
       end
     end
   end
@@ -35,7 +40,7 @@ class MicropostsController < ApplicationController
   private
 
     def micropost_params
-      params.require(:micropost).permit(:content, :picture)
+      params.require(:micropost).permit(:content, :image)
     end
 
     def correct_user

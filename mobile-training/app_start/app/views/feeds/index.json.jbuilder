@@ -1,1 +1,1 @@
-json.array! @feeds, partial: "microposts/micropost", as: :micropost
+json.array! @feeds, partial: 'feeds/feed', as: :feed
