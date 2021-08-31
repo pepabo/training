@@ -19,6 +19,7 @@ gem 'turbolinks', '5.2.0'
 gem 'jbuilder',   '2.11.2'
 gem 'bootsnap',   '1.7.5', require: false
 gem 'rexml', '~> 3.2', '>= 3.2.5'
+gem 'doorkeeper'
 
 group :development, :test do
   gem 'sqlite3', '1.4.2'

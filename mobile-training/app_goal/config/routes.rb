@@ -1,4 +1,5 @@
 Rails.application.routes.draw do
+  use_doorkeeper
   root 'static_pages#home'
   get  '/help',    to: 'static_pages#help'
   get  '/about',   to: 'static_pages#about'
@@ -20,6 +21,16 @@ Rails.application.routes.draw do
   resources :microposts,          only: [:create, :destroy]
   resources :relationships,       only: [:create, :destroy]
   resources :feeds, only: [:index]
+
+  namespace :api do
+    namespace :v1 do
+      resources :users, only: [:index, :show] do
+        get 'self', on: :collection
+      end
+      resources :microposts, only: [:create, :destroy]
+      resources :feeds, only: [:index]
+    end
+  end
 
   # /rails 以下は特別な意味を持つので :any としてはルーティングさせない
   scope ':any', as: :any, constraints: { any: /(?!rails\/).*/ } do
