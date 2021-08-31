@@ -4,7 +4,7 @@
 * [教材](./app_start/)
 * [完成品](./app_goal/)
 
-## Rail Tutorialのライセンス
+## Rails Tutorialのライセンス
 
 Ruby on Rails Tutorial: Learn Web Development with Rails. Copyright © 2014 by Michael Hartl.
 
