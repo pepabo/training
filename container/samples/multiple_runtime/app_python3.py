@@ -13,7 +13,7 @@ class CallbackHandler(BaseHTTPRequestHandler):
         return
 
 
-host = 'localhost'
+host = '0.0.0.0'
 port = 8800
 server = HTTPServer((host, port), CallbackHandler)
 server.serve_forever()

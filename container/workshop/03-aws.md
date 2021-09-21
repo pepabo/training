@@ -22,32 +22,84 @@ AWS では、いろいろな土地にサーバが置いてあり、それぞれ�
 東京リージョンという、日本のどこかにかにあるリージョンもあります。  
 今回は、バージニア州にある「us-east-1」のみが利用できます。
 
-#### 踏み台サーバは消さない、いじらない
-
-ssh ログインするための踏み台サーバを用意してあります。  
-みんなで利用するものなので、消さないでおきましょう。  
-
-### 外部アクセスは確認してから
+#### 外部アクセスは確認してから
 
 外部からアクセスする設定を行うことができます。  
 しかし、危険な設定もあるので、一度メンターにレビューをもらってから設定をしてください。  
 外部へアクセスしない設定なら、何をやっても大丈夫です。  
 
-### 研修が終わったら消す
+#### 研修が終わったら消す
 
 研修が終わったら、退勤前に作成したリソースは自分で削除しましょう。  
 残っていたものはメンターが削除します。  
 
-## 演習 3.1 は社内環境とのつなぎ込みであるため削除いたしました
+## 演習 3.0
+
+AWS CLIを利用するために必要な設定を行います。
+
+次のように設定ファイルを作成します。認証情報はメンターから安全な方法でお伝えします。
+
+- `~/.aws/credentials`
+
+    ```
+    [training]
+    aws_access_key_id=<ACCESS_KEY_ID>
+    aws_secret_access_key=<SECRET_ACCESS_KEY>
+    ```
+
+- `~/.aws/config`
+
+    ```
+    [profile training]
+    region=us-east-1
+    ```
+
+設定が行えたら次のコマンドがエラーなく実行できることを確認します。
+
+```console
+$ aws ec2 describe-instances --profile training
+```
+
+---
+
+`AWS_PROFILE`環境変数を指定することで、いちいち`--profile training`を指定する必要がなくなります。
+
+```
+export AWS_PROFILE=training
+```
+
+## 演習 3.1
+
+AWSのマネジメントコンソールにログインして、 [Amazon EC2 の開始方法](https://aws.amazon.com/jp/ec2/getting-started/) を参考にEC2インスタンスを起動してみましょう。
+
+インスタンスの設定では次を設定してください。
+
+- OS: Amazon Linux 2 AMI (HVM), SSD Volume Type (64 ビット x86)
+- インスタンスタイプ: t2.micro
+- ネットワーク: training
+- サブネット: training-private-us-east-1a
+- IAM role: SSMProfileForTraining
+- Security Group: training
+- tag: `Name`tagに自分のたてたインスタンスであることがわかるように任意の名前を設定します
+- キーペア: 「キーペア無しで続行」
+
+作成できたら、 [Session Manager](https://docs.aws.amazon.com/ja_jp/AWSEC2/latest/UserGuide/session-manager.html) でインスタンスに接続してみます。
+
+```console
+$ aws --region us-east-1 ssm start-session --target <インスタンスID>
+```
+
+session managerの利用にはプラグインが必要です。次の記事を参考にインストールしてください。
+
+[(オプション) AWS CLI 用の Session Manager プラグインをインストールする - AWS Systems Manager](https://docs.aws.amazon.com/ja_jp/systems-manager/latest/userguide/session-manager-working-with-install-plugin.html)
 
 ## 演習3.2 作成したインスタンスを壊してみる
 
 作成できたインスタンスを、中身を書き換えて起動できないように壊してみましょう。  
 どうやれば起動できないまでに破壊できるか調べてみましょう。  
-ssh ログインしている状態で破壊したらどうなるのか見てみましょう。  
-Running の状態なのに、ssh できない、または ssh できるけど何もできない状態にしてください。  
+ログインしている状態で破壊したらどうなるのか見てみましょう。  
+Running の状態なのに、ログインできない、またはログインできるけど何もできない状態にしてください。  
 無事破壊できたらお知らせください。  
-踏み台を壊さないように気をつけて！  
 
 ## 演習3.3 複数のシステムを繋いでみる
 
@@ -59,18 +111,23 @@ Running の状態なのに、ssh できない、または ssh できるけど何
 nginx をインストールして curl してみるなどで大丈夫です。  
 通信できたら完了です。  
 
-
 ### 演習3.3.2 RDS を利用してアプリケーションを動かしてみる
 
 DB を簡単に構築できる RDS というサービスがあります。  
 こちらを利用して、DB を利用するサービスを動かしてみましょう。  
 Rails アプリでも、Wordpress でもなんでも大丈夫です。  
-`ssh ubuntu@xx.xx.xx.xx -L [Macのポート]:[インスタンスのIP]:[アプリ側ポート]` でフォワーディングして、`http://localhost:[Macのポート]` でアクセスできたら完了です。
+次のようにポートフォワーディングをして、`http://localhost:ローカル側ポート` でアクセスできたら完了です。
+
+```console
+$ aws --region us-east-1 ssm start-session --target <インスタンスID> \
+--document-name AWS-StartPortForwardingSession \
+--parameters "portNumber=アプリ側ポート,localPortNumber=ローカル側ポート"
+```
 
 ### 演習3.3.3 アプリケーションを外部疎通させる
 
 3.3.2 のアプリケーションを外部疎通させましょう。  
-training-public サブネットに、ロードバランサとなるコンポーネントを起動させ、アプリケーションにアクセスしてください。  
+training-public-us-east-1a サブネットに、ロードバランサとなるコンポーネントを起動させ、アプリケーションにアクセスしてください。  
 こちらはパブリックの IP を付けることが必要となります。声をかけてください。  
 接続できたら OK です。  
 
@@ -78,7 +135,6 @@ training-public サブネットに、ロードバランサとなるコンポー�
 
 AWS は API を持っているので、いろいろなアプリケーションから実行することができます。  
 AWS がターミナルから利用するクライアントを提供しているため、それを使ってみましょう。  
-演習3.4 に取り掛かる際に、必要になるトークンをお渡ししますので、声をかけてください。  
 インスタンスが起動できたら完了です。  
 
 ## 演習3.5 プログラムから RDS を起動して DB に繋いでみる

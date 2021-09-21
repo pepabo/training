@@ -12,14 +12,24 @@ Terraform を使う準備をしましょう。
 terraform のバージョン管理である tfenv を利用してインストールします。  
 ```
 brew install tfenv
-tfenv install 0.12.25
-tfenv use 0.12.25
+tfenv install 1.0.1
+tfenv use 1.0.1
 ```
 
-### クレデンシャルの設定
+### AWSクレデンシャルの設定
+
+ホームディレクトリの `.aws/credentials` に、講師から教えられた認証情報を記入しましょう。  
+ファイルやフォルダがなければ作成しましょう。 
+
+```
+[training]
+aws_access_key_id = ******
+aws_secret_access_key = ******
+```
+
+### Terraform作業ディレクトリの初期化
 
 terraform 用のリポジトリを作成して、そちらで作業をしましょう。  
-
 
 以下の、backend.tf を作成します。  
 
@@ -27,17 +37,11 @@ terraform 用のリポジトリを作成して、そちらで作業をしまし�
 terraform {
   backend "local" {}
 }
-
 ```
 
-ホームディレクトリの `.aws/credentials` に、以下の gist の内容を追記しましょう。  
-ファイルやフォルダがなければ作成しましょう。 
-
-```
-ナイショ
-```
 
 `provider.tf` を作成しましょう。
+`profile`には[AWSクレデンシャルの設定](#AWSクレデンシャルの設定)で指定したprofile名を指定します。
 
 ```
 provider "aws" {
@@ -47,8 +51,9 @@ provider "aws" {
 }
 ```
 
-`terraform init` を実行して、以下の表示が出れば OK です。
-```
+`terraform init` を実行して、以下のように`Terraform has been successfully initialized!`が表示されれば OK です。
+
+```console
 % terraform init
 
 Initializing the backend...
@@ -83,7 +88,7 @@ commands will detect it and remind you to do so if necessary.
 
 ## 4.1 インスタンスを操作してみる
 
-## 4.1.1 インスタンスを起動してみる
+### 4.1.1 インスタンスを起動してみる
 
 コンソールポチーで起動していたインスタンスをコードから起動してみましょう。  
 以下のコードを、`instance.tf` という名前で保存します。
@@ -92,8 +97,10 @@ commands will detect it and remind you to do so if necessary.
 resource "aws_instance" "test" {
   ami           = "ami-0ac80df6eff0e70b5"
   instance_type = "t2.micro"
-  subnet_id = "subnet-0f82350780ed8c71b"
-  vpc_security_group_ids = ["sg-03cffe5ebe505e62f"]
+  subnet_id     = "subnet-09ab64d2a04b6d5be"
+
+  vpc_security_group_ids = ["sg-0caac3cc6c56185a3"]
+
   tags = {
     Name = "training-[自分の名前]"
   }
@@ -105,7 +112,7 @@ resource "aws_instance" "test" {
 すると、インスタンスが作成されます！
 
 
-## 4.1.2 インスタンスを削除する
+### 4.1.2 インスタンスを削除する
 
 インスタンスを削除する際は、`terraform destroy` を実行すると削除されます。  
 あるいは、instance.tf の中の記述をコメントアウトして、`apply` すると削除されます。  
@@ -135,6 +142,7 @@ resource "aws_volume_attachment" "test" {
 }
 
 ```
+
 上記の要領で、インスタンスにストレージを追加してみましょう。  
 
 ## 4.4 rds を import する
@@ -159,7 +167,7 @@ https://dev.classmethod.jp/articles/use-awspec-to-test-aws-resrouces/
 
 ## 4.7 自動 plan, 自動 apply をしてみる
 
-ペパボの GHE では、drone というツールを利用して CI/CD を構築することができます。  
+ペパボの GHE では、GitHub Actions を利用して CI/CD を構築することができます。  
 PR を出したら `plan` を実行し、マージされたら `apply` が実行されるパイプラインを構築してみましょう。  
 こちらを実行する際には、tfstate を local から s3 などの remote のものに切り替える必要があります。  
 取り組む際に声をかけてください。  
