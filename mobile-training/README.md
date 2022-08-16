@@ -1,6 +1,6 @@
 # モバイルアプリ(Flutter) 研修
 
-* [テキスト](https://pepabo.github.io/mobile-training/)
+* [テキスト](https://github.com/pepabo/training/tree/master/mobile-training/docs)
 * [教材](./app_start/)
 * [完成品](./app_goal/)
 
