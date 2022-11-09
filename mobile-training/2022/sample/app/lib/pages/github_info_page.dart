@@ -16,13 +16,11 @@ class GithubInfoPage extends ConsumerWidget {
         children: [
           Text(accessToken ?? "トークンが空"),
           TextButton(
-            onPressed: () async {
-              // final character = await RestRequests().fetchCharacter(1);
-              final test = await RestRequests(accessToken: accessToken).postGist();
-              print(111);
-            },
-            child: Text("aaaaa")
-          ),
+              onPressed: () async {
+                final request =
+                    await RestRequests(accessToken: accessToken).postGist();
+              },
+              child: Text("post gist")),
         ],
       ),
     );

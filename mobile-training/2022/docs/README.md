@@ -13,5 +13,7 @@
 
 ### [6章 状態管理](./chapter6/README.md)
 
+### [おまけ](./chapter_rest/README.md)
+
 ### [7章 自由にアプリを作ってみる](./chapter7/README.md)
 

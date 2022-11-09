@@ -1,3 +1,11 @@
+# おまけ
+
+## アプリからREST APIにリクエストする
+
+REST APIの方が色々なAPIを叩けると思うので、REST APIでのリクエスト方法を雑に残しておきます。
+
+```dart
+//rest_requests.dart
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 
@@ -33,3 +41,5 @@ class RestRequests {
         await _client.post(uri, headers: _headers, body: json.encode(params));
   }
 }
+
+```

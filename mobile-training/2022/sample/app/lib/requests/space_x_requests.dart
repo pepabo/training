@@ -32,9 +32,9 @@ class SpaceXRequests {
     final QueryResult response = await client.query(options);
 
     final result = response.data;
-    final ship = result?['ship'];
-    final shipmodel = Ship.fromJson(ship);
+    final shipResult = result?['ship'];
+    final ship = Ship.fromJson(shipResult);
 
-    return shipmodel;
+    return ship;
   }
 }
