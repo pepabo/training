@@ -1,6 +1,6 @@
 # モバイルアプリ(Flutter)研修ドキュメント
 主にソフトウェアエンジニアやデザイナーがFlutterを用いたモバイルアプリ開発に入門するためのドキュメントです。
-//
+
 ### [1章 Flutterと、宣言的UIプログラミング](./chapter1/README.md)
 
 ### [2章 Dart言語](./chapter2/README.md)
