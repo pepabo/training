@@ -1,6 +1,6 @@
 import 'package:app/pages/login_page.dart';
 import 'package:flutter/material.dart';
-import 'package:app/pages/character_info_page.dart';
+import 'package:app/pages/ship_info_page.dart';
 
 import 'github_info_page.dart';
 
@@ -15,19 +15,28 @@ class HomePage extends StatelessWidget {
         children: [
           TextButton(
             onPressed: () {
-              Navigator.push(context, MaterialPageRoute(builder: (context) => const CharacterInfoPage(),));
+              Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const ShipInfoPage(),
+                  ));
             },
-          child: const Text("キャラクター画面へ"),
+            child: const Text("キャラクター画面へ"),
           ),
           TextButton(
             onPressed: () {
-              Navigator.push(context, MaterialPageRoute(builder: (context) => const LoginPage()));
+              Navigator.push(context,
+                  MaterialPageRoute(builder: (context) => const LoginPage()));
             },
             child: const Text("Github ログイン画面"),
           ),
           TextButton(
             onPressed: () {
-              Navigator.push(context, MaterialPageRoute(builder: (context) => const GithubInfoPage(),));
+              Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const GithubInfoPage(),
+                  ));
             },
             child: const Text("Githubの情報表示画面へ"),
           ),
