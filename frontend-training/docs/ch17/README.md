@@ -43,7 +43,7 @@ npm uninstall @rails/webpacker
 さて、Rails Tutorial を終えた時点では `webpack` と `webpack-cli` が `dependencies` 内に宣言されていますが、webpack はモジュールバンドリングのためだけに必要なものでありアプリケーション実行時には必要ないので、本来 `devDependencies` にあるべきものです。そこで以下のコマンドを実行しましょう:
 
 ```bash
-npm install --save-dev --save-exact webpack@5.38.1 webpack-cli@4.7.2
+npm install --save-dev --save-exact webpack@5.91.0 webpack-cli@4.7.2
 ```
 
 `--save-dev` は `Gemfile` の `group :development, :test` のようなもので、開発時とテストの時のみ使うもの（`devDependencies` に追加したいもの）につけるオプションです。
