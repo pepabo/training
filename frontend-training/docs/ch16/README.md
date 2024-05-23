@@ -58,7 +58,7 @@ module.exports = () => {
 ```js
 // requiring.js
 
-const requiredFunction = require('./required')
+const requiredFunction = require('./required');
 
 requiredFunction();
 ```
