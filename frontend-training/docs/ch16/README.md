@@ -1,4 +1,4 @@
-# 第 16 章　JavaScript のモジュールシステム
+# 第 16 章　 JavaScript のモジュールシステム
 
 プロジェクトが大きくなるにつれて、JavaScript コードが複雑化して巨大化していきます。そしてコードを別々のファイルに分割したくなってきます。では、各ファイルの間で変数などデータのやりとりが必要になったときは、どのようにすればいいのでしょうか？
 
@@ -13,30 +13,32 @@
 他にも、 Node.js にはモジュールシステムとして CommonJS という仕組みが以前から存在しており、この仕組みを使うことで別ファイルや外部ライブラリのコードを使うことができます。 ES Modules と CommonJS は似た仕組みを提供しようとしていますが異なっている部分もあり、注意が必要です。本題となる ES Modules に入る前に、 CommonJS がどのようなものかを見ていきましょう。
 
 ## CommonJS
+
 CommonJS がどのようなものか動かしてみるコードを書く前に、まず Node.js を実行してみましょう。
 
 Node.js とは C10K 問題（大規模サービスに大量ユーザのアクセスが発生して詰まってしまう問題）を解決するために考案された、非同期 I/O が特色のなどという説明があったりもしますが、一旦ここでその辺の話は置いておいて、雑に JavaScript がコマンドラインから動くもの＋その周辺環境という認識で良いです（実際最近のフロントエンド開発ではそういった側面が強く出ている）。なので、みなさんが書いている js ファイルもブラウザ固有の機能となっている部分を除けば、例えば四則演算だけで構成された js ファイルなどは Node.js で実行できます。
 
 ### Node.js 環境のセットアップ
+
 （この節は macOS でのセットアップについてのみ書いています、他の OS でのセットアップについては Pull Request Welcome です）
 
 Homebrew で直接インストールもできますが、 Node.js は頻繁にリリースがあるので Node.js の各バージョンをインストールしたり切り替えたりできるツールがある方がよいと思います。以下のどちらかを使うと良いでしょう。
 
-* [nodenv/nodenv: Manage multiple NodeJS versions.](https://github.com/nodenv/nodenv) + [nodenv/node-build: Install NodeJS versions](https://github.com/nodenv/node-build) Homebrew にあります。
-* [nvm-sh/nvm: Node Version Manager - Simple bash script to manage multiple active node.js versions](https://github.com/nvm-sh/nvm) Homebrew にあります。
+- [nodenv/nodenv: Manage multiple NodeJS versions.](https://github.com/nodenv/nodenv) + [nodenv/node-build: Install NodeJS versions](https://github.com/nodenv/node-build) Homebrew にあります。
+- [nvm-sh/nvm: Node Version Manager - Simple bash script to manage multiple active node.js versions](https://github.com/nvm-sh/nvm) Homebrew にあります。
 
 （私見です： nodenv + node-build の方が rbenv + ruby-build と同じようなコマンドになっているので使いやすいと思います）
 
-2021年6月現在では Node.js 14 を指定すると良いでしょう。nodenv であれば `sample_app` ディレクトリ直下で `nodenv local 14.17.0` のようなコマンドを実行しましょう。
+2021 年 6 月現在では Node.js 14 を指定すると良いでしょう。nodenv であれば `sample_app` ディレクトリ直下で `nodenv local 14.17.0` のようなコマンドを実行しましょう。
 
 ```js
 // hello_nodejs.js
 
-const foo = 1;
-const bar = 2;
-const baz = foo + bar;
+const foo = 1
+const bar = 2
+const baz = foo + bar
 
-console.log(baz);
+console.log(baz)
 ```
 
 （ tips: Node.js は `let` `const` や arrow function をネイティブでサポートしているので、それらを優先的に使いましょう。）
@@ -51,16 +53,16 @@ $ node hello_nodejs.js
 // required.js
 
 module.exports = () => {
-  console.log('require OK!');
+  console.log('require OK!')
 }
 ```
 
 ```js
 // requiring.js
 
-const requiredFunction = require('./required');
+const requiredFunction = require('./required')
 
-requiredFunction();
+requiredFunction()
 ```
 
 注意すべき点は `required.js` と `requiring.js` を同じディレクトリに置いておくことです。 `node requiring.js` を実行すると require OK! が出力されますでしょうか。この `module.exports =` と `require()` が CommonJS の仕組みです。この仕組みを使うと、公開されているライブラリをインストールして使うことができます。 [Day.js](https://day.js.org) という日付時間を便利に扱えるライブラリが公開されているので、これをインストールして使ってみましょう。
@@ -72,9 +74,9 @@ $ yarn add dayjs
 ```js
 // hello_dayjs.js
 
-const dayjs = require('dayjs');
+const dayjs = require('dayjs')
 
-console.log(dayjs().format());
+console.log(dayjs().format())
 ```
 
 実行すると現在時刻が人間にも読めるように表示されると思います。
@@ -88,11 +90,12 @@ console.log(dayjs().format());
 const employees = [
   { name: 'Taro', gender: 'male' },
   { name: 'Hanako', gender: 'female' },
-  { name: 'Jiro', gender: 'male' }
-];
+  { name: 'Jiro', gender: 'male' },
+]
 ```
 
 ## ES Modules
+
 ES Modules も基本的な仕組みはファイルの `require` と同じ仕組みになっていて、 `module.exports =` で公開していたものが `export` という予約語になります。ただし、 CommonJS と違う点は default export というものが存在し、少し入り組んだ公開ができるようになっているということです。
 
 ```js
@@ -100,22 +103,22 @@ ES Modules も基本的な仕組みはファイルの `require` と同じ仕組�
 
 // default export
 export default function foo() {
-  console.log('foo');
+  console.log('foo')
 }
 
 // named export
 export function bar() {
-  console.log('bar');
+  console.log('bar')
 }
 ```
 
 ```js
 // importing.js
 
-import foo, { bar } from './exporting';
+import foo, { bar } from './exporting'
 
-foo();
-bar();
+foo()
+bar()
 ```
 
 このコードは IE を除けば一定のバージョン以上のブラウザからは実行できますが、それ以外のブラウザからは実行できません。つまり、ブラウザでこれを実行するためには何らかの実行可能な形に変換しなければなりません。これを実行可能な形に変換するには、ざっくりというと以下の工程が必要になります。
@@ -126,3 +129,6 @@ bar();
 4. `export` `import` コードを置き換え、それぞれ指定したものにアクセスできるようにする。
 
 これらを機械的に行ってブラウザで実行できる一つの巨大なファイルを生成する（トランスパイリング＋バンドリング）ことを行ってくれるのが、（名前は聞いたことあるかもしれません） [webpack](https://webpack.js.org/) です。そして webpack 自体は JavaScript 製のツールですが、これを Rails で扱えるようにしたのが `webpacker` gem です。これを使うと Rails でのフロントエンド開発に必要なものがワンアクションでインストールできますが、 webpack は上記の工程以外にも機能を持たせることができる、かつ設定が複雑、その上 `webpacker` gem でその複雑性が隠蔽されてしまうという問題があるので、ここでは `webpacker` gem を引き剥がして webpack を直接触るようにしつつ Rails と協調して開発していこうと思います。
+
+(2024/05/21 追記)
+現在時点での最新版である第７版の Rails チュートリアルでは、前述の`webpacker`を利用していません。第７版の教材を基に作成した Rails アプリケーションに対してこの研修を進めるためには`webpacker`gem を剥がす作業は不要になるので、17 章の内容に入る前に、「付録 4 Rails7 での準備」に進んでください。
