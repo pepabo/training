@@ -84,7 +84,7 @@ ECMAScript 2015 以降は毎年1回その時点での ECMAScript 仕様書のス
 
 （オフトピック：CoffeeScript と同じように便利だったため JavaScript DOM API に取り込まれたものとして jQuery の `$(selector)` などもあります。 Internet Explorer 8 以降であれば `$('.foo')` ではなく `document.querySelectorAll('.foo')` で同じような処理ができるので、無用な jQuery の導入を避けることができます）
 
-## Babel を試しに使ってみる
+## Babel を使ってみてECMAScriptのバージョンを意識する
 
 Rails Tutorial を終えた時点では皆さんの環境で `yarn` コマンドが利用できるようになっているはずです。 `yarn` コマンドを使って Babel をインストールしてみましょう:
 
@@ -98,7 +98,7 @@ $ yarn add -D @babel/core @babel/cli @babel/preset-env
 
 この方法でインストールした Babel はコマンドを実行したディレクトリに `node_modules` ディレクトリが掘られてそこに存在しています。もし Rails Tutorial をやっているディレクトリで実行した場合、このまま Git でコミットしてしまうと膨大な `node_modules` ディレクトリの中身がそのままコミットされてしまいます。それを避けるために、 `.gitignore` に（もしまだ無ければ） `node_modules` という行を追加してください。
 
-さて、これで Babel を実行する準備が整ったので、 ECMAScript 2015 のコードを書いてみましょう。
+Babel を実行する準備が整ったので、以下のスクリプトを `hello_es2015_class.js` として保存します。
 
 ```js
 // hello_es2015_class.js
@@ -119,15 +119,33 @@ class Foo {
 new Foo('qux').baz();
 ```
 
-`hello_es2015_class.js` を書いたら次のコマンドを実行してみましょう。
+次に、`babel.config.js` を以下のように編集します。すでにファイルが存在する場合はすべてコメントアウトしてから、以下を追記してみましょう。
 
-```bash
-# Rails 6 がデフォルトで生成した babel.config.js が存在したままだとそちらの設定を見に行ってしまうので一旦削除します
-$ rm babel.config.js
-$ yarn run babel --presets @babel/preset-env hello_es2015_class.js -o transpiled_es2015_class_to_es5.js
+```js
+module.exports = {
+  "presets": [
+    [
+      "@babel/preset-env",
+      {
+        "targets": {"ie":"11"}
+      }
+    ]
+  ]
+}
 ```
 
-コマンド後に生成されている `transpiled_es2015_class_to_es5.js` を見てみると、なにやらよくわからない JavaScript のコードが書かれています。これはブラウザで実行可能な形に変更されたあとのコードです。
+次に、以下のようなコマンドを実行します。
+
+```bash
+$ yarn run babel hello_es2015_class.js -o transpiled_es2015_class_to_es5.js
+```
+
+実行に生成される `transpiled_es2015_class_to_es5.js` を見ると、スクリプトが変換されて出力されている様子を確認できます。
+
+JavaScriptの言語仕様(=[ECMAScript](https://jsprimer.net/basic/ecmascript/))にはいくつかのバージョンがあります。都度バージョンアップが重ねられ、新しい言語仕様が増えていきますが、必ずしも実行環境(たとえばブラウザ)が対応できているわけではありません。
+今回の場合は、[@babel/preset-env](https://babeljs.io/docs/babel-preset-env) を用いて指定した動作環境に合わせてスクリプトが変換されています。
+Internet Explorer 11はES2015の構文を理解できないので、それより下のECMAScriptバージョンにあわせて変換されたのです。
+
 Webpacker を利用している場合 `config/webpacker.yml` の設定が `compile: true` となっていれば、 `app/javascript` ディレクトリ以下に書かれたコードは自動でこのような Babel によるトランスパイルが行われるという寸法です。
 
 こちらのコードも書いてみましょう。ECMAScript 2015 から導入された **アロー関数（arrow function）** と呼ばれるものを使っています:
@@ -143,10 +161,10 @@ const add = (a, b) => {
 `hello_es2015_arrow_function.js` を書いたら次のコマンドを実行してみましょう。
 
 ```bash
-$ yarn run babel --presets @babel/preset-env hello_es2015_arrow_function.js -o transpiled_es2015_arrow_function_to_es5.js
+$ yarn run babel hello_es2015_arrow_function.js -o transpiled_es2015_arrow_function_to_es5.js
 ```
 
-`transpiled_es2015_arrow_function_to_es5.js` を見てみると以下のようなコードが生成されているでしょうか:
+`transpiled_es2015_arrow_function_to_es5.js` を見てみると以下のようなスクリプトが生成されているでしょうか。
 
 ```js
 // transpiled_es2015_arrow_function_to_es5.js
@@ -158,9 +176,46 @@ var add = function add(a, b) {
 };
 ```
 
-もとのコードの arrow function `() => {}` が ECMAScript 5 でも解釈可能な `function` による構文に変換されていることがわかります。
+変換前のスクリプトの arrow function `() => {}` が ECMAScript 5 の `function` による構文に変換されていることがわかります。
 
-これでモダンな JavaScript がどのようなものか、それがどのようにブラウザで動作するかがわかったと思います。 [Babel Repl](https://babeljs.io/repl) とドキュメントを使って ECMAScript 20xx にはどのような言語仕様があるか、それがどのようにブラウザで実行可能なコードに変換されるかを見てみましょう。
+最近の主要ブラウザであれば、ES2015の仕様に準拠したスクリプトを理解できるので、トランスパイルをしなくても良い場合があります。`babel.config.js` を以下のように編集します。
+
+```diff
+  module.exports = {
+    "presets": [
+      [
+        "@babel/preset-env",
+        {
+-         "targets": {"ie":"11"}
+          "targets": "> 0.25%, not dead"
+        }
+      ]
+    ]
+  }
+```
+
+再度以下のコマンドを実行します。
+
+```bash
+$ yarn run babel hello_es2015_class.js -o transpiled_es2015_class_to_es5.js
+```
+
+生成された `transpiled_es2015_class_to_es5.js` と、変換元である `hello_es2015_class.js` の差分はそれほど多くないことが確認できると思います。
+
+```bash
+>>> % diff hello_es2015_class.js transpiled_es2015_class_to_es5.js
+1c1
+< class Foo {
+---
+> "use strict";
+2a3
+> class Foo {
+13d13
+<
+```
+
+JavaScriptの言語仕様にバージョンが存在することや、実行環境に合わせてトランスパイルが必要になることがあることが理解できたでしょうか。
+[Babel Repl](https://babeljs.io/repl) とドキュメントを使って ECMAScript 20xx にはどのような言語仕様があるか、それがどのようにブラウザで実行可能なコードに変換されるかを見てみましょう。
 
 これから JavaScript のコードを書くときは Babel に準拠して、 `var` ではなく `let` `const` を、 `function` ではなく arrow function を使うよう心がけましょう（私見ですが `const` を使うケースが 95% ぐらいで `let` が 5%, `var` を使うことはまず無くなります）。
 
