@@ -27,7 +27,8 @@ Homebrew で直接インストールもできますが、 Node.js は頻繁に�
 
 （私見です： nodenv + node-build の方が rbenv + ruby-build と同じようなコマンドになっているので使いやすいと思います）
 
-2021年6月現在では Node.js 14 を指定すると良いでしょう。nodenv であれば `sample_app` ディレクトリ直下で `nodenv local 14.17.0` のようなコマンドを実行しましょう。
+[Node.js Releases](https://nodejs.org/en/about/previous-releases) でLTS(長期サポート)のバージョンを確認できます。
+2024年6月現在では Node.js 20.x を指定すると良いでしょう。nodenv であれば `sample_app` ディレクトリ直下で `nodenv local 20.13.1` のようなコマンドを実行しましょう。
 
 ```js
 // hello_nodejs.js
