@@ -74,15 +74,15 @@ TypeScriptについての詳細はこの研修資料では取り扱いません�
 
 ## Babel を使ってみてECMAScriptのバージョンを意識する
 
-Rails Tutorial を終えた時点では皆さんの環境で `yarn` コマンドが利用できるようになっているはずです。 `yarn` コマンドを使って Babel をインストールしてみましょう:
+`npm` コマンドを使って Babel をインストールしてみましょう:
 
 ```
-$ yarn add -D @babel/core @babel/cli @babel/preset-env
+$ npm install -D @babel/core @babel/cli @babel/preset-env
 ```
+
+npmはJavaScriptの代表的なパッケージマネージャーですが、ほかにもpnpm, yarn といった同様のツールが存在し、それぞれに特徴(実行速度や依存関係のインストールの取扱、付加されている機能の違い)があります。
 
 色々ログが出ると思いますが、最終的には `added xxxx packages` のようなメッセージが出ると思います（出なかったらなぜ出なかったかちょっと考えてみて、わからなさそうだったら呼んでください）。
-
-（オフトピック：ドキュメント類でたまに `yarn` というコマンドを使っている時がありますが、 Yarn が生まれた経緯としては NPM のインストールがかつて遅かったり lockfile が無かったりという話があり、 NPM の機能が Yarn とあまり変わらなくなった今 Yarn を採用しなければならない理由はあまりありません。Webpacker が Yarn に依存しているため、この章ではとりあえず Yarn を使っていますが、ほかのプロジェクトでは適宜 `npm` コマンドに置き換えて読んでください）
 
 この方法でインストールした Babel はコマンドを実行したディレクトリに `node_modules` ディレクトリが掘られてそこに存在しています。もし Rails Tutorial をやっているディレクトリで実行した場合、このまま Git でコミットしてしまうと膨大な `node_modules` ディレクトリの中身がそのままコミットされてしまいます。それを避けるために、 `.gitignore` に（もしまだ無ければ） `node_modules` という行を追加してください。
 
@@ -125,7 +125,7 @@ module.exports = {
 次に、以下のようなコマンドを実行します。
 
 ```bash
-$ yarn run babel hello_es2015_class.js -o transpiled_es2015_class_to_es5.js
+$ npx babel hello_es2015_class.js -o transpiled_es2015_class_to_es5.js
 ```
 
 実行に生成される `transpiled_es2015_class_to_es5.js` を見ると、スクリプトが変換されて出力されている様子を確認できます。
@@ -149,7 +149,7 @@ const add = (a, b) => {
 `hello_es2015_arrow_function.js` を書いたら次のコマンドを実行してみましょう。
 
 ```bash
-$ yarn run babel hello_es2015_arrow_function.js -o transpiled_es2015_arrow_function_to_es5.js
+$ npx babel hello_es2015_arrow_function.js -o transpiled_es2015_arrow_function_to_es5.js
 ```
 
 `transpiled_es2015_arrow_function_to_es5.js` を見てみると以下のようなスクリプトが生成されているでしょうか。
@@ -185,7 +185,7 @@ var add = function add(a, b) {
 再度以下のコマンドを実行します。
 
 ```bash
-$ yarn run babel hello_es2015_class.js -o transpiled_es2015_class_to_es5.js
+$ npx babel hello_es2015_class.js -o transpiled_es2015_class_to_es5.js
 ```
 
 生成された `transpiled_es2015_class_to_es5.js` と、変換元である `hello_es2015_class.js` の差分はそれほど多くないことが確認できると思います。
@@ -216,7 +216,7 @@ JavaScriptの言語仕様にバージョンが存在することや、実行環�
 1. `function` と arrow function それぞれにおける `this` の意味がどのように異なるかを調べて説明してください。
 1. Babel を使って `increment()` メソッドで数字を増やすことができ、 `decrement()` で数字を減らすことができる、 `Counter` クラスを作り、その変換した結果をブラウザ上で確認できるようにしてみてください。
 
-（注意：このチャプターで作成したファイルは次以降のチャプターでは使いませんので、間違えてコミットしないよう元に戻しておいてください。 `yarn add` したパッケージも `yarn remove` したり、削除した `babel.config.js` も `git restore` で元に戻しておいてください。）
+（注意：このチャプターで作成したファイルは次以降のチャプターでは使いませんので、間違えてコミットしないよう元に戻しておいてください。 `npm install` したパッケージも `npm remove` したり、削除した `babel.config.js` も `git restore` で元に戻しておいてください。）
 
 ## 次回予告
 
