@@ -57,7 +57,20 @@ bar();
 その状況を打破するために、より安全なコードを書けるような言語仕様を策定し、徐々にブラウザ側もその言語仕様を処理できるようにしていくという試みが取られるようになりました。これが ECMAScript 2015 (ECMAScript 6) ならびにその後継である ECMAScript 20xx です。
 ECMAScript 2015 以降は毎年1回その時点での ECMAScript 仕様書のスナップショットが ECMAScript 20xx としてリリースされています。
 
-とはいえ、現状でブラウザがサポートしていない言語仕様をどうやって使うのか。そこにも altJS の力を使います。 ECMAScript 20xx で書いたコードを ECMAScript 5 で解釈できるコードへと変換するツール（これを一般的に**トランスパイラ**と呼びます）を使い、ブラウザで実行可能なコードへと変換するようにしたのです。将来的にブラウザが直接サポートするようになれば、そのツール自体は捨ててしまえます。現在この ECMAScript 20xx to ECMAScript 5 トランスパイラとして主流なのが [Babel](https://babeljs.io/) という Node.js 製のツールで、モダンフロントエンド開発は基本的にこのツールの上に構築されています。私たちも ECMAScript 20xx （執筆時は 2021 年 6 月なので ECMAScript 2021）に準拠して、安全なコードを書いていきましょう。
+とはいえ、ブラウザが常に最新のECMAScriptをサポートしているとは限りません。
+ECMAScript 20xx で書いたコードを他のECMAScript Versionで解釈できるコードへと変換するツール（これを一般的に**トランスパイラ**と呼びます）を使い、ブラウザで実行可能なコードへと変換するようにしたのです。
+将来的にブラウザが直接サポートするようになれば、そのツール自体は捨ててしまえます。
+
+現在このトランスパイラとして主流なのが [Babel](https://babeljs.io/) という Node.js 製のツールで、モダンフロントエンド開発は基本的にこのツールの上に構築されています。
+私たちも ECMAScript 20xx （執筆時は 2021 年 6 月なので ECMAScript 2021）に準拠して、安全なコードを書いていきましょう。
+
+また、[TypeScript](https://www.typescriptlang.org/)を用いて静的型付けによる効率的な開発を行うこともできるようになります。
+TypeScriptはAltJS(=Alternative JavaScript, JavaScriptの代替言語)の代表的なものですが、トランスパイルを経て最終的にはJavaScriptに変換して利用します(ブラウザなどの多くの実行環境では、いまのところTypeScriptを直接サポートしない場合が多いです)。
+
+TypeScriptについての詳細はこの研修資料では取り扱いませんが、フロントエンド開発をはじめとして広く採用されている言語です。
+本研修を一通り終了し、JavaScriptを学習したら、[TypeScript for JavaScript Programmers](https://www.typescriptlang.org/docs/handbook/typescript-in-5-minutes.html)を読んでみるとよいです。
+ブラウザでTypeScriptのコードを試すことができる [TypeScript Playground](https://www.typescriptlang.org/play/)で遊んでみてもよいでしょう。
+(これらの資料はいずれもTypeScript公式が提供しているものです)
 
 ## Babel を使ってみてECMAScriptのバージョンを意識する
 
