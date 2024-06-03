@@ -118,6 +118,12 @@ import foo, { bar } from './exporting';
 foo();
 bar();
 ```
+なお、このコードを`node importing.js`で実行すると、
+```
+(node:21140) Warning: To load an ES module, set "type": "module" in the package.json or use the .mjs extension.
+(Use `node --trace-warnings ...` to show where the warning was created)
+```
+のようにエラーが発生する。これは、node.jsがデフォルトではjsファイルをCommonJSとして認識するからです。CommonJSには`import 〇〇`という構文が存在しないため、エラーとなっています。これを回避するためには、CommonJSがES Moduleを認識できるように、設定ファイルをいじるか、ファイル名を`.mjs` にして、ES Moduleのファイルであることを明示的に示してやる必要がある(`exporting.mjs`, `importing.mjs`にする。)。その後、`node importing.mjs`を実行すれば、エラーが起こることなくコードが実行できます。
 
 このコードは IE を除けば一定のバージョン以上のブラウザからは実行できますが、それ以外のブラウザからは実行できません。つまり、ブラウザでこれを実行するためには何らかの実行可能な形に変換しなければなりません。これを実行可能な形に変換するには、ざっくりというと以下の工程が必要になります。
 
