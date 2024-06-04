@@ -252,7 +252,9 @@ module ApplicationHelper
 end
 ```
 
-これで `app/views/layouts/application.html.erb` にある `<%= javascript_pack_tag %>` を消して代わりに `<%= javascript_bundle_tag 'application' %>` と書くとバンドル済 js が `<script>` タグで読み込まれるようになります。Rails サーバを起動して `http://localhost:3000` を開き、js ファイルが読み込まれていることを確認してください。
+これで `app/views/layouts/application.html.erb` にある `<%= javascript_importmap_tags %>`の下に `<%= javascript_bundle_tag 'application' %>` と書くとバンドル済 js が `<script>` タグで読み込まれるようになります。Rails サーバを起動して `http://localhost:3000` を開き、js ファイルが読み込まれていることを確認してください。
+
+...読み込まれないですね。
 
 ## 次回予告
 
