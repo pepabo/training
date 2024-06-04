@@ -294,6 +294,13 @@ module ApplicationHelper
 end
 ```
 
+また、バンドル済みjsファイルが大量に生成されるので、.gitignoreを修正して、煩雑になってしまうコミットログをキレイにしましょう。今後の変更でもよしなに入れて結構です。(変更を忘れたらやばいファイルは入れないでください。)
+```diff
+# .gitignore
++/public/*.js
++/public/manifest.json
+```
+
 
 ## 次回予告
 
