@@ -133,7 +133,7 @@ class FeedsController < ApplicationController
 end
 ```
 
-まずはルーティングを追加してコントローラを用意します。ここまでは HTML を出力するコントローラと同じですね。しかし JSON を出力するには `.json.jbuilder` 形式のファイルが ERB の代わりに必要になります。ひとまずは `app/views/feeds/index.json.jbuilder` と `app/view/feeds/_feeds.json.jbuilder` を用意します。
+まずはルーティングを追加してコントローラを用意します。ここまでは HTML を出力するコントローラと同じですね。しかし JSON を出力するには `.json.jbuilder` 形式のファイルが ERB の代わりに必要になります。ひとまずは `app/views/feeds/index.json.jbuilder` と `app/views/feeds/_feed.json.jbuilder` を用意します。
 
 ```ruby
 # app/views/feeds/index.json.jbuilder
