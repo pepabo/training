@@ -153,7 +153,7 @@ json.extract! feed, :id, :content
 
 ## React から JSON にアクセスする
 
-データを提供するところまではできたので、実際に React コンポーネントからデータを取得しましょう。まずは `axios`（XMLHttpRequest をラップして Promise を返却する HTTP クライアントとして人気のあるライブラリです）をインストールしましょう:
+データを提供するところまではできたので、実際に React コンポーネントからデータを取得しましょう。まずは `axios`（XMLHttpRequest をラップして Promise を返却する HTTP クライアントとして人気のあるライブラリです）をインストールしましょう！(前章の練習問題2でインストールしている人は不要です！)
 
 ```bash
 npm i -E axios@0.21.1
