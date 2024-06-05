@@ -241,7 +241,7 @@ json.user do
 end
 ```
 
-次に Gravatar の画像を出力できるようにします。現在 UsersHelper に定義している `gravatar_for` メソッドでは、 `<img>` タグが全部出力されてしまいます。これを分割して、 Rails 側では Gravatar 用の URL を出力するようにし、 React 側で Gravatar の画像を表示するコンポーネントを作成します。
+次に Gravatar の画像を出力できるようにします。現在 UsersHelper に定義している `gravatar_for` メソッドでは、 `<img>` タグが全部出力されてしまいます。これを分割して、 Rails 側では Gravatar 用の URL を出力するようにし、 React 側で Gravatar の画像を表示するコンポーネントを作成します。(以下のコードはprivate以下に書かないように注意)
 
 ```ruby
 # app/models/user.rb
