@@ -273,6 +273,7 @@ end
 
 # 略
 json.user do
+  # 略
   json.gravatar_url feed.user.gravatar_url(**{ size: 50 })
 end
 ```
