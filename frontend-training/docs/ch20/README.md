@@ -63,7 +63,7 @@ export default Home;
 
 （ Tips: これまで Ruby/Rails で開発してきたので、 `Home.tsx` とファイル名に大文字が入ることに違和感を感じるかもしれませんが、React や Vue でコンポーネントを作った時のファイル名はキャメルケースを使うことが多いです。）
 
-この `Home` コンポーネントを `app/javascript/components/static-pages/index.tsx` から提供する形にしましょう:
+この `Home` コンポーネントを `app/javascript/components/static-pages/index.ts` から提供する形にしましょう:
 
 ```ts
 import Home from "./Home";
@@ -271,7 +271,7 @@ end
 ```ruby
 # app/views/feeds/_feed.json.jbuilder
 
-# 略
+#
 json.user do
   # 略
   json.gravatar_url feed.user.gravatar_url(**{ size: 50 })
