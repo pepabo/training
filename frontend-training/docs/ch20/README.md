@@ -153,7 +153,7 @@ json.extract! feed, :id, :content
 
 ## React から JSON にアクセスする
 
-データを提供するところまではできたので、実際に React コンポーネントからデータを取得しましょう。まずは `axios`（XMLHttpRequest をラップして Promise を返却する HTTP クライアントとして人気のあるライブラリです）をインストールしましょう:
+データを提供するところまではできたので、実際に React コンポーネントからデータを取得しましょう。まずは `axios`（XMLHttpRequest をラップして Promise を返却する HTTP クライアントとして人気のあるライブラリです）をインストールしましょう！(前章の練習問題2でインストールしている人は不要です！)
 
 ```bash
 npm i -E axios@0.21.1
@@ -241,7 +241,7 @@ json.user do
 end
 ```
 
-次に Gravatar の画像を出力できるようにします。現在 UsersHelper に定義している `gravatar_for` メソッドでは、 `<img>` タグが全部出力されてしまいます。これを分割して、 Rails 側では Gravatar 用の URL を出力するようにし、 React 側で Gravatar の画像を表示するコンポーネントを作成します。
+次に Gravatar の画像を出力できるようにします。現在 UsersHelper に定義している `gravatar_for` メソッドでは、 `<img>` タグが全部出力されてしまいます。これを分割して、 Rails 側では Gravatar 用の URL を出力するようにし、 React 側で Gravatar の画像を表示するコンポーネントを作成します。(以下のコードはprivate以下に書かないように注意)
 
 ```ruby
 # app/models/user.rb
@@ -271,8 +271,9 @@ end
 ```ruby
 # app/views/feeds/_feed.json.jbuilder
 
-# 略
+#
 json.user do
+  # 略
   json.gravatar_url feed.user.gravatar_url(**{ size: 50 })
 end
 ```
