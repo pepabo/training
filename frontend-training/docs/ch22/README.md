@@ -184,7 +184,7 @@ export default UserProfle;
 
 `GravatarImage` の ``<a href={`/users/${props.user.id}`}>`` タグを ``<Link to={`/user_profiles/${props.user.id}`}>`` に変えて、 Gravatar の画像をクリックしたら画面遷移ができること、かつパスの `:id` 部分の値に応じた表示になっていることを確かめてみてください。
 
-## 練習問題 2
+## 練習問題
 
 できる範囲で構わないので、 Rails が `/users/:id` で表示していたのと同等の画面を `UserProfile.tsx` で作ってください。
 
