@@ -150,15 +150,9 @@ export default App;
  const App = () => {
    return (
 @@ -9,6 +10,9 @@ const App = () => {
-         <Route exact path="/">
-           <Home></Home>
-         </Route>
-+        <Route path="/user_profiles/:id">
-+          <UserProfle></UserProfle>
-+        </Route>
-         <Route path="*">
-           <PageNotFound></PageNotFound>
-         </Route>
+         <Route path="/" element={<Home />} />
++        <Route path="/user_profiles/:id" element={<UserProfile />} />
+         <Route path="*" element={<PageNotFound />} />
 ```
 
 パラメータの具体的な値は [useParams](https://reactrouter.com/web/api/Hooks/useparams) フックを使って取得できます:
@@ -168,7 +162,7 @@ export default App;
 
 import { useParams } from "react-router-dom";
 
-interface Params {
+type Params {
   id: string;
 }
 
