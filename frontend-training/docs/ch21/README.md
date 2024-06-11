@@ -234,7 +234,7 @@ end
   - 画像投稿が結構むずいかも。React 公式ドキュメントの [ファイル input タグ](https://ja.reactjs.org/docs/uncontrolled-components.html#the-file-input-tag) や [useRef](https://ja.reactjs.org/docs/hooks-reference.html#useref) 、[FormData](https://developer.mozilla.org/ja/docs/Web/API/FormData) などを参考にしてください。
 
   - 現状 `app/javascript/packs/application.js` に「ファイルサイズが 5MB 以上の場合はアラートを出す」ための jQuery のコードが置きっぱなしになっていると思いますが、そのコードを消して、新規 Micropost 投稿フォームのコンポーネント内で（jQuery を使わない形で）書き直してください。
-  - ページネーション機能を実装してみましょう。Rails Tutorialではwill_paginateで実装していました。こちらのフロントエンド部分をReactのコンポーネントとして作ってみましょう。
+  - ページネーション機能を実装してみましょう。Rails Tutorialでは[will_paginate](https://github.com/mislav/will_paginate) Gemを利用して実装していました。こちらのフロントエンド部分をReactのコンポーネントとして作ってみましょう。
 
   - すべてできたら `home.html.erb` の `<% if logged_in? %>` の分岐内部から `<div id="app"></div>` 以外のDOM要素を削除して、完全に React の描画だけで画面を作るようにしてください。
 
