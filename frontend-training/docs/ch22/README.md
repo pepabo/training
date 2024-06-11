@@ -101,6 +101,7 @@ end
 
 ```tsx
 // app/javascript/components/PageNotFound.tsx
+import React from "react";
 
 const PageNotFound = () => {
   return <>Page Not Found.</>;
@@ -112,21 +113,20 @@ export default PageNotFound;
 ```tsx
 // app/javascript/components/index.tsx
 
-import { BrowserRouter, Link, Switch, Route } from "react-router-dom";
-import PageNotFound from "./PageNotFound";
+import { BrowserRouter, Link, Routes, Route } from "react-router-dom";
+import HelloRouter from "./HelloRouter";
 import { Home } from "./static-pages";
+import React from "react";
+import PageNotFound from "./PageNotFound";
 
 const App = () => {
   return (
     <BrowserRouter>
-      <Switch>
-        <Route exact path="/">
-          <Home></Home>
-        </Route>
-        <Route path="*">
-          <PageNotFound></PageNotFound>
-        </Route>
-      </Switch>
+      <Routes>
+        <Route path="/" element={<Home />} />
+        <Route path="/hello" element={<HelloRouter />} />
+        <Route path="*" element={<PageNotFound />} />
+      </Routes>
     </BrowserRouter>
   );
 };
