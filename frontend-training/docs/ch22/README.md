@@ -19,17 +19,17 @@ SPA でも、現時点で表示している内容に対応する URL をブラ�
 
 ## Hello, React Router
 
-それでは、 React Router を始めましょう。 `react-router-dom` とその型定義をインストールします:
+それでは、 React Router を始めましょう。 `react-router-dom` をインストールします(型定義は6.xからは同梱されるようになっています)。適宜、[React Routerの公式ページ](https://reactrouter.com/en/main)を確認して進めてみましょう。
 
 ```bash
-npm i -E react-router-dom@5.2.0
-npm i -D -E @types/react-router-dom@5.1.7
+npm i -E react-router-dom@6.23.1
 ```
 
 まずは移動先としてメッセージを表示するだけのコンポーネントを作ります。そしてそれを React Router でルーティングします。
 
 ```tsx
 // app/javascript/components/HelloRouter.tsx
+import React from "react";
 
 const HelloRouter = () => {
   return <>Hello, Router!</>;
@@ -41,9 +41,10 @@ export default HelloRouter;
 ```tsx
 // app/javascript/components/index.tsx
 
-import { BrowserRouter, Link, Switch, Route } from "react-router-dom";
+import { BrowserRouter, Link, Routes, Route } from "react-router-dom";
 import HelloRouter from "./HelloRouter";
 import { Home } from "./static-pages";
+import React from "react";
 
 const App = () => {
   return (
@@ -59,25 +60,23 @@ const App = () => {
         </ul>
       </nav>
 
-      <Switch>
-        <Route exact path="/">
-          <Home></Home>
-        </Route>
-        <Route path="/hello">
-          <HelloRouter></HelloRouter>
-        </Route>
-      </Switch>
+      <Routes>
+        <Route path="/" element={<Home />} />
+        <Route path="/hello" element={<HelloRouter />} />
+      </Routes>
     </BrowserRouter>
   );
 };
 
 export default App;
+
+
 ```
 
 画面を再読み込みすると、画面上部に新たにリンクが2つ表示されています。 `<Link>` コンポーネントは画面遷移が React Router によって制御される `<a>` タグ（本物の `<a>` タグ）をレンダーします。
-`<Route>` コンポーネントは `path` 属性に URL のパスを指定し、そのパスにおいて描画したいコンポーネントを子コンポーネントとして書きます。
+`<Route>` コンポーネントは `path` 属性に URL のパスを指定し、そのパスにおいて描画したいコンポーネントをelementで指定して書きます。
 
-`<Route>` コンポーネントたちの親にさらに `<Switch>` コンポーネントがあると、パスに最初に合致したコンポーネントだけが描画されるようになります（ `<Switch>` が無いとパスが合致したコンポーネントすべてが描画されるのです。詳しくは [公式APIドキュメント](https://reactrouter.com/web/api/Switch) を読んでください）。
+`<Route>` コンポーネントたちの親にさらに `<Routes>` コンポーネントがあると、パスに最初に合致したコンポーネントだけが描画されるようになります（ `<Routes>` が無いとパスが合致したコンポーネントすべてが描画されるのです。詳しくは [公式APIドキュメント](https://reactrouter.com/en/main/components/routes#routes) を読んでください）。
 
 さて、画面に表示されたリンクを何回かいろいろクリックしてみて、画面が素早く遷移することを確認してください。
 また開発者コンソールの Network タブを確認すると、 `/hello` へのリンクをクリックしても実際にサーバにリクエストは送られていないこともわかると思います。
