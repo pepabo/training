@@ -150,7 +150,7 @@ module.exports = {
     filename: '[name].[contenthash].js',
     sourceMapFilename: '[file].map',
     chunkFormat: 'module',
-    path: path.resolve(__dirname, 'app/assets/builds'),
+    path: path.resolve(__dirname, 'public'),
   },
   plugins: [
     new webpack.optimize.LimitChunkCountPlugin({
@@ -174,7 +174,7 @@ Loader とは簡単に言うと「Webpack でコードをバンドルする前�
 
 ## 練習課題
 
-1. ここまでできたら、 [webpack-cli で利用可能なコマンド](https://webpack.js.org/api/cli/) を見て、試しにバンドルファイルをビルドしてみましょう。`/app/javascript/packs`に任意の js ファイルを作成し実行した結果、 `app/assets/builds` ディレクトリに `application.ce5b5fc52a137b3fd42e.js` のようなファイルができていれば成功です。
+1. ここまでできたら、 [webpack-cli で利用可能なコマンド](https://webpack.js.org/api/cli/) を見て、試しにバンドルファイルをビルドしてみましょう。`/app/javascript/packs`に任意の js ファイルを作成し実行した結果、 `public` ディレクトリに `application.ce5b5fc52a137b3fd42e.js` のようなファイルができていれば成功です。
 
 ## Rails から読み込めるようにする
 
@@ -223,7 +223,7 @@ Rails から `public/packs` に存在するバンドル済み js ファイルを
  };
 ```
 
-`npm run watch` を再実行して、 `app/assets/builds/manifest.json` が生成されたことを確認してください。
+`npm run watch` を再実行して、 `public/manifest.json` が生成されたことを確認してください。
 
 実際に `app/helpers/application_helper.rb` に `javascript_bundle_tag` ヘルパーメソッドを書いて、 `app/views/layouts/application.html.erb` から呼び出すようにします。少し複雑なコードになるので、以下のコードを読み解きながら実装してください。
 
@@ -242,7 +242,7 @@ module ApplicationHelper
     end
 
     def load
-      manifest_path = Rails.root.join('app', 'assets', 'builds', 'manifest.json')
+      manifest_path = Rails.root.join('public', 'manifest.json')
       if manifest_path.exist?
         JSON.parse(manifest_path.read)
       else
@@ -252,7 +252,15 @@ module ApplicationHelper
 end
 ```
 
-これで `app/views/layouts/application.html.erb` にある `<%= javascript_pack_tag %>` を消して代わりに `<%= javascript_bundle_tag 'application' %>` と書くとバンドル済 js が `<script>` タグで読み込まれるようになります。Rails サーバを起動して `http://localhost:3000` を開き、js ファイルが読み込まれていることを確認してください。
+これで `app/views/layouts/application.html.erb` にある `<%= javascript_importmap_tags %>`の下に `<%= javascript_bundle_tag 'application' %>` と書くとバンドル済 js が `<script>` タグで読み込まれるようになります。Rails サーバを起動して `http://localhost:3000` を開き、js ファイルが読み込まれていることを確認してください。
+
+また、バンドル済みjsファイルが大量に生成されるので、.gitignoreを修正して、煩雑になってしまうコミットログをキレイにしましょう。今後の変更でもよしなに入れて結構です。(変更を忘れたらやばいファイルは入れないでください。)
+```diff
+# .gitignore
++/public/*.js
++/public/manifest.json
+```
+
 
 ## 次回予告
 
