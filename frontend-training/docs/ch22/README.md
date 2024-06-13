@@ -162,7 +162,7 @@ export default App;
 
 import { useParams } from "react-router-dom";
 
-type Params {
+type Params = {
   id: string;
 }
 
