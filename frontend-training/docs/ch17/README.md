@@ -254,46 +254,6 @@ end
 
 これで `app/views/layouts/application.html.erb` にある `<%= javascript_importmap_tags %>`の下に `<%= javascript_bundle_tag 'application' %>` と書くとバンドル済 js が `<script>` タグで読み込まれるようになります。Rails サーバを起動して `http://localhost:3000` を開き、js ファイルが読み込まれていることを確認してください。
 
-...読み込まれないですね。
-
-詳しくは各自調べて欲しいのですが、`public/`でのバンドル済みjsファイルがうまく読み込むことができなくて、Railsが怒ってます。おそらく、Rails6からRails7でJavaScriptの管理がimportmap-railsやjsbundling-railsなどの新しい方法に移行したことに由来していると認識しています。(要加筆: 一緒に勉強しましょう！)
-
-そのため、本チュートリアルでは`app/assets/builds/`ではなく、`public/`に置かれるように設定しましょう。自力で解決してみても面白いですが、以下に方法を記載します。
-
-
-具体的には、以下の箇所を変更してみましょう。変更して、`npm run watch` を再実行して、`manifest.json`が生成されること、バンドル済みjsファイルが生成されることを確認してみましょう。
-
-```diff
-// webpack.config.js
-...
-module.exports = {
-  ...,
-  output: {
-    ...
-+    path: path.resolve(__dirname, 'public'),
--    path: path.resolve(__dirname, 'app/assets/builds'),
-  },
-  ...
-}
-```
-
-```diff
-# app/helpers/application_helper.rb
-
-module ApplicationHelper
-...
-    def load
-+      manifest_path = Rails.root.join('public', 'manifest.json')
--      manifest_path = Rails.root.join('app', 'assets', 'builds', 'manifest.json')
-      if manifest_path.exist?
-        JSON.parse(manifest_path.read)
-      else
-        {}
-      end
-    end
-end
-```
-
 また、バンドル済みjsファイルが大量に生成されるので、.gitignoreを修正して、煩雑になってしまうコミットログをキレイにしましょう。今後の変更でもよしなに入れて結構です。(変更を忘れたらやばいファイルは入れないでください。)
 ```diff
 # .gitignore
