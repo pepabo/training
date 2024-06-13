@@ -150,7 +150,7 @@ module.exports = {
     filename: '[name].[contenthash].js',
     sourceMapFilename: '[file].map',
     chunkFormat: 'module',
-    path: path.resolve(__dirname, 'app/assets/builds'),
+    path: path.resolve(__dirname, 'public'),
   },
   plugins: [
     new webpack.optimize.LimitChunkCountPlugin({
@@ -174,7 +174,7 @@ Loader とは簡単に言うと「Webpack でコードをバンドルする前�
 
 ## 練習課題
 
-1. ここまでできたら、 [webpack-cli で利用可能なコマンド](https://webpack.js.org/api/cli/) を見て、試しにバンドルファイルをビルドしてみましょう。`/app/javascript/packs`に任意の js ファイルを作成し実行した結果、 `app/assets/builds` ディレクトリに `application.ce5b5fc52a137b3fd42e.js` のようなファイルができていれば成功です。
+1. ここまでできたら、 [webpack-cli で利用可能なコマンド](https://webpack.js.org/api/cli/) を見て、試しにバンドルファイルをビルドしてみましょう。`/app/javascript/packs`に任意の js ファイルを作成し実行した結果、 `public` ディレクトリに `application.ce5b5fc52a137b3fd42e.js` のようなファイルができていれば成功です。
 
 ## Rails から読み込めるようにする
 
@@ -223,7 +223,7 @@ Rails から `public/packs` に存在するバンドル済み js ファイルを
  };
 ```
 
-`npm run watch` を再実行して、 `app/assets/builds/manifest.json` が生成されたことを確認してください。
+`npm run watch` を再実行して、 `public/manifest.json` が生成されたことを確認してください。
 
 実際に `app/helpers/application_helper.rb` に `javascript_bundle_tag` ヘルパーメソッドを書いて、 `app/views/layouts/application.html.erb` から呼び出すようにします。少し複雑なコードになるので、以下のコードを読み解きながら実装してください。
 
@@ -242,7 +242,7 @@ module ApplicationHelper
     end
 
     def load
-      manifest_path = Rails.root.join('app', 'assets', 'builds', 'manifest.json')
+      manifest_path = Rails.root.join('public', 'manifest.json')
       if manifest_path.exist?
         JSON.parse(manifest_path.read)
       else
@@ -256,7 +256,7 @@ end
 
 ...読み込まれないですね。
 
-詳しくは各自調べて欲しいのですが、`app/assets/builds/`でのバンドル済みjsファイルがうまく読み込むことができなくて、Railsが怒ってます。おそらく、Rails6からRails7でJavaScriptの管理がimportmap-railsやjsbundling-railsなどの新しい方法に移行したことに由来していると認識しています。(要加筆: 一緒に勉強しましょう！)
+詳しくは各自調べて欲しいのですが、`public/`でのバンドル済みjsファイルがうまく読み込むことができなくて、Railsが怒ってます。おそらく、Rails6からRails7でJavaScriptの管理がimportmap-railsやjsbundling-railsなどの新しい方法に移行したことに由来していると認識しています。(要加筆: 一緒に勉強しましょう！)
 
 そのため、本チュートリアルでは`app/assets/builds/`ではなく、`public/`に置かれるように設定しましょう。自力で解決してみても面白いですが、以下に方法を記載します。
 
