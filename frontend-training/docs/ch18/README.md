@@ -255,6 +255,101 @@ const defaultPets = [
 
 この思想が優れている点は「宣言的に UI を書ける」ということ、さらに『データから自動で UI を生成できる、そしてその UI は書き換えの回数が最小化される』という考え方が、 Web フロントエンドに限らず UI を備えたスマートフォンのアプリケーションやデスクトップアプリケーションにも応用できるということです。これが [ReactNative](https://facebook.github.io/react-native/) や [Flutter](https://flutter.dev) といったものです。
 
+ここで、「宣言的に UI を書ける」という点をもう少し深掘りしてみましょう。宣言的UIプログラミングとは、「何をするか」ではなく「どうあるべきか」を記述するアプローチです。これは単なる実装テクニックではなく、UIを考える根本的な思考法の転換を意味します。
+
+従来の命令型プログラミングでは、「ボタンを作成し、テキストを設定し、クリックイベントを登録し...」というように一連の手順を指示していました。例えば、フォームのバリデーションを命令的に実装すると
+
+```js
+// 命令的アプローチ
+const emailInput = document.getElementById('email');
+const submitButton = document.getElementById('submit');
+
+emailInput.addEventListener('input', function() {
+  const email = emailInput.value;
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  
+  if (emailRegex.test(email)) {
+    submitButton.disabled = false;
+  } else {
+    submitButton.disabled = true;
+  }
+});
+
+// フォーム送信時の処理
+const form = document.getElementById('contact-form');
+form.addEventListener('submit', function(event) {
+  event.preventDefault();
+  
+  // 送信中の状態に変更
+  emailInput.disabled = true;
+  submitButton.disabled = true;
+  submitButton.textContent = '送信中...';
+  submitButton.classList.add('loading');
+  
+  // 送信処理（仮想的な非同期処理）
+  setTimeout(function() {
+    // 成功時の処理
+    form.innerHTML = '<div class="success">送信完了しました！</div>';
+  }, 2000);
+});
+```
+
+- DOM要素を直接操作する
+- 状態変化のたびに影響を受ける要素を手動で更新する
+- 各イベントハンドラで状態変更の全てのケースを処理する必要がある
+- コードが増えると状態管理が複雑になり、バグが発生しやすい
+
+対して宣言的アプローチでは、「この状態のときはこのように見える」という関係性を定義します。UIの状態とその表示方法を明確に分離することで、命令的アプローチにおける問題を解決します。
+
+```js
+// 宣言的アプローチ
+function Form() {
+  const [email, setEmail] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isSuccess, setIsSuccess] = useState(false);
+  const isValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+  
+  async function handleSubmit(e) {
+    e.preventDefault();
+    setIsSubmitting(true);
+    
+    // 送信処理（仮想的な非同期処理）
+    await new Promise(resolve => setTimeout(resolve, 2000));
+    setIsSuccess(true);
+  }
+  
+  if (isSuccess) {
+    return <div className="success">送信完了しました！</div>;
+  }
+  
+  return (
+    <form onSubmit={handleSubmit}>
+      <input
+        value={email}
+        onChange={e => setEmail(e.target.value)}
+        disabled={isSubmitting}
+      />
+      <button 
+        type="submit"
+        disabled={!isValid || isSubmitting}
+        className={isSubmitting ? 'loading' : ''}
+      >
+        {isSubmitting ? '送信中...' : '送信'}
+      </button>
+    </form>
+  );
+}
+```
+
+- UIの各状態を明示的に定義する
+- 状態変化に応じたUIの表示を宣言的に記述する
+- DOMの直接操作を抽象化し、「何を表示するか」にフォーカスする
+- 状態の変更が自動的にUIの更新に反映される
+
+宣言的アプローチによって、DOM操作という手段を分離し、開発者は「何を表示するか」という本質的な問題に集中できるようになりました。この思想転換により、フロントエンド開発はコードの記述方法から考え方そのものが変わり、複雑なUIを扱う際の認知的負荷が大幅に軽減されました。開発者は「このボタンをどう変更するか」ではなく「このデータ状態ではUIはどうあるべきか」という、より抽象度の高い設計に注力できるようになったのです。この根本的な考え方の変化こそが、ReactやVueが今なおフロントエンド開発のデファクトスタンダードとして広く採用され続ける最大の理由です。
+
+宣言的UIと命令的UIの比較については、Reactの公式ドキュメントにも詳しく記載されているので、こちらも併せて参照してください。[How declarative UI compares to imperative ](https://react.dev/learn/reacting-to-input-with-state#how-declarative-ui-compares-to-imperative)
+
 ## 練習問題 2
 
 1. 先ほど作ったペットリストと登録フォームの全体を1つのコンポーネントに切り出してください（すでにそのように実装していればこの問題は飛ばしてください）。
