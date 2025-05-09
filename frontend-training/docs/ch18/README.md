@@ -350,6 +350,8 @@ function Form() {
 
 宣言的UIと命令的UIの比較については、Reactの公式ドキュメントにも詳しく記載されているので、こちらも併せて参照してください。[How declarative UI compares to imperative ](https://react.dev/learn/reacting-to-input-with-state#how-declarative-ui-compares-to-imperative)
 
+この項以外にもReactの公式ドキュメントでは、基本的な思想からReactの使い方まで分かりやすく網羅的にカバーされています。一読しておくと、より理解を深めることができるでしょう。
+
 ## 練習問題 2
 
 1. 先ほど作ったペットリストと登録フォームの全体を1つのコンポーネントに切り出してください（すでにそのように実装していればこの問題は飛ばしてください）。
