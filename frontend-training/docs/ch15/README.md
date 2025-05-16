@@ -1,223 +1,224 @@
-# 第 15 章　モダン JavaScript 入門
+# 第 15 章 JavaScript 入門
 
-## ECMAScript
+この章では以下のことを学習します。
 
-Rails Tutorial 第6版では JavaScript を扱うことはほとんどありませんでしたが、第8.2章で `app/javascript/packs/application.js` に以下のようなコードを書いたと思います:
+- JavaScript / ECMAScript とは
+- 実行環境
+- トランスパイル
+- パッケージマネージャーの利用
 
-```js
-import Rails from "@rails/ujs"
-import Turbolinks from "turbolinks"
-import * as ActiveStorage from "@rails/activestorage"
-import "channels"
-import "jquery"
-import "bootstrap"
+研修資料上のリンク先も参照しながら進めましょう。
 
-Rails.start()
-Turbolinks.start()
-ActiveStorage.start()
+## JavaScript
+
+ブラウザ上でJavaScriptを動かしてみましょう。例えば以下のようなコードを適当な場所に保存し、ブラウザで開きます。
+
+```html
+<!DOCTYPE html>
+<html>
+  <body>
+    <h1>JavaScript Test Page</h1>
+    <script>
+      function foo() {
+        x = 'foo';
+        alert(x);
+      }
+      
+      foo();  // 先ほど宣言した function を実行
+    </script>
+  </body>
+</html>
 ```
 
-実はここで使われていた `import` 文が JavaScript の仕様としてリリースされたのは 2015 年 6 月のことです。JavaScript のプログラムをモジュールに分割して別のファイルから必要なときにインポートするという仕組みはこれ以前には標準仕様に無かったのですね。
+foo と書いたアラートが表示されるはずです。
+ブラウザ上でJavaScriptを動かすには、`<script>` タグの内部にコードを記述すればいいことが分かりました。
 
-`import` / `export` 文などといった JavaScript の言語仕様を定めている仕様書は [ECMAScript](https://tc39.es/ecma262/) と呼ばれています。
+続けて以下のように書き加えてみましょう。
 
-これらのJavaScriptファイルは、本番（e.g. Heroku, マネクラ）環境では一つの `.js` ファイルにまとめられるようになっています(`rails assets:precompile` コマンドで、一つのファイルにする、かつ改行などを削除することでインターネットへのアクセス回数や通信容量を減らすという目的を果たしています)。
-この処理を**バンドリング**などと呼んでいます。
-バンドリングは JavaScript と同様に CSS にも存在し、Rails では `.scss` ファイルを一つの CSS ファイルにまとめて本番環境に置いています。
-
-`app/assets/javascripts/application.js` に例えば以下のようなコードを書いてみましょう。
-
-```js
-// function xxx() は Ruby の def のようなものです
-function foo() {
-  x = 'foo';  // 一時変数を宣言
-  alert(x);
-}
-
-foo();  // 先ほど宣言した function を実行
+```diff
+  <!DOCTYPE html>
+  <html>
+    <body>
+      <h1>JavaScript Test Page</h1>
+      <script>
+        function foo() {
+          x = 'foo';
+          alert(x);
+        }
+        
+        foo();  // 先ほど宣言した function を実行
+  
++       function bar() {
++         alert(x);
++       }
++       
++       bar();
+      </script>
+    </body>
+  </html>
 ```
 
-rails server を立ち上げてどこでもいいので開発環境のページを読み込むと、 foo と書いたアラートが表示されるはずです。Ruby に立ち返って考えてみると、 `x` として宣言した一時変数は `def` の外からは参照できなかったはずです。
+ページをリロードすると、 foo と書いたアラートが 2 回表示されるでしょう。
+つまり、 `function foo` で設定した一時変数を `function bar` からも参照できるということです。
+コード上のどこからでも参照できてしまうということは、予想しないタイミングで書き換えてしまうようなコードも書けてしまいます。
+これを避けるためには `x` の前に `var` をつけ `var x = 'foo';` と書く必要がありますが、うっかり `var` をつけ忘れても動いてしまいます。
 
-続けてその下にこう書いてみましょう。
+このように、ブラウザで動いている JavaScript には歴史的経緯により罠が存在し、それを回避するために [Strict Mode](https://developer.mozilla.org/ja/docs/Web/JavaScript/Reference/Strict_mode) があります。
 
-```js
-function bar() {
-  alert(x);
-}
-
-bar();
-```
-
-ページをリロードすると、 foo と書いたアラートが 2 回表示されるでしょう。つまり、 `function foo` で設定した一時変数を `function bar` からも参照できるということです。コード上のどこからでも参照できてしまうということは、予想しないタイミングで書き換えてしまうようなコードも書けるわけで、チーム開発をすると「知らないうちに変数が書き換えられていて、書き換わってないものと思ってコードを書いたらバグってしまった」という事態が発生してしまうわけです。恐ろしいですね。これを避けるためには `x` の前に `var` をつけ `var x = 'foo';` と書く必要がありますが、うっかり `var` をつけ忘れても動いてしまいます。
-そもそも、各処理のコードの末尾には `;` をつけるという決まりになっているのですが、JavaScript の文法には [自動セミコロン挿入](https://developer.mozilla.org/ja/docs/Web/JavaScript/Reference/Lexical_grammar#automatic_semicolon_insertion) (Automatic Semicolon Insertion, ASI) という規則があり、 `var x = 'foo'` の場合は `;` を省略しても動いてしまいます。が、構文によってはコードの意味がプログラマの意図しないものに変わってしまう場合もあります（例えば [return文](https://developer.mozilla.org/ja/docs/Web/JavaScript/Reference/Statements/return#automatic_semicolon_insertion) ）。恐ろしいですね。
-
-このように、ブラウザで動いている JavaScript には歴史的経緯により罠が大量に存在し、それを回避するために Strict （厳格：バグが混入しやすいコードを書いた場合エラーが発生する）モードなども存在していますが、これも宣言を忘れると罠のあるコードで動くという険しい状況にあります。
-
-その状況を打破するために、より安全なコードを書けるような言語仕様を策定し、徐々にブラウザ側もその言語仕様を処理できるようにしていくという試みが取られるようになりました。これが ECMAScript 2015 (ECMAScript 6) ならびにその後継である ECMAScript 20xx です。
+このような状況を打破するために、より安全なコードを書けるような言語仕様を[ECMAScript](https://tc39.es/ecma262/)として策定し、徐々にブラウザ側もその言語仕様を処理できるようにしていくという試みが取られるようになりました。
 ECMAScript 2015 以降は毎年1回その時点での ECMAScript 仕様書のスナップショットが ECMAScript 20xx としてリリースされています。
 
 とはいえ、ブラウザが常に最新のECMAScriptをサポートしているとは限りません。
-ECMAScript 20xx で書いたコードを他のECMAScript Versionで解釈できるコードへと変換するツール（これを一般的に**トランスパイラ**と呼びます）を使い、ブラウザで実行可能なコードへと変換するようにしたのです。
-将来的にブラウザが直接サポートするようになれば、そのツール自体は捨ててしまえます。
+新しいECMAScriptの機能をより安全に使用するためのアプローチとして、以下の手法が一般的です
 
-現在このトランスパイラとして主流なのが [Babel](https://babeljs.io/) という Node.js 製のツールで、モダンフロントエンド開発は基本的にこのツールの上に構築されています。
-私たちも ECMAScript 20xx （執筆時は 2021 年 6 月なので ECMAScript 2021）に準拠して、安全なコードを書いていきましょう。
+1. **トランスパイラの使用**: ECMAScript の最新機能を古いブラウザでも動作するコードに変換するツール
+2. **Polyfill**: 新しいAPIを古いブラウザでも利用可能にする実装
 
-また、[TypeScript](https://www.typescriptlang.org/)を用いて静的型付けによる効率的な開発を行うこともできるようになります。
-TypeScriptはAltJS(=Alternative JavaScript, JavaScriptの代替言語)の代表的なものですが、トランスパイルを経て最終的にはJavaScriptに変換して利用します(ブラウザなどの多くの実行環境では、いまのところTypeScriptを直接サポートしない場合が多いです)。
+[Can I Use](https://caniuse.com/)などで機能のサポート状況を確認し、ターゲットとするブラウザ上で動作することを確認し、必要であれば上記のような手法を取ります。
 
-TypeScriptについての詳細はこの研修資料では取り扱いませんが、フロントエンド開発をはじめとして広く採用されている言語です。
-本研修を一通り終了し、JavaScriptを学習したら、[TypeScript for JavaScript Programmers](https://www.typescriptlang.org/docs/handbook/typescript-in-5-minutes.html)を読んでみるとよいです。
-ブラウザでTypeScriptのコードを試すことができる [TypeScript Playground](https://www.typescriptlang.org/play/)で遊んでみてもよいでしょう。
-(これらの資料はいずれもTypeScript公式が提供しているものです)
+最近では、主要なブラウザの対応状況を一目で分かるようにする仕組みとして[Baseline](https://web.dev/baseline?hl=ja)も利用できます。
+たとえば、MDNにおいて[Iterator](https://developer.mozilla.org/ja/docs/Web/JavaScript/Reference/Global_Objects/Iterator)を確認すると主要ブラウザで広く対応していることを確認できますが、最近ES2025で導入された[Iterator.prototype.toArray()](https://developer.mozilla.org/ja/docs/Web/JavaScript/Reference/Global_Objects/Iterator/toArray)では古いブラウザやデバイスでは動作しないことがある可能性があることがわかります。
 
-## Babel を使ってみてECMAScriptのバージョンを意識する
+MDNの [JavaScript ガイド](https://developer.mozilla.org/ja/docs/Web/JavaScript/Guide) や [JavaScript リファレンス](https://developer.mozilla.org/ja/docs/Web/JavaScript/Reference) を参考に、研修を進めながら文法を習得するとよいでしょう。
 
-`npm` コマンドを使って Babel をインストールしてみましょう:
+また、フロントエンドプロジェクトやこの研修でのコーディング規約を [付録 1](../appendix01/) にまとめていますので、これからコードを書くときは適宜参照してください。
 
+## JavaScriptの実行環境
+
+上記ではブラウザを実行環境としましたが、CLIアプリケーションやサーバサイドアプリケーションを作成するのに適した実行環境もあります。
+
+代表的な実行環境であるNode.jsを利用してみましょう。
+
+### Node.js 環境のセットアップ
+
+Homebrew で直接インストールもできますが、プロジェクトによって依存する Node.js を切り替えるためのツールがあると便利です。
+
+* [nodenv/nodenv: Manage multiple NodeJS versions.](https://github.com/nodenv/nodenv) + [nodenv/node-build: Install NodeJS versions](https://github.com/nodenv/node-build) Homebrew にあります。
+* [nvm-sh/nvm: Node Version Manager - Simple bash script to manage multiple active node.js versions](https://github.com/nvm-sh/nvm) Homebrew にあります。
+
+[Node.js Releases](https://nodejs.org/en/about/previous-releases) でLTS(長期サポート)のバージョンを確認できます。
+最新のLTSバージョンのNode.jsをインストールしましょう。
+
+### Node.js で実行してみる
+
+ためしに先ほどのコード `foo.js` として保存し、Node.jsで動作させてみます。
+
+```js
+function foo() {
+  x = 'foo';
+  alert(x);
+}
+
+foo();
 ```
+
+```sh
+node foo.js
+```
+
+すると以下のようなエラーが表示されます。
+
+```sh
+>>> % node foo.js
+/path/to/foo.js:3
+  alert(x);
+  ^
+
+ReferenceError: alert is not defined
+```
+
+`alert()` 関数は[DOM (Document Object Model)[https://developer.mozilla.org/ja/docs/Web/API/Document_Object_Model] APIとしてブラウザ上では利用できますが、Node.js上では未定義です。
+このように、実行環境によって利用できるAPIに差異があります。
+
+たとえば、フロントエンドアプリケーションのパフォーマンス向上のためにサーバサイド上でHTMLを生成する[Server Side Rendering](https://web.dev/articles/rendering-on-the-web?hl=ja#server-side)のような技術を活用するときは、そのコードが動作する実行環境(たとえばブラウザなのか、Node.jsなのか)を意識することが重要です。
+
+実行環境は他にも [Deno](https://deno.com/) や [Bun](https://bun.sh/) などがあり、それぞれに利用できる機能やセキュリティに関する機構、周辺ツールの違いがあります。
+
+## 異なるバージョンのECMAScriptに変換する
+
+トランスパイラを導入するために、Node.jsに標準で付属しているパッケージマネージャー npm を利用します。
+
+ほかにもpnpm, yarn といった同様のツールが存在し、それぞれに特徴(実行速度や依存関係のインストールの取扱、付加されている機能の違い)があります。
+
+`npm` コマンドを使って Babel をインストールしてみましょう。
+まずは、適当な場所にディレクトリを作成して移動し、以下のコマンドを入力します。
+
+```sh
+$ npm init
+```
+
+つづいて、以下のコマンドでパッケージをインストールします。
+
+```sh
 $ npm install -D @babel/core @babel/cli @babel/preset-env
 ```
 
-npmはJavaScriptの代表的なパッケージマネージャーですが、ほかにもpnpm, yarn といった同様のツールが存在し、それぞれに特徴(実行速度や依存関係のインストールの取扱、付加されている機能の違い)があります。
+インストールしたパッケージは、コマンドを実行したディレクトリ直下の `node_modules` ディレクトリに存在しています。
+ソースコードをgit管理する場合は、`node_modules` ディレクトリの中身がそのままコミットされることを避けるために、 `.gitignore` に `node_modules` という行を追加してください。
 
-色々ログが出ると思いますが、最終的には `added xxxx packages` のようなメッセージが出ると思います（出なかったらなぜ出なかったかちょっと考えてみて、わからなさそうだったら呼んでください）。
+インストールが完了すると、`package.json` と `package-lock.json` が作成されていることを確認できます。
+`package.json` にインストールしたパッケージとそのバージョンが記述され、`package-lock.json` に依存ツリー全体のパッケージのバージョンが記録されます。
 
-この方法でインストールした Babel はコマンドを実行したディレクトリに `node_modules` ディレクトリが掘られてそこに存在しています。もし Rails Tutorial をやっているディレクトリで実行した場合、このまま Git でコミットしてしまうと膨大な `node_modules` ディレクトリの中身がそのままコミットされてしまいます。それを避けるために、 `.gitignore` に（もしまだ無ければ） `node_modules` という行を追加してください。
-
-Babel を実行する準備が整ったので、以下のスクリプトを `hello_es2015_class.js` として保存します。
+Babel を実行する準備が整ったので、以下のスクリプトを `try-transpile.js` として保存します。
+このスクリプトには、ES2022から導入された[Class Static Block](https://github.com/tc39/proposal-class-static-block)が含まれています。
 
 ```js
-// hello_es2015_class.js
-
 class Foo {
-
-  // Ruby の initialize 相当
-  constructor(bar) {
-    this.bar = bar;
-  }
-
-  // class に def するのと同じ
-  baz() {
-    alert(this.bar);
-  }
+  static staticProperty = "Called";
+  static staticFunction = function() {
+    return Foo.staticProperty;
+  };
 }
 
-new Foo('qux').baz();
+let foo = new Foo();
+
+console.log(foo.staticFunction());
 ```
 
 次に、`babel.config.js` を以下のように編集します。すでにファイルが存在する場合はすべてコメントアウトしてから、以下を追記してみましょう。
 
 ```js
 module.exports = {
-  "presets": [
+  plugins: ["@babel/plugin-transform-class-properties"],
+  presets: [
     [
-      "@babel/preset-env",
+      '@babel/preset-env',
       {
-        "targets": {"ie":"11"}
+        targets: 'defaults'
       }
     ]
   ]
-}
+};
 ```
 
 次に、以下のようなコマンドを実行します。
 
 ```bash
-$ npx babel hello_es2015_class.js -o transpiled_es2015_class_to_es5.js
+$ npx babel try-transpile.js -o try-transpiled.js
 ```
 
-実行に生成される `transpiled_es2015_class_to_es5.js` を見ると、スクリプトが変換されて出力されている様子を確認できます。
+実行に生成される `try-transpiled.js` を見ると、スクリプトがES2015形式に変換されて出力されている様子を確認できます。
 
-JavaScriptの言語仕様(=[ECMAScript](https://jsprimer.net/basic/ecmascript/))にはいくつかのバージョンがあります。都度バージョンアップが重ねられ、新しい言語仕様が増えていきますが、必ずしも実行環境(たとえばブラウザ)が対応できているわけではありません。
-今回の場合は、[@babel/preset-env](https://babeljs.io/docs/babel-preset-env) を用いて指定した動作環境に合わせてスクリプトが変換されています。
-Internet Explorer 11はES2015の構文を理解できないので、それより下のECMAScriptバージョンにあわせて変換されたのです。
-
-Webpacker を利用している場合 `config/webpacker.yml` の設定が `compile: true` となっていれば、 `app/javascript` ディレクトリ以下に書かれたコードは自動でこのような Babel によるトランスパイルが行われるという寸法です。
-
-こちらのコードも書いてみましょう。ECMAScript 2015 から導入された **アロー関数（arrow function）** と呼ばれるものを使っています:
-
-```js
-// hello_es2015_arrow_function.js
-
-const add = (a, b) => {
-  return a + b;
-}
-```
-
-`hello_es2015_arrow_function.js` を書いたら次のコマンドを実行してみましょう。
-
-```bash
-$ npx babel hello_es2015_arrow_function.js -o transpiled_es2015_arrow_function_to_es5.js
-```
-
-`transpiled_es2015_arrow_function_to_es5.js` を見てみると以下のようなスクリプトが生成されているでしょうか。
-
-```js
-// transpiled_es2015_arrow_function_to_es5.js
-
-"use strict";
-
-var add = function add(a, b) {
-  return a + b;
-};
-```
-
-変換前のスクリプトの arrow function `() => {}` が ECMAScript 5 の `function` による構文に変換されていることがわかります。
-
-最近の主要ブラウザであれば、ES2015の仕様に準拠したスクリプトを理解できるので、トランスパイルをしなくても良い場合があります。`babel.config.js` を以下のように編集します。
-
-```diff
-  module.exports = {
-    "presets": [
-      [
-        "@babel/preset-env",
-        {
--         "targets": {"ie":"11"}
-          "targets": "> 0.25%, not dead"
-        }
-      ]
-    ]
-  }
-```
-
-再度以下のコマンドを実行します。
-
-```bash
-$ npx babel hello_es2015_class.js -o transpiled_es2015_class_to_es5.js
-```
-
-生成された `transpiled_es2015_class_to_es5.js` と、変換元である `hello_es2015_class.js` の差分はそれほど多くないことが確認できると思います。
-
-```bash
->>> % diff hello_es2015_class.js transpiled_es2015_class_to_es5.js
-1c1
-< class Foo {
----
-> "use strict";
-2a3
-> class Foo {
-13d13
-<
-```
+今回の場合は、[@babel/preset-env](https://babeljs.io/docs/babel-preset-env) を用いて、指定した実行環境に合わせてスクリプトが変換されています。
+targetsには、[Browserslist](https://browsersl.ist/)形式で実行環境を指定できます。
 
 JavaScriptの言語仕様にバージョンが存在することや、実行環境に合わせてトランスパイルが必要になることがあることが理解できたでしょうか。
+
 [Babel Repl](https://babeljs.io/repl) とドキュメントを使って ECMAScript 20xx にはどのような言語仕様があるか、それがどのようにブラウザで実行可能なコードに変換されるかを見てみましょう。
-
-これから JavaScript のコードを書くときは Babel に準拠して、 `var` ではなく `let` `const` を、 `function` ではなく arrow function を使うよう心がけましょう（私見ですが `const` を使うケースが 95% ぐらいで `let` が 5%, `var` を使うことはまず無くなります）。
-
-フロントエンドプロジェクトやこの研修でのコーディング規約を [付録 1](../appendix01/) にまとめていますので、これからコードを書くときは適宜参照してください。
 
 ## 練習問題
 
-1. ECMAScript の仕様に新しい機能が追加されるためにはどのようなプロセスが必要かを説明してください。
+### 基本
+
+1. ECMAScript の仕様に新しい機能が追加されるためにはどのようなプロセスが必要かを調べてみましょう。
 1. `var` と `let` `const` とのそれぞれの違いを調べて説明してください。
 1. `function` と arrow function それぞれにおける `this` の意味がどのように異なるかを調べて説明してください。
+1. JavaScriptの実行環境を列挙し、違いを比較してみましょう。
 1. Babel を使って `increment()` メソッドで数字を増やすことができ、 `decrement()` で数字を減らすことができる、 `Counter` クラスを作り、その変換した結果をブラウザ上で確認できるようにしてみてください。
+1. なぜ `package-lock.json` が必要なのかを調べてみましょう。
+1. 先ほど実行した `npx` コマンドの意味を調べてみましょう。
 
-（注意：このチャプターで作成したファイルは次以降のチャプターでは使いませんので、間違えてコミットしないよう元に戻しておいてください。 `npm install` したパッケージも `npm remove` したり、削除した `babel.config.js` も `git restore` で元に戻しておいてください。）
+### おかわり
 
-## 次回予告
-
-次のチャプターでは、ECMAScript 20xx で書いたコードを Rails で自動的に読み込めるようにするため、また本番環境でバンドリングできるようにするための前段階として JavaScript のモジュール機構について学びます。
+1. Node.jsを実行環境とするコマンドラインインタフェースアプリケーションを何かつくってみましょう。
+1.  [付録 1](../appendix01/)で取り上げたeslintをインストールし、ソースコードを検査してみましょう。
