@@ -124,9 +124,6 @@ function Form() {
 
 1. React の開発に自信がない人は、React の公式チュートリアル「[チュートリアル：三目並べ – React](https://ja.react.dev/learn/tutorial-tic-tac-toe)」をやってみてください。
   - その際、 [React の流儀 – React](https://ja.react.dev/learn/thinking-in-react) も併せて読み、React の思想について理解を深めてください。
-  - 開発環境のセットアップは、公式ドキュメントのどちらかを参考してください
-    - [React アプリの作成 – React](https://ja.react.dev/learn/creating-a-react-app)
-    - [ゼロからの React アプリ構築 – React](https://ja.react.dev/learn/build-a-react-app-from-scratch)
 
 ## 次回予告
 
