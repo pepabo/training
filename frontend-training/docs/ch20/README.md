@@ -6,14 +6,22 @@
 
 ## 要件
 
-Rails Tutorial で作成した Micropost アプリケーションを SPA にします。ただし、以下については時間の都合上考えないことにします。
+Rails Tutorial で作成した Micropost アプリケーションを SPA にします。
+
+- [SPA Mode の React Router](https://reactrouter.com/how-to/pre-rendering#pre-rendering-with-ssrfalse) で React アプリを構築します
+  - 開発環境は React Router(Vite dev server proxy)経由で Rails サーバーにアクセスします
+  - 本番環境は React Router(Vite build)で静的ファイルを生成し、Rails サーバーの静的ファイルとして配置(public 配下) & 配信します
+- Ruby on Rails で作ったロジックはそのまま利用します
+- Ruby on Rails の View は利用せず (一部は利用しますが)、React Router でリビルドします
+
+ただし、以下については時間の都合上考えないことにします。
 
 * ログイン機構（ JWT あたりで実装するのですが長くなりすぎる）
 * Rails を BFF (Backend for Frontend) にして Next.js のフロントエンドサーバを立てる
 * Redux （グローバルな状態管理）
 * Server Side Rendering （ React が吐き出す HTML をサーバ側で生成して処理高速化＋ SEO 対策）
 
-なので、基本方針としては「ログイン後のページを、リンク読み込み不要なリッチフロントエンドにする」という方向性にします。上記のおまけテーマは appendix にある（予定）なのでそちらをご覧ください。
+なので、基本方針としては「ログイン後のページをリッチフロントエンドにする」という方向性にします。上記のおまけテーマは appendix にある（予定）なのでそちらをご覧ください。
 
 ## 前提
 
@@ -23,7 +31,7 @@ Rails Tutorial で作成した Micropost アプリケーションを SPA にし�
 
 ## React on Rails をはじめる
 
-前章までで React による UI を表示させることはできました。ではまず、ログイン後に React の UI が出るようにしたいので、`app/views/layouts/application.html.erb` に置いていた `<div>` 要素を削除して、`app/views/static_pages/home.html.erb` に以下のように配置します:
+前章までで React による UI を表示させることはできました。ではまず、ログイン後に React の UI が出るようにしたいので、`app/views/layouts/application.html.erb` に置いていた `<div>` 要素を削除します
 
 ```diff
 --- a/app/views/layouts/application.html.erb
