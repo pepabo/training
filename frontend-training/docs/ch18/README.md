@@ -1,11 +1,5 @@
 # 第 18 章　React 開発ことはじめ
 
-それでは、いよいよ React を使っての開発に入ります。
-
-最近の React は、React を直接組み込むよりもフレームワークを使った開発が主流です。公式ドキュメントでは Next.js, React Router, Expo などのフレームワークが紹介されています。
-
-https://ja.react.dev/learn/creating-a-react-app
-
 ## React や Vue の何がかつてのフロントエンドライブラリと比べて優れていたか
 
 練習問題 1-3 のような画面をかつて JavaScript で実装しようとした場合、フォームから取得した値をデータとして持つのではなく、単純に画面に表示する要素として追記していただけでした。しかし、これだと 1-2 のような絞込み機能を実装することがとても難しくなります。仮に `species` を表示要素のどこかに書き込んでおいて、繰り返しでその値をチェックして絞込みの対象でなければ消去するという処理を実装するにしても、「猫絞込み→犬絞込みへの切り替え」「猫絞込み→全件表示」のような 2 アクションの操作に対応しようと思うと、「消去したデータを保管する変数」のようなものを設けなければいけません。今回は単純なアプリケーションですが、これが複雑化して例えばゲームのような画面になった時には、数え切れないほどのパターンの状態と変更が発生するようになります。
@@ -119,6 +113,128 @@ function Form() {
 また、ここまでで宣言的アプローチを実現する方法として、「React や Vue」というまとめ方をしてきましたが、以降の資料ではReactを使った研修内容になっています。
 
 両者の比較については様々な観点からの考え方がありますが、ここでは詳細については触れず、単に社内における採用実績をベースとしてReactを選定しています。
+
+## React Router をセットアップする
+
+それでは、いよいよ React を使っての開発に入ります。
+
+最近の React アプリの開発は、React を直接組み込むよりもフレームワークを使った開発が主流です。公式ドキュメントでは Next.js, React Router, Expo などのフレームワークが紹介されています。
+
+https://ja.react.dev/learn/creating-a-react-app
+
+今回は、前研修で作成した Ruby on Rails を活かしつつ React を組み込みます。具体的には、[SPA Mode の React Router](https://reactrouter.com/how-to/pre-rendering#pre-rendering-with-ssrfalse) を使います。
+
+Ruby on Rails アプリケーションは、[yasslab/sample_app のサンプルアプリケーション (第7版 第14章)](https://github.com/yasslab/sample_apps/tree/main/7_0/ch14) を想定しています (ただし Ruby on Rails のバージョンは `7.1.5.1` に上がっている)
+
+```diff:Gemfile
+- gem "rails",                      "7.0.4.3"
++ gem "rails",                      "7.1.5.1"
+```
+
+### 前提
+
+- 前研修で作成した Ruby on Rails アプリ内に、フロントエンド用のディレクトリ `./frontend` を作成します
+  - 開発環境では、React Router (Vite dev server の proxy) 経由で Rails サーバーにアクセスします
+  - 本番環境では、React Router (Vite build) で静的ファイルを生成し、Rails サーバーの静的ファイルとして配信 (`./public` に配置) します
+- Ruby on Rails で作ったロジックはそのまま利用します
+- Ruby on Rails の View は利用せず、React Router でリビルドします
+
+ただし、以下については時間の都合上考えないことにします。
+
+- ログイン機構（ JWT あたりで実装するのですが長くなりすぎる）
+- Rails を BFF (Backend for Frontend) にして Next.js のフロントエンドサーバを立てる
+- Server Side Rendering （ React が吐き出す HTML をサーバ側で生成して処理高速化＋ SEO 対策）
+- Redux （グローバルな状態管理）
+
+なので、基本方針としては「ログイン後のページをリッチフロントエンドにする」という方向性にします。
+
+### 1. React Router プロジェクトの作成
+
+前研修で作成した Ruby on Rails アプリケーションのプロジェクトルートで作業します。
+基本は [Installation | React Router](https://reactrouter.com/start/framework/installation) に沿って React Router を導入します。
+(`Initialize a new git repository?` には `No` を選択します。`Install dependencies with npm?` はお好みで)
+
+```bash
+$ npx create-react-router@latest frontend
+
+         create-react-router v7.6.0
+      ◼  Directory: Using frontend as project directory
+
+      ◼  Using default template See https://github.com/remix-run/react-router-templates for more
+      ✔  Template copied
+
+   git   Initialize a new git repository?
+         No
+
+  deps   Install dependencies with npm?
+         Yes
+
+      ✔  Dependencies installed
+
+  done   That's it!
+
+         Enter your project directory using cd ./frontend
+         Check out README.md for development and deploy instructions.
+
+         Join the community at https://rmx.as/discord
+```
+
+### 2. フロントエンドプロジェクトの設定
+
+[React Router の SPA Mode](https://reactrouter.com/how-to/spa) を設定
+
+```diff:frontend/react-router.config.ts
+-  ssr: true,
++  ssr: false,
+} satisfies Config;
+```
+
+### 3. 開発環境の起動
+
+フロントエンドとバックエンドを別々に起動します。
+
+```bash
+# React Router の起動確認
+cd frontend
+npm run dev
+```
+
+### 4. React Router のルーティング設定
+
+React Router のルーティングを設定します。
+
+```tsx:frontend/app/routes.ts
+import { type RouteConfig, index, route } from "@react-router/dev/routes";
+
+export default [
+  index("routes/home.tsx"),
+] satisfies RouteConfig;
+```
+
+```tsx:frontend/app/routes/home.tsx
+import type { Route } from "./+types/home";
+
+export function meta({}: Route.MetaArgs) {
+  return [
+    { title: "Sample App" },
+    { name: "description", content: "Ruby on Rails Tutorial Sample App" },
+  ];
+}
+
+export default function Home() {
+  return (
+    <div className="center jumbotron">
+      <h1>Welcome to the Sample App</h1>
+      <p>
+        This is the home page for the{" "}
+        <a href="https://railstutorial.jp/">Ruby on Rails Tutorial</a>
+        {" "}sample application.
+      </p>
+      <a href="/signup" className="btn btn-lg btn-primary">Sign up now!</a>
+    </div>
+  );
+}
+```
 
 ## 練習問題 1
 
