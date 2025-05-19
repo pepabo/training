@@ -36,9 +36,11 @@ fs.writeFile('output.txt', 'foo', () => {
 console.log('このコードの時点では書き込みが終了していることは保証されません');
 ```
 
-JavaScript によるネットワーク通信を実装する場合も、同じようにコールバック関数による後続処理の実装が求められます。ブラウザで最初から使えるのは [XMLHttpRequest](https://developer.mozilla.org/ja/docs/Web/API/XMLHttpRequest/Synchronous_and_Asynchronous_Requests) です。リンク先にどのようなコードを書くかは掲載されていますが、実際のコーディングで使うことはないので眺める程度で大丈夫です。この場合後続処理は `xhr.onload` で書きます。
+JavaScript によるネットワーク通信を実装する場合も、同じようにコールバック関数による後続処理の実装が求められることがあります。
+例えば、古くから利用されているブラウザ組み込みの処理 [XMLHttpRequest](https://developer.mozilla.org/ja/docs/Web/API/XMLHttpRequest/Synchronous_and_Asynchronous_Requests) では、後続処理は `xhr.onload` に書きます。
 
-しかし、コールバック関数を要求する処理を複数行う場合（例えばある Web API のレスポンスを使って他の Web API にアクセスしたい場合）など、コールバック関数の中にコールバック関数が入ることになってインデントの回数も多くなり、大変見にくいコードとなってしまいます。関数を変数に代入して引数に渡せばインデントは深くならないですが、今度は上下にコードの塊が散らかってしまうので、これもまた見にくい状況になってしまいます。
+しかし、コールバック関数を要求する処理を複数行う場合（例えばある Web API のレスポンスを使って他の Web API にアクセスしたい場合）など、コールバック関数の中にコールバック関数が入ることになってインデントの回数も多くなり、大変見にくいコードとなってしまいます。
+関数を変数に代入して引数に渡せばインデントは深くならないですが、今度は上下にコードの塊が散らかってしまうので、これもまた見にくい状況になってしまいます。
 
 ```js
 someFunction(() => {
@@ -64,16 +66,20 @@ const otherFunction = () => {};
 someFunction(otherFunction);
 ```
 
-この複雑化に対応できるのが [Promise](https://developer.mozilla.org/ja/docs/Web/JavaScript/Guide/Using_promises) です。 Promise を使うとコールバックを連ねていたのが `.then` のチェーンに落とし込むことができます（それ以外にも複数の非同期処理の終了を待ち合わせる API もありますが、あまり使わないのでここではそういうこともあるよという認識で大丈夫です）。
+この複雑化に対応できるのが [Promise](https://developer.mozilla.org/ja/docs/Web/JavaScript/Guide/Using_promises) です。
+Promise を使うとコールバックを連ねていたのが `.then` のチェーンに落とし込むことができます（それ以外にも複数の非同期処理の終了を待ち合わせる API もあります）。
 
 ## 練習問題 1
 
 1. `setTimeout()` を Promise でラップしたものを返す `sleep(ms)` 関数を作り、 `sleep(ms)` を呼び、`.then` でチェーンさせた内部でもう一度 `sleep(ms)` を `return` し、 `.then` が2個チェーンした形になるようにしてください。
-2. `fs.writeFile()` の第 3 引数は、 Error オブジェクトが引数として渡ってくるコールバック関数ですが、これを考慮に入れて、 Promise でラップしたものを返す `write(filename, data)` 関数を作ってください。
+2. `fs.writeFile()` は `node:fs/promises` からimportすると、Promise版の `writeFile()` を利用できます。試してみましょう。
 
 ## async/await
 
-コールバック地獄は Promise で解決することができますが、 Promise に直したところでいくつかの問題が別で発生します。一つは、`.then` のチェーンで行数がだらだらと伸びてしまうこと。もう一つは、例外発生時の `.catch` のフローが一見してわかりづらく、処理を目で追いづらいということです。処理を直感的に追えないというのは変数の代入にも言えて、例えば以下のようなコードが Promise では発生してしまいます。
+コールバック地獄は Promise で解決することができますが、 Promise に直したところでいくつかの問題が別で発生します。
+一つは、`.then` のチェーンで行数がだらだらと伸びてしまうこと。
+もう一つは、例外発生時の `.catch` のフローが一見してわかりづらく、処理を目で追いづらいということです。
+処理を直感的に追えないというのは変数の代入にも言えて、例えば以下のようなコードが Promise では発生してしまいます。
 
 ```js
 let aValue;  // then 複数箇所で変数を使いまわしたい場合ここで宣言せざるを得ない
@@ -88,7 +94,9 @@ someFunction()  // 結果つきで Promise を返す関数
   });
 ```
 
-これを直列的に書けるようにしたのが **async function** です。さっきのコードが以下のようなコードになります。大事なのは宣言時に `async` をつけることと、 Promise を返却する関数を実行する際には `await` を頭につけることで待ち合わせして結果を取り出せるということです。 async function を実行した結果は暗黙のうちに Promise として返却されるので、 async function 実行の結果を `.then` で引き継ぐこともできます。
+これを直列的に書けるようにしたのが **async function** です。さっきのコードが以下のようなコードになります。
+大事なのは宣言時に `async` をつけることと、 Promise を返却する関数を実行する際には `await` を頭につけることで待ち合わせして結果を取り出せるということです。
+async function を実行した結果は暗黙のうちに Promise として返却されるので、 async function 実行の結果を `.then` で引き継ぐこともできます。
 
 ```js
 // 頭に async をつけて宣言する
@@ -122,11 +130,7 @@ async function foo() {
 }
 ```
 
-## axios
+## fetch
 
-ここまでなぜ長々と Promise, async/await について書いてきたかというと、モダンな web フロントエンド開発においては XMLHttpRequest をそのまま書くようなことはあまりなく、 XMLHttpRequest をラップして Promise を返却するようなラッパーライブラリを使うからです。 Vue では [axios/axios](https://github.com/axios/axios) を使うことが推奨されています。詳細は GitHub の当該ページに譲りますが、リクエストの結果が Promise で返却されるのが見て取れると思います。
-
-## 練習問題 2
-
-1. NPM でインストールした axios を使って Reddit 上にある Vue の記事一覧 `https://www.reddit.com/r/vue.json` を取得し、結果を `console.log` で表示してください。
-2. 上の問題で取得した Vue の記事一覧を取得するコードを、 async/await を使って書き直してください。
+ブラウザ標準の組み込みAPIに [Fetch](https://developer.mozilla.org/ja/docs/Web/API/Fetch_API/Using_Fetch) があります。
+`fetch()` はPromiseを返却するので、これまで説明した `.then()` によるメソッドチェーンや `async` / `await` 構文を利用することができます。
