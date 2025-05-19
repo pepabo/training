@@ -199,9 +199,15 @@ cd frontend
 npm run dev
 ```
 
+http://localhost:5173/ にアクセスして、デフォルトのページが表示されれば OK です。
+
+![npm run dev の結果](first-react-router-app.png)
+
 ### 4. React Router のルーティング設定
 
-React Router のルーティングを設定します。
+React Router のルーティングを確認します。
+
+公式ドキュメント: https://reactrouter.com/start/framework/routing
 
 ```tsx:frontend/app/routes.ts
 import { type RouteConfig, index, route } from "@react-router/dev/routes";
@@ -210,6 +216,8 @@ export default [
   index("routes/home.tsx"),
 ] satisfies RouteConfig;
 ```
+
+`frontend/app/routes/home.tsx` を確認し、変更してみましょう
 
 ```tsx:frontend/app/routes/home.tsx
 import type { Route } from "./+types/home";
