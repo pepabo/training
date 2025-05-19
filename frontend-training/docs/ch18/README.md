@@ -500,30 +500,6 @@ http://localhost:5173/users にアクセスしてみましょう。ユーザー�
 2. `/api` 配下に移動した他のリソースも `users.tsx` のように React Router からアクセスできるようにしてみましょう。
 3. 先ほどの `frontend/app/users/users.tsx` の例は、fetch する際に useEffect を使用していますが、フレームワークやサードパーティライブラリを用いることでデータフェッチをよりシンプルに記述できることが[公式ドキュメントに記載](https://ja.react.dev/reference/react/useEffect#fetching-data-with-effects)されています。これを踏まえて改善方法を提案してみてください。
 
-## React Router から Ruby on Rails へPOSTする
-
-WIP
-
-API リクエスト (JSON) に対して CSRF トークン検証をスキップするための設定を行います。
-この設定はセキュリティリスクを伴います。本番環境ではリスク評価を行った上で対策を講じてください。
-
-```ruby:app/controllers/application_controller.rb
-class ApplicationController < ActionController::Base
-  include SessionsHelper
-  
-  # API リクエストに対して CSRF トークン検証をスキップ
-  skip_before_action :verify_authenticity_token, if: :json_request?
-  
-  private
-  
-  def json_request?
-    request.format.json?
-  end
-  
-  # ...
-end
-```
-
 ## 次回予告
 
 ついに React を使ってフロントエンドを開発できるようになりました。次回は Ruby とは違う JavaScript 非同期コールバックモデルとその問題点、その問題点を解消した Promise や async/await について学びます。
