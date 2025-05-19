@@ -351,45 +351,6 @@ https://railsguides.jp/action_view_overview.html#jbuilder
 この研修では取り扱いませんが、Ruby on Rails を API 専用のサーバーとして動かしたい場合は以下のドキュメントなどをご参考ください。
 https://railsguides.jp/api_app.html
 
-### 開発サーバーを起動するための Procfile.dev を作成
-
-このままでは、Ruby on Rails のサーバーと React Router のサーバーを別々に起動しないといけませんので、一度にどちらのサーバーも起動する `bin/dev` を作成しましょう。
-
-```bash:./bin/dev
-#!/usr/bin/env sh
-
-if ! gem list foreman -i --silent; then
-  echo "Installing foreman..."
-  gem install foreman
-fi
-
-# Default to port 3000 if not specified
-export PORT="${PORT:-3000}"
-
-# Let the debug gem allow remote connections,
-# but avoid loading until `debugger` is called
-export RUBY_DEBUG_OPEN="true"
-export RUBY_DEBUG_LAZY="true"
-
-exec foreman start -f Procfile.dev "$@"
-```
-
-```./Procfile.dev
-web: bin/rails server
-frontend: cd frontend && pnpm run dev
-```
-
-```bash
-# 初回のみ
-chmod +x ./bin/dev
-bin/dev
-
-# 2回目以降
-bin/dev
-```
-
-参考: https://zenn.dev/ykpythemind/articles/78586345df229b#procfile%E3%82%92%E4%BD%9C%E6%88%90(optional)
-
 ### 6. フロントエンドから API サーバーに GET リクエストを送る
 
 先ほどの users_controller.rb#index を利用して、React から JSON を取得して表示するコンポーネントを作成します。
