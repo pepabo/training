@@ -151,7 +151,7 @@ Ruby on Rails アプリケーションは、[yasslab/sample_app のサンプル�
 
 前研修で作成した Ruby on Rails アプリケーションのプロジェクトルートで作業します。
 基本は [Installation | React Router](https://reactrouter.com/start/framework/installation) に沿って React Router を導入します。
-(`Initialize a new git repository?` には `No` を選択します。`Install dependencies with npm?` はお好みで)
+(`Initialize a new git repository?` には `No` を選択します。)
 
 ```bash
 $ npx create-react-router@latest frontend
