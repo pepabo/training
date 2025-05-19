@@ -249,8 +249,308 @@ export default function Home() {
 1. React の開発に自信がない人は、React の公式チュートリアル「[チュートリアル：三目並べ – React](https://ja.react.dev/learn/tutorial-tic-tac-toe)」をやってみてください。
   - その際、 [React の流儀 – React](https://ja.react.dev/learn/thinking-in-react) も併せて読み、React の思想について理解を深めてください。
 
+## React Router と Ruby on Rails の連携
+
+#### 5. API サーバーとしての Ruby on Rails
+
+Ruby on Rails のコントローラーを API として利用するための設定を行います。
+ログイン以外の API サーバーとして利用する `resources` を `namespace :api do ... end` で囲み、 `/api` という名前空間に指定します。
+
+```ruby:config/routes.rb
+Rails.application.routes.draw do
+  get    "/help",    to: "static_pages#help"
+  get    "/about",   to: "static_pages#about"
+  get    "/contact", to: "static_pages#contact"
+  get    "/signup",  to: "users#new"
+  get    "/login",   to: "sessions#new"
+  post   "/login",   to: "sessions#create"
+  delete "/logout",  to: "sessions#destroy"
+  resources :account_activations, only: [:edit]
+  resources :password_resets,     only: [:new, :create, :edit, :update]
+
+  namespace :api do
+    resources :users do
+      member do
+        get :following, :followers
+      end
+    end
+    resources :microposts,          only: [:index, :create, :destroy]
+    resources :relationships,       only: [:create, :destroy]
+  end
+end
+```
+
+この例では、エンドポイント `/microposts` について、 `get '/microposts', to: 'static_pages#home'` を削除し、 `microposts_controller.rb#index` へと変更しています。コントローラー側も変更しておきましょう。
+
+`/api` の名前空間を指定したコントローラーを `app/controllers/` から `app/controllers/api/` に移動します
+
+- `app/controllers/users_controller.rb` -> `app/controllers/api/users_controller.rb`
+- `app/controllers/relationships_controller.rb` -> `app/controllers/api/relationships_controller.rb`
+- `app/controllers/microposts_controller.rb` -> `app/controllers/api/microposts_controller.rb`
+
+移動後、 class 名を `Api::*` に変更します。
+
+```rb:app/controllers/api/users_controller.rb
+class Api::UsersController < ApplicationController
+  .
+  . 中略
+  .
+end
+```
+
+つぎに、React Router への一部のアクセスを Rails サーバーにプロキシするように設定します。これは開発環境用の設定となります。
+
+```ts:frontend/vite.config.ts
+import { reactRouter } from "@react-router/dev/vite";
+import tailwindcss from "@tailwindcss/vite";
+import { defineConfig } from "vite";
+import tsconfigPaths from "vite-tsconfig-paths";
+
+export default defineConfig({
+  plugins: [tailwindcss(), reactRouter(), tsconfigPaths()],
+  server: {
+    proxy: {
+      "/api": "http://localhost:3000",
+      "/help": "http://localhost:3000",
+      "/about": "http://localhost:3000",
+      "/contact": "http://localhost:3000",
+      "/signup": "http://localhost:3000",
+      "/login": "http://localhost:3000",
+      "/logout": "http://localhost:3000",
+      "/account_activations": "http://localhost:3000",
+      "/password_resets": "http://localhost:3000",
+    },
+  },
+});
+```
+
+試しに `/api/users` でユーザー一覧の JSON を返すようにします。
+
+```rb:app/controllers/users_controller.rb
+class UsersController < ApplicationController
+  # 動作検証のために一時的に :index を対象外にする
+  # before_action :logged_in_user, only: [:index, :edit, :update, :destroy, :following, :followers]
+  before_action :logged_in_user, only: [:edit, :update, :destroy, :following, :followers]
+  .
+  . 中略
+  .
+  def index
+    @users = User.paginate(page: params[:page])
+    render json: @users
+  end
+  .
+  . 中略
+  .
+end
+```
+
+http://localhost:3000/api/users.json にアクセスしてみましょう。JSON が表示されていたら設定は完了しています。
+
+上記の `render json: @users` の例は簡単のためにこのように記述しておりますが、Ruby on Rails で JSON 形式のレスポンスを生成する方法の一つとして Jbuilder があります。
+https://railsguides.jp/action_view_overview.html#jbuilder
+
+この研修では取り扱いませんが、Ruby on Rails を API 専用のサーバーとして動かしたい場合は以下のドキュメントなどをご参考ください。
+https://railsguides.jp/api_app.html
+
+### 開発サーバーを起動するための Procfile.dev を作成
+
+このままでは、Ruby on Rails のサーバーと React Router のサーバーを別々に起動しないといけませんので、一度にどちらのサーバーも起動する `bin/dev` を作成しましょう。
+
+```bash:./bin/dev
+#!/usr/bin/env sh
+
+if ! gem list foreman -i --silent; then
+  echo "Installing foreman..."
+  gem install foreman
+fi
+
+# Default to port 3000 if not specified
+export PORT="${PORT:-3000}"
+
+# Let the debug gem allow remote connections,
+# but avoid loading until `debugger` is called
+export RUBY_DEBUG_OPEN="true"
+export RUBY_DEBUG_LAZY="true"
+
+exec foreman start -f Procfile.dev "$@"
+```
+
+```./Procfile.dev
+web: bin/rails server
+frontend: cd frontend && pnpm run dev
+```
+
+```bash
+# 初回のみ
+chmod +x ./bin/dev
+bin/dev
+
+# 2回目以降
+bin/dev
+```
+
+参考: https://zenn.dev/ykpythemind/articles/78586345df229b#procfile%E3%82%92%E4%BD%9C%E6%88%90(optional)
+
+### 6. フロントエンドから API サーバーに GET リクエストを送る
+
+先ほどの users_controller.rb#index を利用して、React から JSON を取得して表示するコンポーネントを作成します。
+
+```diff
+diff --git a/frontend/app/routes.ts b/frontend/app/routes.ts
+index 102b402..b0e8551 100644
+--- a/frontend/app/routes.ts
++++ b/frontend/app/routes.ts
+@@ -1,3 +1,6 @@
+-import { type RouteConfig, index } from "@react-router/dev/routes";
++import { type RouteConfig, index, route } from "@react-router/dev/routes";
+ 
+-export default [index("routes/home.tsx")] satisfies RouteConfig;
++export default [
++  index("routes/home.tsx"),
++  route("users", "./routes/users.tsx"),
++] satisfies RouteConfig;
+```
+
+```tsx:frontend/app/routes/users.tsx
+import type { Route } from "./+types/home";
+import { Users } from "../users/users";
+
+export function meta({}: Route.MetaArgs) {
+  return [
+    { title: "Users" },
+    { name: "description", content: "Users list" },
+  ];
+}
+
+export default function UsersRoute() {
+  return <Users />;
+}
+```
+
+```tsx:frontend/app/users/users.tsx
+import React, { useEffect, useState } from "react";
+import { Link } from "react-router";
+
+type User = {
+  id: number;
+  name: string;
+  email: string;
+  gravatar_id?: string;
+  admin?: boolean;
+  activated?: boolean;
+};
+
+export function Users() {
+  const [users, setUsers] = useState<User[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchUsers = async () => {
+      try {
+        setLoading(true);
+        const response = await fetch("/api/users", {
+          headers: {
+            "Content-Type": "application/json",
+          },
+        });
+        
+        if (!response.ok) {
+          throw new Error(`APIリクエストエラー: ${response.status}`);
+        }
+        
+        const data = await response.json();
+        setUsers(data);
+        setError(null);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : "ユーザー情報の取得中にエラーが発生しました");
+        console.error("ユーザー情報の取得エラー:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchUsers();
+  }, []);
+
+  if (loading) {
+    return <div className="text-center my-4">読み込み中...</div>;
+  }
+
+  if (error) {
+    return <div className="text-center my-4 text-red-600">{error}</div>;
+  }
+
+  return (
+    <div className="container mx-auto px-4 py-6">
+      <h1 className="text-2xl font-bold mb-6">ユーザー一覧</h1>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        {users.length > 0 ? (
+          users.map((user) => (
+            <div key={user.id} className="border rounded-lg p-4 shadow-sm">
+              <div className="flex items-center gap-4">
+                {user.gravatar_id && (
+                  <img
+                    src={`https://secure.gravatar.com/avatar/${user.gravatar_id}?s=80`}
+                    alt={`${user.name}のアバター`}
+                    className="w-16 h-16 rounded-full"
+                  />
+                )}
+                <div>
+                  <h2 className="text-lg font-semibold">
+                    <Link to={`/users/${user.id}`} className="text-blue-600 hover:underline">
+                      {user.name}
+                    </Link>
+                  </h2>
+                  <p className="text-gray-500">{user.email}</p>
+                  {user.admin && <span className="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded">管理者</span>}
+                </div>
+              </div>
+            </div>
+          ))
+        ) : (
+          <p className="col-span-full text-center text-gray-500">ユーザーが見つかりませんでした</p>
+        )}
+      </div>
+    </div>
+  );
+}
+```
+
+http://localhost:5173/users にアクセスしてみましょう。ユーザー一覧が表示されていたら成功です。
+
+
+## 練習問題 2
+
+1. `/api` 配下に移動した他のリソースも `users.tsx` のように React Router からアクセスできるようにしてみましょう。
+2. 先ほどの `frontend/app/users/users.tsx` の例は、fetch する際に useEffect を使用しており、古典的なモデルとなっています。 [React API の `use`](https://ja.react.dev/reference/react/use) を使って書き換えてみましょ
+
+## React Router から Ruby on Rails へPOSTする
+
+WIP
+
+API リクエスト (JSON) に対して CSRF トークン検証をスキップするための設定を行います。
+この設定はセキュリティリスクを伴います。本番環境ではリスク評価を行った上で対策を講じてください。
+
+```ruby:app/controllers/application_controller.rb
+class ApplicationController < ActionController::Base
+  include SessionsHelper
+  
+  # API リクエストに対して CSRF トークン検証をスキップ
+  skip_before_action :verify_authenticity_token, if: :json_request?
+  
+  private
+  
+  def json_request?
+    request.format.json?
+  end
+  
+  # ...
+end
+```
+
 ## 次回予告
 
-ついに React を使ってフロントエンドを開発できるようになりました。しかし、そこに流し込みたいデータを Micropost アプリから読み取ることができません。次のチャプターでは Micropost アプリに Web API としての機能を追加し、 React 部分からデータを取得できるようにします。またその前段階として、 Ruby とは違う JavaScript 非同期コールバックモデルとその問題点、その問題点を解消した Promise や async/await について学びます。
+ついに React を使ってフロントエンドを開発できるようになりました。次回は Ruby とは違う JavaScript 非同期コールバックモデルとその問題点、その問題点を解消した Promise や async/await について学びます。
 
 {% endraw %}
