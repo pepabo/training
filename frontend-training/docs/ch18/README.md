@@ -141,7 +141,7 @@ Ruby on Rails アプリケーションは、[yasslab/sample_app のサンプル�
 
 ただし、以下については時間の都合上考えないことにします。
 
-- ログイン機構（ JWT あたりで実装するのですが長くなりすぎる）
+- ログイン処理をRuby on Railsアプリケーションから独立させる
 - Rails を BFF (Backend for Frontend) にして Next.js のフロントエンドサーバを立てる
 - Server Side Rendering （ React が吐き出す HTML をサーバ側で生成して処理高速化＋ SEO 対策）
 - Redux （グローバルな状態管理）
