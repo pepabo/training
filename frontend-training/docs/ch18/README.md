@@ -252,7 +252,7 @@ export default function Home() {
 
 #### 5. API サーバーとしての Ruby on Rails
 
-Ruby on Rails のコントローラーを API として利用するための設定を行います。
+これから作成するSPAからRuby on Railsアプリケーションを参照できるように、JSON APIサーバとして利用するための設定を行います。
 ログイン以外の API サーバーとして利用する `resources` を `namespace :api do ... end` で囲み、 `/api` という名前空間に指定します。
 
 ```ruby:config/routes.rb
