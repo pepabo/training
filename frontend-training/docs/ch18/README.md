@@ -442,44 +442,26 @@ type User = {
 
 export function Users() {
   const [users, setUsers] = useState<User[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
   useEffect(() => {
     const fetchUsers = async () => {
       try {
-        setLoading(true);
         const response = await fetch("/api/users", {
           headers: {
             "Content-Type": "application/json",
           },
         });
-        
         if (!response.ok) {
           throw new Error(`APIリクエストエラー: ${response.status}`);
         }
-        
         const data = await response.json();
         setUsers(data);
-        setError(null);
       } catch (err) {
-        setError(err instanceof Error ? err.message : "ユーザー情報の取得中にエラーが発生しました");
         console.error("ユーザー情報の取得エラー:", err);
-      } finally {
-        setLoading(false);
       }
     };
-
     fetchUsers();
   }, []);
 
-  if (loading) {
-    return <div className="text-center my-4">読み込み中...</div>;
-  }
-
-  if (error) {
-    return <div className="text-center my-4 text-red-600">{error}</div>;
-  }
 
   return (
     <div className="container mx-auto px-4 py-6">
@@ -489,13 +471,6 @@ export function Users() {
           users.map((user) => (
             <div key={user.id} className="border rounded-lg p-4 shadow-sm">
               <div className="flex items-center gap-4">
-                {user.gravatar_id && (
-                  <img
-                    src={`https://secure.gravatar.com/avatar/${user.gravatar_id}?s=80`}
-                    alt={`${user.name}のアバター`}
-                    className="w-16 h-16 rounded-full"
-                  />
-                )}
                 <div>
                   <h2 className="text-lg font-semibold">
                     <Link to={`/users/${user.id}`} className="text-blue-600 hover:underline">
@@ -522,8 +497,9 @@ http://localhost:5173/users にアクセスしてみましょう。ユーザー�
 
 ## 練習問題 2
 
-1. `/api` 配下に移動した他のリソースも `users.tsx` のように React Router からアクセスできるようにしてみましょう。
-2. 先ほどの `frontend/app/users/users.tsx` の例は、fetch する際に useEffect を使用しており、古典的なモデルとなっています。 [React API の `use`](https://ja.react.dev/reference/react/use) を使って書き換えてみましょ
+1. このままでは「ユーザーが見つかりませんでした」という表示が API からデータを取得する前に一瞬表示されてしまいます。これを避けて「読み込み中...」という表示を出す方法を考えてください。
+2. `/api` 配下に移動した他のリソースも `users.tsx` のように React Router からアクセスできるようにしてみましょう。
+3. 先ほどの `frontend/app/users/users.tsx` の例は、fetch する際に useEffect を使用しており、古典的なモデルとなっています。 [React API の `use`](https://ja.react.dev/reference/react/use) を使って書き換えてみましょ
 
 ## React Router から Ruby on Rails へPOSTする
 
