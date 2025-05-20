@@ -1,136 +1,468 @@
-# 第 19 章　JavaScript 非同期処理とネットワーク通信
+# 第 19 章　React 開発ことはじめ
 
-ところで話はいきなり JavaScript の言語仕様の話になりますが、 **JavaScript では function はオブジェクトです**。つまり関数を変数に代入したり引数として別の関数に渡したりすることができます。下記は実際に動くコードです。
+## React や Vue の何がかつてのフロントエンドライブラリと比べて優れていたか
+
+練習問題 1-3 のような画面をかつて JavaScript で実装しようとした場合、フォームから取得した値をデータとして持つのではなく、単純に画面に表示する要素として追記していただけでした。しかし、これだと 1-2 のような絞込み機能を実装することがとても難しくなります。仮に `species` を表示要素のどこかに書き込んでおいて、繰り返しでその値をチェックして絞込みの対象でなければ消去するという処理を実装するにしても、「猫絞込み→犬絞込みへの切り替え」「猫絞込み→全件表示」のような 2 アクションの操作に対応しようと思うと、「消去したデータを保管する変数」のようなものを設けなければいけません。今回は単純なアプリケーションですが、これが複雑化して例えばゲームのような画面になった時には、数え切れないほどのパターンの状態と変更が発生するようになります。
+
+このような複雑な UI を実装する手段として、データの状態をどこかに保持しておいて（React の `useState` で作られる変数や、それこそ Vue の `data` のように）、変更があったら UI の方も書き換えるというアプローチが取られるようになりました（ React / Vue の動きに似ていないですか？）。しかし、これを手で実装していた時はいつ UI を書き換えるかも手動で設定しなければならず、その結果として変更の反映がされてないというバグが発生することがありました。それならば、毎秒（ゲームなら毎フレーム）データから UI を生成できればよかったのですが、 JavaScript で UI を書き換えるという処理はとても遅く、毎秒全部書き換えでは非常にストレスフルなアプリケーションが出来上がってしまいます。
+
+先ほど「全部書き換え」と書いたのが要点で、 React や Vue はそこを HTML の構造を模したオブジェクトを作成しデータ変更の前後でどこが書き換わるかを検知し、 UI のその部分のみを置き換えているのです。 JavaScript オブジェクトの比較は UI の直接変更より十分に短い時間でできるので、データが置き換わった時に毎回自動でチェックするようなフックを仕掛けられるようになります。この HTML の構造を模したオブジェクトを **Virtual DOM** と言います。
+
+この思想が優れている点は「宣言的に UI を書ける」ということ、さらに『データから自動で UI を生成できる、そしてその UI は書き換えの回数が最小化される』という考え方が、 Web フロントエンドに限らず UI を備えたスマートフォンのアプリケーションやデスクトップアプリケーションにも応用できるということです。これが [ReactNative](https://reactnative.dev/) や [Flutter](https://flutter.dev) といったものです。
+
+ここで、「宣言的に UI を書ける」という点をもう少し深掘りしてみましょう。宣言的UIプログラミングとは、「何をするか」ではなく「どうあるべきか」を記述するアプローチです。これは単なる実装テクニックではなく、UIを考える根本的な思考法の転換を意味します。
+
+従来の命令型プログラミングでは、「ボタンやテキストを変数に束縛し、クリックイベントを登録し...」というように一連の手順を指示していました。例えば、フォームのバリデーションを命令的に実装すると
 
 ```js
-const add = (x, y) => {
-  return x + y;
-}
-console.log(add(3, 2));  // => 5
+// 命令的アプローチ
+const emailInput = document.getElementById('email');
+const submitButton = document.getElementById('submit');
 
-// 関数を引数に取って 2 番目の引数として 2 を与える新しい関数を返す関数
-const apply2 = (f) => {
-  return (x) => {
-    return f(x, 2);
+emailInput.addEventListener('input', function() {
+  const email = emailInput.value;
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  
+  if (emailRegex.test(email)) {
+    submitButton.disabled = false;
+  } else {
+    submitButton.disabled = true;
   }
+});
+
+// フォーム送信時の処理
+const form = document.getElementById('contact-form');
+form.addEventListener('submit', function(event) {
+  event.preventDefault();
+  
+  // 送信中の状態に変更
+  emailInput.disabled = true;
+  submitButton.disabled = true;
+  submitButton.textContent = '送信中...';
+  submitButton.classList.add('loading');
+  
+  // 送信処理（仮想的な非同期処理）
+  setTimeout(function() {
+    // 成功時の処理
+    form.innerHTML = '<div class="success">送信完了しました！</div>';
+  }, 2000);
+});
+```
+
+- DOM要素を直接操作する
+- 状態変化のたびに影響を受ける要素を手動で更新する
+- イベント処理が複雑になり、管理すべき状態が増え、バグが発生しやすくなる
+
+対して宣言的アプローチでは、「この状態のときはこのように見える」という関係性を定義します。UIの状態とその表示方法を明確に分離することで、命令的アプローチにおける問題を解決します。
+
+```js
+// 宣言的アプローチ
+function Form() {
+  const [email, setEmail] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isSuccess, setIsSuccess] = useState(false);
+  const isValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+  
+  async function handleSubmit(e) {
+    e.preventDefault();
+    setIsSubmitting(true);
+    
+    // 送信処理（仮想的な非同期処理）
+    await new Promise(resolve => setTimeout(resolve, 2000));
+    setIsSuccess(true);
+  }
+  
+  if (isSuccess) {
+    return <div className="success">送信完了しました！</div>;
+  }
+  
+  return (
+    <form onSubmit={handleSubmit}>
+      <input
+        value={email}
+        onChange={e => setEmail(e.target.value)}
+        disabled={isSubmitting}
+      />
+      <button 
+        type="submit"
+        disabled={!isValid || isSubmitting}
+        className={isSubmitting ? 'loading' : ''}
+      >
+        {isSubmitting ? '送信中...' : '送信'}
+      </button>
+    </form>
+  );
 }
-const add2 = apply2(add);  // 2 を足す関数になる
-console.log(add2(3));  // => 5
-
-// 引数として直接 function を書くこともできる
-const sub2 = apply2((x, y) => {
-  return x - y;
-})
-console.log(sub2(3));  // => 1
 ```
 
-また、 JavaScript は Ruby と違い、I/O 処理などをする時は時間がかかるので原則として処理の終了を待ちません。例えば第 16 章の練習問題で出てきた文字列をファイルに書き出す `fs.writeFile()` は直後にコードを挿入しても、その時にファイルへの書き込みが終了していることを保証しません（終了を待ち合わせする `fs.writeFileSync()` というのもあります）。 JavaScript ではこのような場合直列でコードを書くのではなく、関数を引数に渡して後続の処理を書くことになります。これを**コールバック関数**と呼びます。
+- UIの各状態を明示的に定義する
+- 状態に応じたUIの表示を宣言的に記述する
+- 状態の変更が自動的にUIへと反映される
+- DOMの直接操作を抽象化し、「何を表示するか」にフォーカスする
 
-```js
-const fs = require('fs');
+宣言的アプローチによって、DOM操作という手段を分離し、開発者は「何を表示するか」という本質的な問題に集中できるようになりました。この思想転換により、フロントエンド開発はコードの記述方法から考え方そのものが変わり、複雑なUIを扱う際の認知的負荷が大幅に軽減されました。
 
-// もし膨大なデータを書き込もうとした場合…
-fs.writeFile('output.txt', 'foo', () => {
-  console.log('このコールバック関数の中では確実に書き込みが完了しています');
-});
-console.log('このコードの時点では書き込みが終了していることは保証されません');
+開発者は「このボタンをどう変更するか」ではなく「このデータ状態ではUIはどうあるべきか」という、より抽象度の高い設計に注力できるようになったのです。また、ユーザーのインタラクションに対しても、「何が起こるべきか」という宣言的なアプローチに移行できました。
+
+この根本的な考え方の変化こそが、ReactやVueが今なおフロントエンド開発のデファクトスタンダードとして広く採用され続ける最大の理由です。
+
+宣言的UIと命令的UIの比較については、Reactの公式ドキュメントにも詳しく記載されているので、こちらも併せて参照してください。[How declarative UI compares to imperative ](https://react.dev/learn/reacting-to-input-with-state#how-declarative-ui-compares-to-imperative)
+
+この項以外にもReactの公式ドキュメントでは、基本的な思想からReactの使い方まで分かりやすく網羅的にカバーされています。一読しておくと、より理解を深めることができるでしょう。
+
+また、ここまでで宣言的アプローチを実現する方法として、「React や Vue」というまとめ方をしてきましたが、以降の資料ではReactを使った研修内容になっています。
+
+両者の比較については様々な観点からの考え方がありますが、ここでは詳細については触れず、単に社内における採用実績をベースとしてReactを選定しています。
+
+## React Router をセットアップする
+
+それでは、いよいよ React を使っての開発に入ります。
+
+最近の React アプリの開発は、React を直接組み込むよりもフレームワークを使った開発が主流です。公式ドキュメントでは Next.js, React Router, Expo などのフレームワークが紹介されています。
+
+https://ja.react.dev/learn/creating-a-react-app
+
+今回は、前研修で作成した Ruby on Rails を活かしつつ React を組み込みます。具体的には、[SPA Mode の React Router](https://reactrouter.com/how-to/pre-rendering#pre-rendering-with-ssrfalse) を使います。
+
+Ruby on Rails アプリケーションは、[yasslab/sample_app のサンプルアプリケーション (第7版 第14章)](https://github.com/yasslab/sample_apps/tree/main/7_0/ch14) を想定しています (ただし Ruby on Rails のバージョンは `7.1.5.1` に上がっている)
+
+```diff:Gemfile
+- gem "rails",                      "7.0.4.3"
++ gem "rails",                      "7.1.5.1"
 ```
 
-JavaScript によるネットワーク通信を実装する場合も、同じようにコールバック関数による後続処理の実装が求められることがあります。
-例えば、古くから利用されているブラウザ組み込みの処理 [XMLHttpRequest](https://developer.mozilla.org/ja/docs/Web/API/XMLHttpRequest/Synchronous_and_Asynchronous_Requests) では、後続処理は `xhr.onload` に書きます。
+### 前提
 
-しかし、コールバック関数を要求する処理を複数行う場合（例えばある Web API のレスポンスを使って他の Web API にアクセスしたい場合）など、コールバック関数の中にコールバック関数が入ることになってインデントの回数も多くなり、大変見にくいコードとなってしまいます。
-関数を変数に代入して引数に渡せばインデントは深くならないですが、今度は上下にコードの塊が散らかってしまうので、これもまた見にくい状況になってしまいます。
+- 前研修で作成した Ruby on Rails アプリ内に、フロントエンド用のディレクトリ `./frontend` を作成します
+  - 開発環境では、React Router (Vite dev server の proxy) 経由で Rails サーバーにアクセスします
+  - 本番環境では、React Router (Vite build) で静的ファイルを生成し、Rails サーバーの静的ファイルとして配信 (`./public` に配置) します
+- Ruby on Rails で作ったロジックはそのまま利用します
+- Ruby on Rails の View は利用せず、React Router でリビルドします
 
-```js
-someFunction(() => {
-  someFunction(() => {
-    someFunction(() => {
-      someFunction(() => {
-        someFunction(() => {
-          // Hell!!!!
-        });
-      });
-    });
-  });
-});
+ただし、以下については時間の都合上考えないことにします。
+
+- ログイン処理をRuby on Railsアプリケーションから独立させる
+- Server Side Rendering （ React が吐き出す HTML をサーバ側で生成して処理高速化＋ SEO 対策）
+- Redux （グローバルな状態管理）
+
+なので、基本方針としては「ログイン後のページをシングルページアプリケーションで構成する」という方向性にします。
+
+### 1. React Router プロジェクトの作成
+
+前研修で作成した Ruby on Rails アプリケーションのプロジェクトルートで作業します。
+基本は [Installation | React Router](https://reactrouter.com/start/framework/installation) に沿って React Router を導入します。
+(`Initialize a new git repository?` には `No` を選択します。)
+
+```bash
+$ npx create-react-router@latest frontend
+
+         create-react-router v7.6.0
+      ◼  Directory: Using frontend as project directory
+
+      ◼  Using default template See https://github.com/remix-run/react-router-templates for more
+      ✔  Template copied
+
+   git   Initialize a new git repository?
+         No
+
+  deps   Install dependencies with npm?
+         Yes
+
+      ✔  Dependencies installed
+
+  done   That's it!
+
+         Enter your project directory using cd ./frontend
+         Check out README.md for development and deploy instructions.
+
+         Join the community at https://rmx.as/discord
 ```
 
-```js
-const otherFunction = () => {};
+### 2. フロントエンドプロジェクトの設定
 
-// very
-// long
-// code
+[React Router の SPA Mode](https://reactrouter.com/how-to/spa) を設定
 
-someFunction(otherFunction);
+```diff:frontend/react-router.config.ts
+-  ssr: true,
++  ssr: false,
+} satisfies Config;
 ```
 
-この複雑化に対応できるのが [Promise](https://developer.mozilla.org/ja/docs/Web/JavaScript/Guide/Using_promises) です。
-Promise を使うとコールバックを連ねていたのが `.then` のチェーンに落とし込むことができます（それ以外にも複数の非同期処理の終了を待ち合わせる API もあります）。
+### 3. 開発環境の起動
+
+フロントエンドとバックエンドを別々に起動します。
+
+```bash
+# React Router の起動確認
+cd frontend
+npm run dev
+```
+
+http://localhost:5173/ にアクセスして、デフォルトのページが表示されれば OK です。
+
+![npm run dev の結果](first-react-router-app.png)
+
+### 4. React Router のルーティング設定
+
+React Router のルーティングを確認します。
+
+公式ドキュメント: https://reactrouter.com/start/framework/routing
+
+```tsx:frontend/app/routes.ts
+import { type RouteConfig, index, route } from "@react-router/dev/routes";
+
+export default [
+  index("routes/home.tsx"),
+] satisfies RouteConfig;
+```
+
+`frontend/app/routes/home.tsx` を確認し、変更してみましょう
+
+```tsx:frontend/app/routes/home.tsx
+import type { Route } from "./+types/home";
+
+export function meta({}: Route.MetaArgs) {
+  return [
+    { title: "Sample App" },
+    { name: "description", content: "Ruby on Rails Tutorial Sample App" },
+  ];
+}
+
+export default function Home() {
+  return (
+    <div className="center jumbotron">
+      <h1>Welcome to the Sample App</h1>
+      <p>
+        This is the home page for the{" "}
+        <a href="https://railstutorial.jp/">Ruby on Rails Tutorial</a>
+        {" "}sample application.
+      </p>
+      <a href="/signup" className="btn btn-lg btn-primary">Sign up now!</a>
+    </div>
+  );
+}
+```
 
 ## 練習問題 1
 
-1. `setTimeout()` を Promise でラップしたものを返す `sleep(ms)` 関数を作り、 `sleep(ms)` を呼び、`.then` でチェーンさせた内部でもう一度 `sleep(ms)` を `return` し、 `.then` が2個チェーンした形になるようにしてください。
-2. `fs.writeFile()` は `node:fs/promises` からimportすると、Promise版の `writeFile()` を利用できます。試してみましょう。
+1. React の開発に自信がない人は、React の公式チュートリアル「[チュートリアル：三目並べ – React](https://ja.react.dev/learn/tutorial-tic-tac-toe)」をやってみてください。
+  - その際、 [React の流儀 – React](https://ja.react.dev/learn/thinking-in-react) も併せて読み、React の思想について理解を深めてください。
 
-## async/await
+## React Router と Ruby on Rails の連携
 
-コールバック地獄は Promise で解決することができますが、 Promise に直したところでいくつかの問題が別で発生します。
-一つは、`.then` のチェーンで行数がだらだらと伸びてしまうこと。
-もう一つは、例外発生時の `.catch` のフローが一見してわかりづらく、処理を目で追いづらいということです。
-処理を直感的に追えないというのは変数の代入にも言えて、例えば以下のようなコードが Promise では発生してしまいます。
+#### 5. API サーバーとしての Ruby on Rails
 
-```js
-let aValue;  // then 複数箇所で変数を使いまわしたい場合ここで宣言せざるを得ない
+これから作成するSPAからRuby on Railsアプリケーションを参照できるように、JSON APIサーバとして利用するための設定を行います。
+ログイン以外の API サーバーとして利用する `resources` を `namespace :api do ... end` で囲み、 `/api` という名前空間に指定します。
 
-someFunction()  // 結果つきで Promise を返す関数
-  .then((res) => {
-    aValue = res.aAttr;  // この値を使いまわしたい
-    return otherFunction(aValue);  // Promise を返す
-  })
-  .then((res) => {
-    return anotherFunction(aValue, res.bAttr);
-  });
+```ruby:config/routes.rb
+Rails.application.routes.draw do
+  get    "/help",    to: "static_pages#help"
+  get    "/about",   to: "static_pages#about"
+  get    "/contact", to: "static_pages#contact"
+  get    "/signup",  to: "users#new"
+  get    "/login",   to: "sessions#new"
+  post   "/login",   to: "sessions#create"
+  delete "/logout",  to: "sessions#destroy"
+  resources :account_activations, only: [:edit]
+  resources :password_resets,     only: [:new, :create, :edit, :update]
+
+  namespace :api do
+    resources :users do
+      member do
+        get :following, :followers
+      end
+    end
+    resources :microposts,          only: [:index, :create, :destroy]
+    resources :relationships,       only: [:create, :destroy]
+  end
+end
 ```
 
-これを直列的に書けるようにしたのが **async function** です。さっきのコードが以下のようなコードになります。
-大事なのは宣言時に `async` をつけることと、 Promise を返却する関数を実行する際には `await` を頭につけることで待ち合わせして結果を取り出せるということです。
-async function を実行した結果は暗黙のうちに Promise として返却されるので、 async function 実行の結果を `.then` で引き継ぐこともできます。
+この例では、エンドポイント `/microposts` について、 `get '/microposts', to: 'static_pages#home'` を削除し、 `microposts_controller.rb#index` へと変更しています。コントローラー側も変更しておきましょう。
 
-```js
-// 頭に async をつけて宣言する
-// const foo = async () => でも書ける
-async function foo() {
-  const aRes = await someFunction();
-  const aValue = aRes.aAttr;  // let でなくてよくなる
-  const bRes = await otherFunction(aValue);
-  return await anotherFunction(aValue, bRes.bAttr);
+`/api` の名前空間を指定したコントローラーを `app/controllers/` から `app/controllers/api/` に移動します
+
+- `app/controllers/users_controller.rb` -> `app/controllers/api/users_controller.rb`
+- `app/controllers/relationships_controller.rb` -> `app/controllers/api/relationships_controller.rb`
+- `app/controllers/microposts_controller.rb` -> `app/controllers/api/microposts_controller.rb`
+
+移動後、 class 名を `Api::*` に変更します。
+
+```rb:app/controllers/api/users_controller.rb
+class Api::UsersController < ApplicationController
+  .
+  . 中略
+  .
+end
+```
+
+つぎに、React Router への一部のアクセスを Rails サーバーにプロキシするように設定します。これは開発環境用の設定となります。
+
+```ts:frontend/vite.config.ts
+import { reactRouter } from "@react-router/dev/vite";
+import tailwindcss from "@tailwindcss/vite";
+import { defineConfig } from "vite";
+import tsconfigPaths from "vite-tsconfig-paths";
+
+export default defineConfig({
+  plugins: [tailwindcss(), reactRouter(), tsconfigPaths()],
+  server: {
+    proxy: {
+      "/api": "http://localhost:3000",
+      "/help": "http://localhost:3000",
+      "/about": "http://localhost:3000",
+      "/contact": "http://localhost:3000",
+      "/signup": "http://localhost:3000",
+      "/login": "http://localhost:3000",
+      "/logout": "http://localhost:3000",
+      "/account_activations": "http://localhost:3000",
+      "/password_resets": "http://localhost:3000",
+    },
+  },
+});
+```
+
+試しに `/api/users` でユーザー一覧の JSON を返すようにします。
+
+```rb:app/controllers/users_controller.rb
+class UsersController < ApplicationController
+  # 動作検証のために一時的に :index を対象外にする
+  # before_action :logged_in_user, only: [:index, :edit, :update, :destroy, :following, :followers]
+  before_action :logged_in_user, only: [:edit, :update, :destroy, :following, :followers]
+  .
+  . 中略
+  .
+  def index
+    @users = User.paginate(page: params[:page])
+    render json: @users
+  end
+  .
+  . 中略
+  .
+end
+```
+
+http://localhost:3000/api/users.json にアクセスしてみましょう。JSON が表示されていたら設定は完了しています。
+
+上記の `render json: @users` の例は簡単のためにこのように記述しておりますが、Ruby on Rails で JSON 形式のレスポンスを生成する方法の一つとして Jbuilder があります。
+https://railsguides.jp/action_view_overview.html#jbuilder
+
+この研修では取り扱いませんが、Ruby on Rails を API 専用のサーバーとして動かしたい場合は以下のドキュメントなどをご参考ください。
+https://railsguides.jp/api_app.html
+
+### 6. フロントエンドから API サーバーに GET リクエストを送る
+
+先ほどの users_controller.rb#index を利用して、React から JSON を取得して表示するコンポーネントを作成します。
+
+```diff
+diff --git a/frontend/app/routes.ts b/frontend/app/routes.ts
+index 102b402..b0e8551 100644
+--- a/frontend/app/routes.ts
++++ b/frontend/app/routes.ts
+@@ -1,3 +1,6 @@
+-import { type RouteConfig, index } from "@react-router/dev/routes";
++import { type RouteConfig, index, route } from "@react-router/dev/routes";
+ 
+-export default [index("routes/home.tsx")] satisfies RouteConfig;
++export default [
++  index("routes/home.tsx"),
++  route("users", "./routes/users.tsx"),
++] satisfies RouteConfig;
+```
+
+```tsx:frontend/app/routes/users.tsx
+import type { Route } from "./+types/home";
+import { Users } from "../users/users";
+
+export function meta({}: Route.MetaArgs) {
+  return [
+    { title: "Users" },
+    { name: "description", content: "Users list" },
+  ];
 }
 
-// async function は Promise を返却する
-// return した値も then に渡す関数で使える
-foo().then((res) => console.log(res));
-```
-
-async/await を使うメリットとして、例外発生時の処理がわかりやすくできるというのもあります。 async/await では例外発生時は `.catch()` ではなく `try {} catch {}` を使うことができ、前述したとおり直列にコードを書くことができるので、例外が発生する部分だけを `try {} catch {}` で囲んで書くことができるようになります。以下のようなコードです。
-
-```js
-async function foo() {
-  let aRes;
-  try {
-    aRes = await someFunction();  // 例えば、この関数が例外を送出しうるとして
-  } catch(err) {
-    console.log('エラー発生！！', err);
-    aRes = { aAttr: '' };
-  }
-  const aValue = aRes.aAttr;
-  const bRes = await otherFunction(aValue);  // 必要に応じてここも try にしたりする
-  return await anotherFunction(aValue, bRes.bAttr);
+export default function UsersRoute() {
+  return <Users />;
 }
 ```
 
-## fetch
+```tsx:frontend/app/users/users.tsx
+import React, { useEffect, useState } from "react";
+import { Link } from "react-router";
 
-ブラウザ標準の組み込みAPIに [Fetch](https://developer.mozilla.org/ja/docs/Web/API/Fetch_API/Using_Fetch) があります。
-`fetch()` はPromiseを返却するので、これまで説明した `.then()` によるメソッドチェーンや `async` / `await` 構文を利用することができます。
+type User = {
+  id: number;
+  name: string;
+  email: string;
+  gravatar_id?: string;
+  admin?: boolean;
+  activated?: boolean;
+};
+
+export function Users() {
+  const [users, setUsers] = useState<User[]>([]);
+  useEffect(() => {
+    const fetchUsers = async () => {
+      try {
+        const response = await fetch("/api/users", {
+          headers: {
+            "Content-Type": "application/json",
+          },
+        });
+        if (!response.ok) {
+          throw new Error(`APIリクエストエラー: ${response.status}`);
+        }
+        const data = await response.json();
+        setUsers(data);
+      } catch (err) {
+        console.error("ユーザー情報の取得エラー:", err);
+      }
+    };
+    fetchUsers();
+  }, []);
+
+
+  return (
+    <div className="container mx-auto px-4 py-6">
+      <h1 className="text-2xl font-bold mb-6">ユーザー一覧</h1>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        {users.length > 0 ? (
+          users.map((user) => (
+            <div key={user.id} className="border rounded-lg p-4 shadow-sm">
+              <div className="flex items-center gap-4">
+                <div>
+                  <h2 className="text-lg font-semibold">
+                    <Link to={`/users/${user.id}`} className="text-blue-600 hover:underline">
+                      {user.name}
+                    </Link>
+                  </h2>
+                  <p className="text-gray-500">{user.email}</p>
+                  {user.admin && <span className="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded">管理者</span>}
+                </div>
+              </div>
+            </div>
+          ))
+        ) : (
+          <p className="col-span-full text-center text-gray-500">ユーザーが見つかりませんでした</p>
+        )}
+      </div>
+    </div>
+  );
+}
+```
+
+http://localhost:5173/users にアクセスしてみましょう。ユーザー一覧が表示されていたら成功です。
+
+
+## 練習問題 2
+
+1. このままでは「ユーザーが見つかりませんでした」という表示が API からデータを取得する前に一瞬表示されてしまいます。これを避けて「読み込み中...」という表示を出す方法を考えてください。
+2. `/api` 配下に移動した他のリソースも `users.tsx` のように React Router からアクセスできるようにしてみましょう。
+3. 先ほどの `frontend/app/users/users.tsx` の例は、fetch する際に useEffect を使用していますが、フレームワークやサードパーティライブラリを用いることでデータフェッチをよりシンプルに記述できることが[公式ドキュメントに記載](https://ja.react.dev/reference/react/useEffect#fetching-data-with-effects)されています。これを踏まえて改善方法を提案してみてください。
+
+## 次回予告
+
+ついに React を使ってフロントエンドを開発できるようになりました。次回は Ruby とは違う JavaScript 非同期コールバックモデルとその問題点、その問題点を解消した Promise や async/await について学びます。
+
+{% endraw %}
