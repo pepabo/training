@@ -454,15 +454,30 @@ export function Users() {
 
 http://localhost:5173/users にアクセスしてみましょう。ユーザー一覧が表示されていたら成功です。
 
-
 ## 練習問題 2
 
-1. このままでは「ユーザーが見つかりませんでした」という表示が API からデータを取得する前に一瞬表示されてしまいます。これを避けて「読み込み中...」という表示を出す方法を考えてください。
-2. `/api` 配下に移動した他のリソースも `users.tsx` のように React Router からアクセスできるようにしてみましょう。
-3. 先ほどの `frontend/app/users/users.tsx` の例は、fetch する際に useEffect を使用していますが、フレームワークやサードパーティライブラリを用いることでデータフェッチをよりシンプルに記述できることが[公式ドキュメントに記載](https://ja.react.dev/reference/react/useEffect#fetching-data-with-effects)されています。これを踏まえて改善方法を提案してみてください。
+このままでは「ユーザーが見つかりませんでした」という表示が API からデータを取得する前に一瞬表示されてしまいます。これを避けて「読み込み中...」という表示を出す方法を考えてください。
 
-## 次回予告
+## 練習問題 3
 
-ついに React を使ってフロントエンドを開発できるようになりました。次回は Ruby とは違う JavaScript 非同期コールバックモデルとその問題点、その問題点を解消した Promise や async/await について学びます。
+Railsアプリケーションに対して、何らかの更新系リクエスト(POST / PUT など)を処理できるWeb APIを用意した上で、フロントエンドアプリケーションから利用するようにしてください。
+
+※ ヒント
+
+すでにWebアプリケーション研修を受講されている場合は、CSRFというキーワードを耳にしたかもしれません。
+Railsには [CSRF対策](https://railsguides.jp/security.html#csrf%E3%81%B8%E3%81%AE%E5%AF%BE%E5%BF%9C%E7%AD%96) が施されており、このことを考慮する必要があります
+
+まずはRailsのセキュリティ機構をオフにして更新系のリクエストを受付できるようにしたあと、どのようにして同様の対策を施せばよいか考えてみましょう。
+また、時間があればその対策をWebアプリケーションに反映してみましょう。
+
+参考資料として以下を添付します。
+
+https://cheatsheetseries.owasp.org/cheatsheets/Cross-Site_Request_Forgery_Prevention_Cheat_Sheet.html
+
+(通常、Webアプリケーションを公開する場合は、何らかの対策を施すことになるので、ぜひ考えてみてください。)
+
+## 練習問題 4
+
+先ほどの `frontend/app/users/users.tsx` の例は、fetch する際に useEffect を使用していますが、フレームワークやサードパーティライブラリを用いることでデータフェッチをよりシンプルに記述できることが[公式ドキュメントに記載](https://ja.react.dev/reference/react/useEffect#fetching-data-with-effects)されています。これを踏まえて改善方法を提案してみてください。
 
 {% endraw %}
