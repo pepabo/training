@@ -37,6 +37,7 @@ end
 
 Railsアプリケーションが生成するHTMLを用いて実装をする場合は、 HTTP リクエストをするときに `<meta>` タグからトークンを取得すれば良いでしょう。
 XMLHttpRequest あるいは Fetch API でリクエストを送信する際に `X-CSRF-Token` ヘッダを付与すれば正常処理されるようになります。
+参考: https://railsguides.jp/security.html#%E5%BF%85%E9%A0%88%E3%82%BB%E3%82%AD%E3%83%A5%E3%83%AA%E3%83%86%E3%82%A3%E3%83%88%E3%83%BC%E3%82%AF%E3%83%B3
 
 （こぼれ話：ちなみに、HTML の `<form>` タグが送信できる HTTP メソッドは実は GET, POST しかなく、 PATCH, PUT, DELETE などの HTTP メソッドは XMLHttpRequest からしか送れません。これを Rails では擬似的に POST で扱えるように、特殊なパラメータをフォームに追加しているのです。）
 
