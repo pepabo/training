@@ -34,7 +34,8 @@ end
 
 さて、`protect_from_forgery` が無効になっているとログイン済みの状態で不正なサイトから POST 処理ができてしまいます。
 これを正規の方法を用いて POST できるようにします。
-もっともシンプルな実装をするのであれば、 HTTP リクエストをするときに `<meta>` タグからトークンを取得すれば良いのです。
+
+Railsアプリケーションが生成するHTMLを用いて実装をする場合は、 HTTP リクエストをするときに `<meta>` タグからトークンを取得すれば良いでしょう。
 XMLHttpRequest あるいは Fetch API でリクエストを送信する際に `X-CSRF-Token` ヘッダを付与すれば正常処理されるようになります。
 
 （こぼれ話：ちなみに、HTML の `<form>` タグが送信できる HTTP メソッドは実は GET, POST しかなく、 PATCH, PUT, DELETE などの HTTP メソッドは XMLHttpRequest からしか送れません。これを Rails では擬似的に POST で扱えるように、特殊なパラメータをフォームに追加しているのです。）
@@ -65,33 +66,7 @@ XMLHttpRequest あるいは Fetch API でリクエストを送信する際に `X
   // ...
 ```
 
-さて、これでリクエストが通るはずです。実際に操作してみましょう。
-
-### Synchronizer Token Pattern
-
-もしかしたら、手元の環境で一度は削除処理ができたものの、複数回はできないままになっていることがあるかもしれません。
-これはリクエストごとにトークンが変化し、新しいものに置き換えをしないと不正なリクエストであると判断されてしまうためです。
-
-これを避けるためには、リクエストごとに新しいトークンに置き換える仕組みが必要です。
-HTTP レスポンスに新しいトークンを付与する [Synchronizer Token Pattern](https://github.com/OWASP/CheatSheetSeries/blob/master/cheatsheets/Cross-Site_Request_Forgery_Prevention_Cheat_Sheet.md#synchronizer-token-pattern) を採用します。
-まずは、 Rails サーバ側からリクエスト完了時に新しいトークンをヘッダに付与して送信するようにします。
-
-```ruby
-# app/controllers/application_controller.rb
-
-class ApplicationController < ActionController::Base
-  # 略
-
-  after_action :set_csrf_token_header
-
-  def set_csrf_token_header
-    response.set_header("X-CSRF-Token", form_authenticity_token)
-  end
-end
-```
-
-そしてこのレスポンスに存在するヘッダを取得し、古いトークンを置き換えるよう実装します。
-
 ## 練習問題
 
 1. CSRFはリクエストの出自を確認できれば防ぐことができると説明しましたが、CSRFトークンを用いずにこれを実現する方法を探して説明してください
+1. これまでの研修で作成したReact Router + Railsアプリケーションの構成では、解説のとおり `<meta>` タグを参照することはできません。どのように対応すればよいか考えてみましょう。
