@@ -474,10 +474,20 @@ Railsには [CSRF対策](https://railsguides.jp/security.html#csrf%E3%81%B8%E3%8
 
 https://cheatsheetseries.owasp.org/cheatsheets/Cross-Site_Request_Forgery_Prevention_Cheat_Sheet.html
 
+付録にも解説があります。 [RailsアプリケーションのCSRF対策をフロントエンドアプリケーションに適用する](../appendix05)
+
 (通常、Webアプリケーションを公開する場合は、何らかの対策を施すことになるので、ぜひ考えてみてください。)
 
 ## 練習問題 4
 
 先ほどの `frontend/app/users/users.tsx` の例は、fetch する際に useEffect を使用していますが、フレームワークやサードパーティライブラリを用いることでデータフェッチをよりシンプルに記述できることが[公式ドキュメントに記載](https://ja.react.dev/reference/react/useEffect#fetching-data-with-effects)されています。これを踏まえて改善方法を提案してみてください。
+
+## 練習問題 5
+
+Rails研修で作成したMicropostアプリの画面をReactで実装し、ログインユーザーの表示、一覧の表示、ポスト、投稿の削除ができるようにしてください。
+- 画像投稿など、難易度が高いと感じる部分があるかもしれません。最低限の実装をまずは目指し、難易度の高そうな部分は後回しにするなどしてください
+  - 画像については、[ウェブアプリケーションからのファイルの使用 - MDN](https://developer.mozilla.org/ja/docs/Web/API/File_API/Using_files_from_web_applications)、[FormData](https://developer.mozilla.org/ja/docs/Web/API/FormData) などを参考にしてください。
+- ページネーション機能を実装してみましょう
+
 
 {% endraw %}
