@@ -230,14 +230,27 @@ export function meta({}: Route.MetaArgs) {
 
 export default function Home() {
   return (
-    <div className="center jumbotron">
+    <div className="flex flex-col items-center justify-center h-screen gap-4">
       <h1>Welcome to the Sample App</h1>
       <p>
         This is the home page for the{" "}
-        <a href="https://railstutorial.jp/">Ruby on Rails Tutorial</a>
-        {" "}sample application.
+        <a href="https://railstutorial.jp/">Ruby on Rails Tutorial</a> sample
+        application.
       </p>
-      <a href="/signup" className="btn btn-lg btn-primary">Sign up now!</a>
+      <div className="flex gap-4">
+        <a
+          href="/signup"
+          className="bg-blue-500 text-white px-4 py-2 rounded-md"
+        >
+          Sign up now!
+        </a>
+        <a
+          href="/login"
+          className="border-2 border-blue-500 text-blue-500 px-4 py-2 rounded-md"
+        >
+          Login
+        </a>
+      </div>
     </div>
   );
 }
@@ -257,15 +270,17 @@ export default function Home() {
 
 ```ruby:config/routes.rb
 Rails.application.routes.draw do
+  root "static_pages#home"
   get    "/help",    to: "static_pages#help"
   get    "/about",   to: "static_pages#about"
   get    "/contact", to: "static_pages#contact"
-  get    "/signup",  to: "users#new"
+  get    "/signup",  to: "api/users#new"
   get    "/login",   to: "sessions#new"
   post   "/login",   to: "sessions#create"
   delete "/logout",  to: "sessions#destroy"
   resources :account_activations, only: [:edit]
   resources :password_resets,     only: [:new, :create, :edit, :update]
+  resources :users, to: "api/users" # エラー回避用
 
   namespace :api do
     resources :users do
@@ -278,8 +293,6 @@ Rails.application.routes.draw do
   end
 end
 ```
-
-この例では、エンドポイント `/microposts` について、 `get '/microposts', to: 'static_pages#home'` を削除し、 `microposts_controller.rb#index` へと変更しています。コントローラー側も変更しておきましょう。
 
 `/api` の名前空間を指定したコントローラーを `app/controllers/` から `app/controllers/api/` に移動します
 
@@ -296,6 +309,66 @@ class Api::UsersController < ApplicationController
   .
 end
 ```
+
+この例では、以下の変更を行っています。
+
+- エンドポイント `/microposts` について、ルーティングを `get '/microposts', to: 'static_pages#home'` から `microposts_controller.rb#index` へと変更しています。コントローラー側も変更してください
+- エンドポイント `/signup` について、ルーティングを `get '/signup', to: 'users#new'` から `api/users_controller.rb#new` へと変更しています。元の View を利用するために、いくつか変更を加えましょう
+  ```diff
+  diff --git a/app/controllers/api/users_controller.rb b/app/controllers/api/users_controller.rb
+  index 02a4cb2..8d572bd 100644
+  --- a/app/controllers/api/users_controller.rb
+  +++ b/app/controllers/api/users_controller.rb
+  @@ -19,6 +19,7 @@ class Api::UsersController < ApplicationController
+  
+    def new
+      @user = User.new
+  +    render 'users/new'
+    end
+  
+    def create
+  @@ -28,7 +29,7 @@ class Api::UsersController < ApplicationController
+        flash[:info] = "Please check your email to activate your account."
+        redirect_to root_url
+      else
+  -      render 'new', status: :unprocessable_entity
+  +      render 'users/new', status: :unprocessable_entity
+      end
+    end
+  
+  diff --git a/app/controllers/sessions_controller.rb b/app/controllers/sessions_controller.rb
+  index 4fa0043..7f41b91 100644
+  --- a/app/controllers/sessions_controller.rb
+  +++ b/app/controllers/sessions_controller.rb
+  @@ -11,12 +11,12 @@ class SessionsController < ApplicationController
+          reset_session
+          params[:session][:remember_me] == '1' ? remember(user) : forget(user)
+          log_in user
+  -        redirect_to forwarding_url || user
+  +        redirect_to forwarding_url || root_path
+        else
+          message  = "Account not activated. "
+          message += "Check your email for the activation link."
+          flash[:warning] = message
+  -        redirect_to root_url
+  +        render 'new'
+        end
+      else
+        flash.now[:danger] = 'Invalid email/password combination'
+  diff --git a/app/views/users/new.html.erb b/app/views/users/new.html.erb
+  index 8b436c5..bd79be9 100644
+  --- a/app/views/users/new.html.erb
+  +++ b/app/views/users/new.html.erb
+  @@ -3,7 +3,7 @@
+  
+  <div class="row">
+    <div class="col-md-6 col-md-offset-3">
+  -    <%= form_with(model: @user) do |f| %>
+  +    <%= form_with(model: @user, url: signup_path) do |f| %>
+        <%= render 'shared/error_messages', object: f.object %>
+        <%= f.label :name %>
+        <%= f.text_field :name, class: 'form-control' %>
+  ```
 
 つぎに、React Router への一部のアクセスを Rails サーバーにプロキシするように設定します。これは開発環境用の設定となります。
 
@@ -318,6 +391,7 @@ export default defineConfig({
       "/logout": "http://localhost:3000",
       "/account_activations": "http://localhost:3000",
       "/password_resets": "http://localhost:3000",
+      "/assets": "http://localhost:3000",
     },
   },
 });
@@ -460,6 +534,19 @@ http://localhost:5173/users にアクセスしてみましょう。ユーザー�
 
 ## 練習問題 3
 
+現在、http://localhost:5173/ から新規登録・ログインが正常にできません。原因を調査し、修正してください。
+
+※ ヒント
+
+ブラウザの開発者ツールを開き、ネットワークタブを中心に、新規登録・ログイン時のリクエストおよびレスポンスをよく観察してください。
+
+エラー内容が特定できたら、以下の参考資料を参考に解決を試みてください。
+https://railsguides.jp/security.html
+
+チャレンジ課題: このエラーは「本番環境では起こらず開発環境でのみ起こるエラー」にすることができます。今回の構成に関連しているのですが、どのようにして実現できるか考え、説明してください。この課題はスキップすることができ、チャレンジする場合でも制限時間1時間とします。
+
+## 練習問題 4
+
 Railsアプリケーションに対して、何らかの更新系リクエスト(POST / PUT など)を処理できるWeb APIを用意した上で、フロントエンドアプリケーションから利用するようにしてください。
 
 ※ ヒント
@@ -478,11 +565,11 @@ https://cheatsheetseries.owasp.org/cheatsheets/Cross-Site_Request_Forgery_Preven
 
 (通常、Webアプリケーションを公開する場合は、何らかの対策を施すことになるので、ぜひ考えてみてください。)
 
-## 練習問題 4
+## 練習問題 5
 
 先ほどの `frontend/app/users/users.tsx` の例は、fetch する際に useEffect を使用していますが、フレームワークやサードパーティライブラリを用いることでデータフェッチをよりシンプルに記述できることが[公式ドキュメントに記載](https://ja.react.dev/reference/react/useEffect#fetching-data-with-effects)されています。これを踏まえて改善方法を提案してみてください。
 
-## 練習問題 5
+## 練習問題 6
 
 Rails研修で作成したMicropostアプリの画面をReactで実装し、ログインユーザーの表示、一覧の表示、ポスト、投稿の削除ができるようにしてください。
 - 画像投稿など、難易度が高いと感じる部分があるかもしれません。最低限の実装をまずは目指し、難易度の高そうな部分は後回しにするなどしてください
