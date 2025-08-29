@@ -1,0 +1,26 @@
+datadog:
+  profiling:
+    enabled: false
+  apiKeyExistingSecret: datadog-secret
+  site: datadoghq.com
+
+  containerExclude: "kube_namespace:.*"
+  containerInclude: "kube_namespace:bqnq kube_namespace:jonny kube_namespace:satomichi kube_namespace:taki"
+
+  apm:
+    portEnabled: true
+    socketEnabled: true
+
+  logs:
+    enabled: true
+    containerCollectAll: true
+
+  otlp:
+    receiver:
+      protocols:
+        grpc:
+          enabled: true
+          endpoint: "0.0.0.0:4317"
+        http:
+          enabled: true
+          endpoint: "0.0.0.0:4318" 
