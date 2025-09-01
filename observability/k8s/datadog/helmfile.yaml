@@ -1,0 +1,11 @@
+repositories:
+- name: datadog
+  url: https://helm.datadoghq.com
+
+releases:
+- name: datadog-agent
+  namespace: monitoring
+  chart: datadog/datadog
+  version: 3.118.0 # Chartのバージョンを固定
+  values:
+  - ./values.yaml 
