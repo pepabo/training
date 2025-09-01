@@ -5,7 +5,7 @@ datadog:
   site: datadoghq.com
 
   containerExclude: "kube_namespace:.*"
-  containerInclude: "kube_namespace:bqnq kube_namespace:jonny kube_namespace:satomichi kube_namespace:taki"
+  containerInclude: "kube_namespace:member_ns1 "
 
   apm:
     portEnabled: true
